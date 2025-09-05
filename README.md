@@ -4,9 +4,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- Add other badges here, e.g., for code quality, tests, etc. -->
 
+<p align="right">
+   <a href="./README_zh.md">中文</a> | <strong>English</strong>
+</p>
+<div align="center">
+
+![Equivocal Logo](./public/placeholder-logo.png)
+
+# Equivocal
+</div>
+
 ## Introduction
 
-[**Enter the core purpose and a one-sentence description of the project here.**]
+[**For those equivocal people**]
 
 Equivocal is a modern web application built with a cutting-edge tech stack, designed to deliver a rich, interactive, and visually engaging user experience through the use of 3D elements.
 
