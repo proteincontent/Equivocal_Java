@@ -1,9 +1,3 @@
-# Equivocal
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fproteincontent%2FEquivocal&project-name=equivocal&repository-name=Equivocal)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-<!-- Add other badges here, e.g., for code quality, tests, etc. -->
-
 <p align="right">
    <a href="./README_zh.md">中文</a> | <strong>English</strong>
 </p>
@@ -12,13 +6,24 @@
 ![Equivocal Logo](./public/placeholder-logo.png)
 
 # Equivocal
+
+✨ A modern web application designed to deliver a rich, interactive, and visually engaging user experience through the use of 3D elements.
+
+<p align="center">
+  <a href="https://github.com/proteincontent/Equivocal/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/proteincontent/Equivocal?color=brightgreen" alt="license">
+  </a>
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fproteincontent%2FEquivocal&project-name=equivocal&repository-name=Equivocal">
+    <img src="https://vercel.com/button" alt="deploy">
+  </a>
+</p>
 </div>
 
-## Introduction
+## 📝 Project Description
 
-[**For those equivocal people**]
+[**Enter the core purpose and a one-sentence description of the project here.**]
 
-Equivocal is a modern web application built with a cutting-edge tech stack, designed to deliver a rich, interactive, and visually engaging user experience through the use of 3D elements.
+Equivocal is built with a cutting-edge tech stack, including Next.js, TypeScript, and Spline for 3D rendering, to create a truly immersive web experience.
 
 ## ✨ Key Features
 
@@ -37,21 +42,27 @@ Equivocal is a modern web application built with a cutting-edge tech stack, desi
 - **UI Components**: [Shadcn/UI](https://ui.shadcn.com/)
 - **Package Manager**: [pnpm](https://pnpm.io/)
 
-## 🚀 Getting Started
+## 🚀 Deployment & Local Setup
 
-Follow these instructions to set up the project on your local machine for development and testing.
+### Vercel One-Click Deploy
 
-### Prerequisites
+You can easily deploy your own instance of this project using Vercel. Click the button below to get started:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fproteincontent%2FEquivocal&project-name=equivocal&repository-name=Equivocal)
+
+### Local Development Guide
+
+#### Prerequisites
 
 Make sure you have the following software installed on your system:
 - [Node.js](https://nodejs.org/) (v18.x or later)
 - [pnpm](https://pnpm.io/installation) (or npm/yarn if you prefer)
 
-### Installation
+#### Installation & Setup
 
-1.  **Clone the repository:**
+1.  **Fork and Clone the repository:**
     ```bash
-    git clone https://github.com/proteincontent/Equivocal.git
+    git clone https://github.com/YOUR_USERNAME/Equivocal.git
     ```
 
 2.  **Navigate to the project directory:**
@@ -64,7 +75,7 @@ Make sure you have the following software installed on your system:
     pnpm install
     ```
 
-### Environment Variables
+#### Environment Variables
 
 To run this project, you will need to configure your environment variables. Create a file named `.env.local` in the root of the project and add the necessary variables.
 
@@ -73,7 +84,7 @@ To run this project, you will need to configure your environment variables. Crea
 NEXT_PUBLIC_API_URL=https://api.example.com
 ```
 
-### Running the Dev Server
+#### Running the Dev Server
 
 Once the installation is complete, you can start the local development server:
 
@@ -82,26 +93,6 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
-
-## 🌐 Deployment with Vercel
-
-You can easily deploy your own instance of this project using Vercel.
-
-### One-Click Deploy
-
-Click the button below to deploy this project to Vercel in a few clicks:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fproteincontent%2FEquivocal&project-name=equivocal&repository-name=Equivocal)
-
-### Manual Steps
-
-1.  **Fork the Repository**: Click the "Fork" button at the top right of this page to create your own copy of the repository.
-
-2.  **Import Project on Vercel**: Go to your [Vercel dashboard](https://vercel.com/dashboard) and click "Add New... > Project". Select your forked repository.
-
-3.  **Configure Environment Variables**: During the import process, Vercel will prompt you to configure the project. Navigate to the "Environment Variables" section and add the same variables you defined in your `.env.local` file.
-
-4.  **Deploy**: Click the "Deploy" button. Vercel will build and deploy your project. Once completed, you will get a unique URL for your live site.
 
 ## 🤝 Contributing
 
@@ -116,3 +107,7 @@ Contributions are what make the open-source community such an amazing place to l
 ## 📄 License
 
 This project is distributed under the MIT License. See `LICENSE` for more information.
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=proteincontent/Equivocal&type=Date)](https://star-history.com/#proteincontent/Equivocal&Date)
