@@ -1,14 +1,21 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState } from "react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AnimatePresence, motion } from "framer-motion"
-import { Check, ChevronDown, Monitor, Moon, Sun, Sunset, Trees, Waves } from "lucide-react"
-import { useTheme } from "next-themes"
+import React, { useEffect, useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronDown, Monitor, Moon, Sun, Sunset, Trees, Waves } from "lucide-react";
+import { useTheme } from "next-themes";
+// Use consistent theme typing
+type NextTheme = "light" | "dark" | "system" | "sunset" | "ocean" | "forest";
 
-import { cn } from "@/lib/utils"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const themeIcons = {
   light: Sun,
@@ -17,57 +24,64 @@ const themeIcons = {
   sunset: Sunset,
   ocean: Waves,
   forest: Trees,
-}
+};
 
-export type ThemeToggleVariant = "button" | "switch" | "dropdown" | "tabs" | "grid" | "radial" | "cards"
-export type ThemeToggleSize = "sm" | "md" | "lg"
+export type ThemeToggleVariant =
+  | "button"
+  | "switch"
+  | "dropdown"
+  | "tabs"
+  | "grid"
+  | "radial"
+  | "cards";
+export type ThemeToggleSize = "sm" | "md" | "lg";
 
 interface ThemeToggleProps {
-  variant?: ThemeToggleVariant
-  size?: ThemeToggleSize
-  showLabel?: boolean
-  themes?: Theme[]
-  className?: string
+  variant?: ThemeToggleVariant;
+  size?: ThemeToggleSize;
+  showLabel?: boolean;
+  themes?: Theme[];
+  className?: string;
 }
 
 export function Theme({
   variant = "button",
   size = "md",
   showLabel = false,
-  themes = ["light", "dark", "system"],
+  themes = ["light", "dark", "system"] as Theme[],
   className,
 }: ThemeToggleProps) {
-  const { theme, setTheme } = useTheme()
-  const [isOpen, setIsOpen] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+  const { theme, setTheme } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
+    setIsMounted(true);
+  }, []);
 
   const sizeClasses = {
     sm: "h-8 px-2 text-xs",
     md: "h-10 px-3 text-sm",
     lg: "h-12 px-4 text-base",
-  }
+  };
 
   const iconSizes = {
     sm: 14,
     md: 16,
     lg: 20,
-  }
+  };
 
-  if (!isMounted) return null
+  if (!isMounted) return null;
 
   if (variant === "button") {
-    function isTheme(value: unknown): value is Theme {
-      return typeof value === "string" && ["light", "dark", "system"].includes(value)
+    function isTheme(value: unknown): value is NextTheme {
+      return typeof value === "string" && ["light", "dark", "system", "sunset", "ocean", "forest"].includes(value);
     }
 
-    const safeTheme: Theme = isTheme(theme) && themes.includes(theme) ? theme : "light"
+    const safeTheme: NextTheme = isTheme(theme) && themes.includes(theme as Theme) ? (theme as NextTheme) : "light";
 
-    const nextTheme = themes[(themes.indexOf(safeTheme) + 1) % themes.length]
-    const Icon = themeIcons[safeTheme]
+    const nextTheme = themes[(themes.indexOf(safeTheme) + 1) % themes.length];
+    const Icon = themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light;
 
     return (
       <motion.button
@@ -98,13 +112,13 @@ export function Theme({
         >
           <Icon size={iconSizes[size]} />
         </motion.div>
-        {showLabel && <span className="font-medium">{themeConfigs[safeTheme].label}</span>}
+        {showLabel && <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "Theme"}</span>}
       </motion.button>
-    )
+    );
   }
 
   if (variant === "switch") {
-    const isLight = theme === "light"
+    const isLight = theme === "light";
 
     return (
       <motion.button
@@ -133,22 +147,28 @@ export function Theme({
             transition={{ duration: 0.3 }}
           >
             {isLight ? (
-              <Sun size={size === "sm" ? 10 : size === "md" ? 12 : 14} className="text-yellow-500" />
+              <Sun
+                size={size === "sm" ? 10 : size === "md" ? 12 : 14}
+                className="text-yellow-500"
+              />
             ) : (
-              <Moon size={size === "sm" ? 10 : size === "md" ? 12 : 14} className="text-slate-700" />
+              <Moon
+                size={size === "sm" ? 10 : size === "md" ? 12 : 14}
+                className="text-slate-700"
+              />
             )}
           </motion.div>
         </motion.div>
       </motion.button>
-    )
+    );
   }
 
   if (variant === "dropdown") {
     function isTheme(value: unknown): value is Theme {
-      return typeof value === "string" && ["light", "dark", "system"].includes(value)
+      return typeof value === "string" && ["light", "dark", "system"].includes(value);
     }
 
-    const safeTheme: Theme = isTheme(theme) && themes?.includes(theme) ? theme : "light"
+    const safeTheme: Theme = isTheme(theme) && themes?.includes(theme) ? theme : "light";
 
     return (
       <div className="relative">
@@ -168,10 +188,10 @@ export function Theme({
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="flex items-center gap-2">
-                  {React.createElement(themeIcons[safeTheme], {
+                  {React.createElement(themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light, {
                     size: iconSizes[size],
                   })}
-                  <span className="font-medium">{themeConfigs[safeTheme].label}</span>
+                  <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "Theme"}</span>
                 </div>
                 <ChevronDown size={iconSizes[size]} />
               </motion.button>
@@ -187,7 +207,7 @@ export function Theme({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {React.createElement(themeIcons[safeTheme], {
+                {React.createElement(themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light, {
                   size: iconSizes[size],
                 })}
               </motion.button>
@@ -196,8 +216,8 @@ export function Theme({
 
           <DropdownMenuContent align="start" className="z-50 min-w-[100px] space-y-1">
             {themes.map((themeOption) => {
-              const Icon = themeIcons[themeOption]
-              const isSelected = theme === themeOption
+              const Icon = themeIcons[themeOption as keyof typeof themeIcons] || themeIcons.light;
+              const isSelected = theme === themeOption;
 
               return (
                 <DropdownMenuItem
@@ -211,16 +231,16 @@ export function Theme({
                   <div className="flex items-center gap-2">
                     <Icon size={iconSizes[size]} />
 
-                    <span className="font-medium">{themeConfigs[themeOption].label}</span>
+                    <span className="font-medium">{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "Theme"}</span>
                   </div>
                   {isSelected && <Check size={iconSizes[size]} />}
                 </DropdownMenuItem>
-              )
+              );
             })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    )
+    );
   }
 
   if (variant === "tabs") {
@@ -233,8 +253,8 @@ export function Theme({
           )}
         >
           {themes.map((themeOption) => {
-            const Icon = themeIcons[themeOption]
-            const isSelected = theme === themeOption
+            const Icon = themeIcons[themeOption];
+            const isSelected = theme === themeOption;
 
             return (
               <TabsTrigger
@@ -255,24 +275,28 @@ export function Theme({
                 )}
                 <div className="relative z-10 flex items-center gap-1">
                   <Icon size={size === "sm" ? 12 : size === "md" ? 14 : 16} />
-                  {showLabel && <span>{themeConfigs[themeOption].label}</span>}
+                  {showLabel && <span>{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "Theme"}</span>}
                 </div>
               </TabsTrigger>
-            )
+            );
           })}
         </TabsList>
       </Tabs>
-    )
+    );
   }
 
   if (variant === "grid") {
     return (
       <div className={cn("flex justify-center", className)}>
-        <RadioGroup value={theme} onValueChange={(value) => setTheme(value as Theme)} className="flex gap-2">
+        <RadioGroup
+          value={theme}
+          onValueChange={(value) => setTheme(value as Theme)}
+          className="flex gap-2"
+        >
           {themes.map((themeOption) => {
-            const config = themeConfigs[themeOption]
-            const Icon = themeIcons[themeOption]
-            const isSelected = theme === themeOption
+            const config = themeConfigs[themeOption as keyof typeof themeConfigs];
+            const Icon = themeIcons[themeOption];
+            const isSelected = theme === themeOption;
 
             return (
               <motion.label
@@ -289,32 +313,38 @@ export function Theme({
                   borderColor: isSelected ? config.colors.primary : config.colors.border,
                 }}
               >
-                <RadioGroupItem id={`theme-${themeOption}`} value={themeOption} className="peer sr-only" />
+                <RadioGroupItem
+                  id={`theme-${themeOption}`}
+                  value={themeOption}
+                  className="peer sr-only"
+                />
 
                 <span className="flex flex-col items-center justify-center gap-2 text-center text-xs font-medium">
                   <Icon
                     size={size === "sm" ? 16 : size === "md" ? 20 : 24}
                     style={{ color: config.colors.foreground }}
                   />
-                  {showLabel && <span style={{ color: config.colors.foreground }}>{config.label}</span>}
+                  {showLabel && (
+                    <span style={{ color: config.colors.foreground }}>{config.label}</span>
+                  )}
                 </span>
               </motion.label>
-            )
+            );
           })}
         </RadioGroup>
       </div>
-    )
+    );
   }
 
   if (variant === "radial") {
-    const radius = size === "sm" ? 60 : size === "md" ? 80 : 100
-    const centerSize = size === "sm" ? 40 : size === "md" ? 48 : 56
+    const radius = size === "sm" ? 60 : size === "md" ? 80 : 100;
+    const centerSize = size === "sm" ? 40 : size === "md" ? 48 : 56;
 
     function isTheme(value: unknown): value is Theme {
-      return typeof value === "string" && ["light", "dark", "system"].includes(value)
+      return typeof value === "string" && ["light", "dark", "system"].includes(value);
     }
 
-    const safeTheme: Theme = isTheme(theme) && themes?.includes(theme) ? theme : "light"
+    const safeTheme: Theme = isTheme(theme) && themes?.includes(theme) ? theme : "light";
 
     return (
       <div className={cn("relative", className)}>
@@ -345,18 +375,18 @@ export function Theme({
           {isOpen && (
             <>
               {themes.map((themeOption, index) => {
-                const Icon = themeIcons[themeOption]
-                const angle = (index * 360) / themes.length
-                const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius
-                const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius
-                const isSelected = theme === themeOption
+                const Icon = themeIcons[themeOption as keyof typeof themeIcons] || themeIcons.light;
+                const angle = (index * 360) / themes.length;
+                const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius;
+                const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius;
+                const isSelected = theme === themeOption;
 
                 return (
                   <motion.button
                     key={themeOption}
                     onClick={() => {
-                      setTheme(themeOption)
-                      setIsOpen(false)
+                      setTheme(themeOption);
+                      setIsOpen(false);
                     }}
                     className={cn(
                       "absolute flex items-center justify-center rounded-full border-2 shadow-lg",
@@ -380,22 +410,22 @@ export function Theme({
                   >
                     <Icon size={size === "sm" ? 12 : size === "md" ? 16 : 18} />
                   </motion.button>
-                )
+                );
               })}
             </>
           )}
         </AnimatePresence>
       </div>
-    )
+    );
   }
 
   if (variant === "cards") {
     return (
       <div className={cn("grid grid-cols-1 gap-4", className)}>
         {themes.map((themeOption) => {
-          const config = themeConfigs[themeOption]
-          const Icon = themeIcons[themeOption]
-          const isSelected = theme === themeOption
+          const config = themeConfigs[themeOption as keyof typeof themeConfigs];
+          const Icon = themeIcons[themeOption];
+          const isSelected = theme === themeOption;
 
           return (
             <motion.div
@@ -415,31 +445,31 @@ export function Theme({
               <Icon size={size === "sm" ? 16 : size === "md" ? 20 : 24} />
               {showLabel && <span className="font-medium">{config.label}</span>}
             </motion.div>
-          )
+          );
         })}
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
-export type Theme = "light" | "dark" | "system"
+export type Theme = "light" | "dark" | "system" | "sunset" | "ocean" | "forest";
 
 export type ThemeConfig = {
-  name: string
-  label: string
+  name: string;
+  label: string;
   colors: {
-    background: string
-    foreground: string
-    primary: string
-    secondary: string
-    accent: string
-    muted: string
-    border: string
-    card: string
-  }
-}
+    background: string;
+    foreground: string;
+    primary: string;
+    secondary: string;
+    accent: string;
+    muted: string;
+    border: string;
+    card: string;
+  };
+};
 
 export const themeConfigs: Record<Theme, ThemeConfig> = {
   light: {
@@ -484,4 +514,46 @@ export const themeConfigs: Record<Theme, ThemeConfig> = {
       card: "#ffffff",
     },
   },
-}
+  sunset: {
+    name: "sunset",
+    label: "Sunset",
+    colors: {
+      background: "#fef3c7",
+      foreground: "#451a03",
+      primary: "#f59e0b",
+      secondary: "#d97706",
+      accent: "#dc2626",
+      muted: "#fef3c7",
+      border: "#fed7aa",
+      card: "#fffbeb",
+    },
+  },
+  ocean: {
+    name: "ocean",
+    label: "Ocean",
+    colors: {
+      background: "#cffafe",
+      foreground: "#164e63",
+      primary: "#0891b2",
+      secondary: "#0e7490",
+      accent: "#0284c7",
+      muted: "#cffafe",
+      border: "#a5f3fc",
+      card: "#f0fdff",
+    },
+  },
+  forest: {
+    name: "forest",
+    label: "Forest",
+    colors: {
+      background: "#dcfce7",
+      foreground: "#14532d",
+      primary: "#16a34a",
+      secondary: "#15803d",
+      accent: "#65a30d",
+      muted: "#dcfce7",
+      border: "#bbf7d0",
+      card: "#f0fdf4",
+    },
+  },
+};

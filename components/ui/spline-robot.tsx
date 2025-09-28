@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { Suspense, lazy } from "react"
-import { motion } from "framer-motion"
+import { Suspense, lazy } from "react";
+import { motion } from "framer-motion";
 
-const Spline = lazy(() => import("@splinetool/react-spline"))
+const Spline = lazy(() => import("@splinetool/react-spline"));
 
 interface SplineSceneProps {
-  scene?: string
-  className?: string
+  scene?: string;
+  className?: string;
 }
 
 // Fallback 3D-like robot visual when no scene is provided
@@ -140,7 +140,7 @@ function RobotFallback() {
         />
       ))}
     </div>
-  )
+  );
 }
 
 export function SplineScene({ scene, className }: SplineSceneProps) {
@@ -149,7 +149,7 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
       <div className={className}>
         <RobotFallback />
       </div>
-    )
+    );
   }
 
   return (
@@ -162,5 +162,5 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
     >
       <Spline scene={scene} className={className} />
     </Suspense>
-  )
+  );
 }

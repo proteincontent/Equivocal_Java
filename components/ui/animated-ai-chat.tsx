@@ -1,69 +1,85 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useCallback, useTransition } from "react"
-import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { ImageIcon, Figma, MonitorIcon, Paperclip, SendIcon, XIcon, LoaderIcon, Sparkles, Command } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import * as React from "react"
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
+import {
+  ImageIcon,
+  Figma,
+  MonitorIcon,
+  Paperclip,
+  SendIcon,
+  XIcon,
+  LoaderIcon,
+  Sparkles,
+  Command,
+  ShieldAlert,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import * as React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useConfig } from "@/hooks/use-config";
+import { useServerConfig } from "@/hooks/use-server-config";
 
 interface UseAutoResizeTextareaProps {
-  minHeight: number
-  maxHeight?: number
+  minHeight: number;
+  maxHeight?: number;
 }
 
 function useAutoResizeTextarea({ minHeight, maxHeight }: UseAutoResizeTextareaProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = useCallback(
     (reset?: boolean) => {
-      const textarea = textareaRef.current
-      if (!textarea) return
+      const textarea = textareaRef.current;
+      if (!textarea) return;
 
       if (reset) {
-        textarea.style.height = `${minHeight}px`
-        return
+        textarea.style.height = `${minHeight}px`;
+        return;
       }
 
-      textarea.style.height = `${minHeight}px`
-      const newHeight = Math.max(minHeight, Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY))
+      textarea.style.height = `${minHeight}px`;
+      const newHeight = Math.max(
+        minHeight,
+        Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY),
+      );
 
-      textarea.style.height = `${newHeight}px`
+      textarea.style.height = `${newHeight}px`;
     },
     [minHeight, maxHeight],
-  )
+  );
 
   useEffect(() => {
-    const textarea = textareaRef.current
+    const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = `${minHeight}px`
+      textarea.style.height = `${minHeight}px`;
     }
-  }, [minHeight])
+  }, [minHeight]);
 
   useEffect(() => {
-    const handleResize = () => adjustHeight()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [adjustHeight])
+    const handleResize = () => adjustHeight();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [adjustHeight]);
 
-  return { textareaRef, adjustHeight }
+  return { textareaRef, adjustHeight };
 }
 
 interface CommandSuggestion {
-  icon: React.ReactNode
-  label: string
-  description: string
-  prefix: string
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+  prefix: string;
 }
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  containerClassName?: string
-  showRing?: boolean
+  containerClassName?: string;
+  showRing?: boolean;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, containerClassName, showRing = true, ...props }, ref) => {
-    const [isFocused, setIsFocused] = React.useState(false)
+    const [isFocused, setIsFocused] = React.useState(false);
 
     return (
       <div className={cn("relative", containerClassName)}>
@@ -73,7 +89,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             "transition-all duration-200 ease-in-out",
             "placeholder:text-muted-foreground",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            showRing ? "focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" : "",
+            showRing
+              ? "focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              : "",
             className,
           )}
           ref={ref}
@@ -102,28 +120,53 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           />
         )}
       </div>
-    )
+    );
   },
-)
-Textarea.displayName = "Textarea"
+);
+Textarea.displayName = "Textarea";
+
+interface ChatMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
 
 export function AnimatedAIChat() {
-  const [value, setValue] = useState("")
-  const [attachments, setAttachments] = useState<string[]>([])
-  const [isTyping, setIsTyping] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const [activeSuggestion, setActiveSuggestion] = useState<number>(-1)
-  const [showCommandPalette, setShowCommandPalette] = useState(false)
-  const [recentCommand, setRecentCommand] = useState<string | null>(null)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const { apiKey, model, baseUrl, apiKeyHeader } = useConfig();
+  const { config: serverConfig } = useServerConfig();
+  const trimmedApiKey = apiKey.trim();
+  const requiresUserApiKey = serverConfig ? !serverConfig.hasOpenAIKey : null;
+  const showMissingKeyNotice = requiresUserApiKey === true && trimmedApiKey.length === 0;
+  const missingKeyMessage = "Add your OpenAI API key in Settings before starting a conversation.";
+  const [value, setValue] = useState("");
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [_recentCommand, setRecentCommand] = useState<string | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 60,
     maxHeight: 200,
-  })
-  const [inputFocused, setInputFocused] = useState(false)
-  const commandPaletteRef = useRef<HTMLDivElement>(null)
+  });
+  const [inputFocused, setInputFocused] = useState(false);
+  const commandPaletteRef = useRef<HTMLDivElement>(null);
 
-  const commandSuggestions: CommandSuggestion[] = [
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: "assistant",
+      content: "👋 你好，我是 Equivocal 的聊天助手，随时可以回答你的 MBTI 或体验相关问题。",
+    },
+  ]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (trimmedApiKey.length > 0 || requiresUserApiKey !== true) {
+      setErrorMessage((current) => (current === missingKeyMessage ? null : current));
+    }
+  }, [trimmedApiKey, requiresUserApiKey, missingKeyMessage]);
+
+  const commandSuggestions: CommandSuggestion[] = useMemo(() => [
     {
       icon: <ImageIcon className="w-4 h-4" />,
       label: "Clone UI",
@@ -148,115 +191,228 @@ export function AnimatedAIChat() {
       description: "Improve existing UI design",
       prefix: "/improve",
     },
-  ]
+  ], []);
 
   useEffect(() => {
     if (value.startsWith("/") && !value.includes(" ")) {
-      setShowCommandPalette(true)
+      setShowCommandPalette(true);
 
-      const matchingSuggestionIndex = commandSuggestions.findIndex((cmd) => cmd.prefix.startsWith(value))
+      const matchingSuggestionIndex = commandSuggestions.findIndex((cmd) =>
+        cmd.prefix.startsWith(value),
+      );
 
       if (matchingSuggestionIndex >= 0) {
-        setActiveSuggestion(matchingSuggestionIndex)
+        setActiveSuggestion(matchingSuggestionIndex);
       } else {
-        setActiveSuggestion(-1)
+        setActiveSuggestion(-1);
       }
     } else {
-      setShowCommandPalette(false)
+      setShowCommandPalette(false);
     }
-  }, [value])
+  }, [value, commandSuggestions]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
 
-    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mousemove", handleMouseMove);
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
-    }
-  }, [])
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-      const commandButton = document.querySelector("[data-command-button]")
+      const target = event.target as Node;
+      const commandButton = document.querySelector("[data-command-button]");
 
       if (
         commandPaletteRef.current &&
         !commandPaletteRef.current.contains(target) &&
         !commandButton?.contains(target)
       ) {
-        setShowCommandPalette(false)
+        setShowCommandPalette(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!messageListRef.current) return;
+    const container = messageListRef.current;
+    container.scrollTop = container.scrollHeight;
+  }, [messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (showCommandPalette) {
       if (e.key === "ArrowDown") {
-        e.preventDefault()
-        setActiveSuggestion((prev) => (prev < commandSuggestions.length - 1 ? prev + 1 : 0))
+        e.preventDefault();
+        setActiveSuggestion((prev) => (prev < commandSuggestions.length - 1 ? prev + 1 : 0));
       } else if (e.key === "ArrowUp") {
-        e.preventDefault()
-        setActiveSuggestion((prev) => (prev > 0 ? prev - 1 : commandSuggestions.length - 1))
+        e.preventDefault();
+        setActiveSuggestion((prev) => (prev > 0 ? prev - 1 : commandSuggestions.length - 1));
       } else if (e.key === "Tab" || e.key === "Enter") {
-        e.preventDefault()
+        e.preventDefault();
         if (activeSuggestion >= 0) {
-          const selectedCommand = commandSuggestions[activeSuggestion]
-          setValue(selectedCommand.prefix + " ")
-          setShowCommandPalette(false)
+          const selectedCommand = commandSuggestions[activeSuggestion];
+          setValue(selectedCommand.prefix + " ");
+          setShowCommandPalette(false);
 
-          setRecentCommand(selectedCommand.label)
-          setTimeout(() => setRecentCommand(null), 3500)
+          setRecentCommand(selectedCommand.label);
+          setTimeout(() => setRecentCommand(null), 3500);
         }
       } else if (e.key === "Escape") {
-        e.preventDefault()
-        setShowCommandPalette(false)
+        e.preventDefault();
+        setShowCommandPalette(false);
       }
     } else if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      if (value.trim()) {
-        handleSendMessage()
-      }
+      e.preventDefault();
+      void handleSendMessage();
     }
-  }
+  };
 
-  const handleSendMessage = () => {
-    if (value.trim()) {
-      startTransition(() => {
-        setIsTyping(true)
-        setTimeout(() => {
-          setIsTyping(false)
-          setValue("")
-          adjustHeight(true)
-        }, 3000)
-      })
+  const handleSendMessage = async () => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
     }
-  }
+
+    if (requiresUserApiKey === true && trimmedApiKey.length === 0) {
+      setErrorMessage(missingKeyMessage);
+      return;
+    }
+
+    const userMessage: ChatMessage = {
+      role: "user",
+      content: trimmed,
+    };
+    const nextMessages = [...messages, userMessage];
+
+    setMessages(nextMessages);
+    setValue("");
+    adjustHeight(true);
+    setAttachments([]);
+    setShowCommandPalette(false);
+    setRecentCommand(null);
+    setErrorMessage(null);
+    setIsTyping(true);
+
+    const trimmedModel = model.trim();
+    const trimmedBaseUrl = baseUrl.trim();
+    const trimmedHeader = apiKeyHeader.trim();
+
+    const configPayload: Record<string, string> = {};
+    if (trimmedApiKey) {
+      configPayload.apiKey = trimmedApiKey;
+    }
+    if (trimmedModel) {
+      configPayload.model = trimmedModel;
+    }
+    if (trimmedBaseUrl) {
+      configPayload.baseUrl = trimmedBaseUrl;
+    }
+    if (trimmedHeader) {
+      configPayload.apiKeyHeader = trimmedHeader;
+    }
+
+    const payload: Record<string, unknown> = {
+      messages: nextMessages,
+    };
+
+    if (attachments.length) {
+      payload.attachments = attachments;
+    }
+
+    if (Object.keys(configPayload).length > 0) {
+      payload.config = configPayload;
+    }
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        let detail;
+        try {
+          const errorBody = await response.json();
+          detail =
+            typeof errorBody?.detail === "string"
+              ? errorBody.detail
+              : typeof errorBody?.error === "string"
+                ? errorBody.error
+                : undefined;
+        } catch {
+          detail = undefined;
+        }
+        throw new Error(detail ?? "Request failed with status " + response.status);
+      }
+
+      const data = await response.json();
+      const assistantContent = extractMessageContent(data?.message);
+
+      if (
+        !assistantContent ||
+        (typeof assistantContent === "string" && assistantContent.trim() === "")
+      ) {
+        setMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content:
+              "Sorry, I couldn't generate a reply for that. Please try rephrasing your question.",
+          },
+        ]);
+        return;
+      }
+
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: assistantContent,
+        },
+      ]);
+    } catch (error) {
+      console.error("[AnimatedAIChat] Failed to send message", error);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "Sorry, we can't reach the server right now. Please try again later.",
+        },
+      ]);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+      return;
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   const handleAttachFile = () => {
-    const mockFileName = `file-${Math.floor(Math.random() * 1000)}.pdf`
-    setAttachments((prev) => [...prev, mockFileName])
-  }
+    const mockFileName = `file-${Math.floor(Math.random() * 1000)}.pdf`;
+    setAttachments((prev) => [...prev, mockFileName]);
+  };
 
   const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index))
-  }
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const selectCommandSuggestion = (index: number) => {
-    const selectedCommand = commandSuggestions[index]
-    setValue(selectedCommand.prefix + " ")
-    setShowCommandPalette(false)
+    const selectedCommand = commandSuggestions[index];
+    setValue(selectedCommand.prefix + " ");
+    setShowCommandPalette(false);
 
-    setRecentCommand(selectedCommand.label)
-    setTimeout(() => setRecentCommand(null), 2000)
-  }
+    setRecentCommand(selectedCommand.label);
+    setTimeout(() => setRecentCommand(null), 2000);
+  };
 
   return (
     <div className="min-h-screen flex flex-col w-full items-center justify-center bg-transparent text-foreground p-6 relative overflow-hidden">
@@ -298,7 +454,15 @@ export function AnimatedAIChat() {
               Type a command or ask a question
             </motion.p>
           </div>
-
+          {showMissingKeyNotice && (
+            <Alert variant="destructive" className="bg-destructive/10 border-destructive/40">
+              <ShieldAlert className="mt-0.5" aria-hidden="true" />
+              <AlertTitle>API key required</AlertTitle>
+              <AlertDescription>
+                Open Settings (top right) and add your OpenAI-compatible key to continue.
+              </AlertDescription>
+            </Alert>
+          )}
           <motion.div
             className="relative backdrop-blur-2xl bg-background/80 dark:bg-white/[0.02] rounded-2xl border border-border/50 dark:border-white/[0.05] shadow-xl dark:shadow-2xl"
             initial={{ scale: 0.98 }}
@@ -334,7 +498,9 @@ export function AnimatedAIChat() {
                           {suggestion.icon}
                         </div>
                         <div className="font-medium">{suggestion.label}</div>
-                        <div className="text-muted-foreground/60 text-xs ml-1">{suggestion.prefix}</div>
+                        <div className="text-muted-foreground/60 text-xs ml-1">
+                          {suggestion.prefix}
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -342,13 +508,45 @@ export function AnimatedAIChat() {
               )}
             </AnimatePresence>
 
+            <div ref={messageListRef} className="px-4 pt-6 space-y-4 max-h-[320px] overflow-y-auto">
+              {messages.map((message, index) => {
+                const isUser = message.role === "user";
+                return (
+                  <motion.div
+                    key={`${message.role}-${index}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className={cn("flex", isUser ? "justify-end" : "justify-start")}
+                  >
+                    <div
+                      className={cn(
+                        "rounded-2xl px-4 py-3 text-sm leading-relaxed max-w-[80%] shadow-sm",
+                        isUser
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted/70 dark:bg-white/[0.04] text-foreground",
+                      )}
+                    >
+                      {message.content}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {errorMessage && (
+              <div className="px-4 pt-2 text-xs text-destructive/80 dark:text-rose-400/80">
+                {errorMessage}
+              </div>
+            )}
+
             <div className="p-4">
               <Textarea
                 ref={textareaRef}
                 value={value}
                 onChange={(e) => {
-                  setValue(e.target.value)
-                  adjustHeight()
+                  setValue(e.target.value);
+                  adjustHeight();
                 }}
                 onKeyDown={handleKeyDown}
                 onFocus={() => setInputFocused(true)}
@@ -419,8 +617,8 @@ export function AnimatedAIChat() {
                   type="button"
                   data-command-button
                   onClick={(e) => {
-                    e.stopPropagation()
-                    setShowCommandPalette((prev) => !prev)
+                    e.stopPropagation();
+                    setShowCommandPalette((prev) => !prev);
                   }}
                   whileTap={{ scale: 0.94 }}
                   className={cn(
@@ -441,11 +639,13 @@ export function AnimatedAIChat() {
                 onClick={handleSendMessage}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                disabled={isTyping || !value.trim()}
+                disabled={isTyping || !value.trim() || showMissingKeyNotice}
                 className={cn(
                   "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                   "flex items-center gap-2",
-                  value.trim() ? "bg-primary text-primary-foreground shadow-lg" : "bg-muted text-muted-foreground",
+                  value.trim() && !showMissingKeyNotice
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "bg-muted text-muted-foreground",
                 )}
               >
                 {isTyping ? (
@@ -525,7 +725,42 @@ export function AnimatedAIChat() {
         />
       )}
     </div>
-  )
+  );
+}
+
+function extractMessageContent(message: unknown): string {
+  if (!message) {
+    return "";
+  }
+
+  if (typeof message === "string") {
+    return message;
+  }
+
+  const content = (message as any).content;
+
+  if (typeof content === "string") {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((part: any) => {
+        if (!part) return "";
+        if (typeof part === "string") return part;
+        if (typeof part.text === "string") return part.text;
+        if (part.type === "text" && typeof part.text?.value === "string") return part.text.value;
+        if (typeof part?.text?.content === "string") return part.text.content;
+        return "";
+      })
+      .join("");
+  }
+
+  if (typeof (message as any).text === "string") {
+    return (message as any).text;
+  }
+
+  return "";
 }
 
 function TypingDots() {
@@ -552,5 +787,15 @@ function TypingDots() {
         />
       ))}
     </div>
-  )
+  );
 }
+
+
+
+
+
+
+
+
+
+

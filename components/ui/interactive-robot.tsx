@@ -1,53 +1,94 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { SplineScene } from "./spline-enhanced"
+import { useState, useEffect, useRef } from "react"; 
+import { motion, AnimatePresence } from "framer-motion";
+import { SplineScene } from "./spline-enhanced";
+import { cn } from "@/lib/utils";
+
+const POINTER_OFFSET = 8;
 
 interface InteractiveRobotProps {
-  className?: string
-  onInteraction?: () => void
+  className?: string;
+  onInteraction?: () => void;
 }
 
 export function InteractiveRobot({ className, onInteraction }: InteractiveRobotProps) {
-  const [isHovered, setIsHovered] = useState(false)
-  const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false);
+  const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Mouse tracking for robot eyes
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = document.querySelector(".robot-container")?.getBoundingClientRect()
+      const rect = document.querySelector(".robot-container")?.getBoundingClientRect();
       if (rect) {
-        const centerX = rect.left + rect.width / 2
-        const centerY = rect.top + rect.height / 2
-        const maxDistance = 8
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const maxDistance = POINTER_OFFSET;
 
-        const deltaX = ((e.clientX - centerX) / rect.width) * maxDistance
-        const deltaY = ((e.clientY - centerY) / rect.height) * maxDistance
+        const deltaX = ((e.clientX - centerX) / rect.width) * maxDistance;
+        const deltaY = ((e.clientY - centerY) / rect.height) * maxDistance;
 
         setEyePosition({
           x: Math.max(-maxDistance, Math.min(maxDistance, deltaX)),
           y: Math.max(-maxDistance, Math.min(maxDistance, deltaY)),
-        })
+        });
       }
-    }
+    };
 
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [])
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+  const handleClick = () => {
+    if (onInteraction) {
+      onInteraction();
+    }
+  };
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect) {
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const maxDistance = POINTER_OFFSET;
+
+      const deltaX = ((e.clientX - centerX) / rect.width) * maxDistance;
+      const deltaY = ((e.clientY - centerY) / rect.height) * maxDistance;
+
+      setEyePosition({
+        x: Math.max(-maxDistance, Math.min(maxDistance, deltaX)),
+        y: Math.max(-maxDistance, Math.min(maxDistance, deltaY)),
+      });
+    }
+  };
 
   return (
-    <motion.div
-      className={`robot-container relative ${className}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={onInteraction}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+    <div
+      ref={containerRef}
+      className={cn("robot-container relative cursor-pointer", className)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      aria-label="Interactive robot assistant - click or hover to interact"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          handleClick();
+        }
+      }}
     >
       {/* Spline 3D Robot Scene */}
-      <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900/50 to-slate-800/50 backdrop-blur-sm border border-white/10">
-        <SplineScene scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full" />
+      <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-2xl overflow-hidden bg-[rgb(250,250,252)] dark:bg-slate-900/60 border border-black/5 dark:border-white/10">
+        <SplineScene
+          scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+          className="w-full h-full"
+          eyePosition={eyePosition}
+          maxPointerOffset={POINTER_OFFSET}
+        />
 
         {/* Interactive overlay effects */}
         <AnimatePresence>
@@ -85,23 +126,28 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
         </div>
 
         {/* Interactive prompt */}
-        <motion.div
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: isHovered ? 1 : 0.7, y: isHovered ? 0 : 5 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="px-4 py-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/50 text-slate-100 text-sm font-medium shadow-lg">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+          <motion.div
+            className={cn(
+              "px-4 py-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/50 text-slate-100 text-sm font-medium shadow-lg",
+            )}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: isHovered ? 1 : 0.8, y: isHovered ? 0 : 10 }}
+            transition={{ duration: 0.3 }}
+            role="status"
+            aria-live="polite"
+          >
             {isHovered ? "Click to interact!" : "Hover to activate"}
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Glow effect */}
       <motion.div
         className="absolute inset-0 rounded-2xl"
         style={{
-          background: "radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%)",
           filter: "blur(20px)",
         }}
         animate={{
@@ -110,6 +156,6 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
         }}
         transition={{ duration: 0.3 }}
       />
-    </motion.div>
-  )
+    </div>
+  );
 }

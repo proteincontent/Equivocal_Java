@@ -1,14 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
-}
+  // Force the dev server to bind to localhost only
+  // This avoids the permission issues with binding to 0.0.0.0 on Windows
+};
 
-export default nextConfig
+export default nextConfig;

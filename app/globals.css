@@ -136,7 +136,7 @@
 }
 
 .animate-spotlight {
-  animation: spotlight 2s ease .75s 1 forwards;
+  animation: spotlight 2s ease 0.75s 1 forwards;
 }
 
 .lab-bg::before {
