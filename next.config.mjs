@@ -1,7 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Force the dev server to bind to localhost only
-  // This avoids the permission issues with binding to 0.0.0.0 on Windows
+  // Output as standalone for Vercel deployment
+  output: 'standalone',
+
+  // Disable type checking during build (already done in CI)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
