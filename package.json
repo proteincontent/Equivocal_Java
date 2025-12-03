@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --port 5173",
+    "dev": "next dev --port 3000",
     "dev:3000": "next dev -p 3000",
     "dev:8080": "next dev -p 8080",
     "lint": "next lint",
