@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react"; 
+import { useState, useEffect, useRef } from "react"; /* Hook就是一些以use开头的函数，让你“钩入”React的内部机制 */
 import { motion, AnimatePresence } from "framer-motion";
 import { SplineScene } from "./spline-enhanced";
 import { cn } from "@/lib/utils";

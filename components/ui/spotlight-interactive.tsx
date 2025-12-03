@@ -29,6 +29,7 @@ export function SpotlightInteractive({
 
   // Only apply theme-specific gradients after mount to avoid hydration mismatch
   useEffect(() => {
+    console.log('[SpotlightInteractive] Component mounted, avoiding hydration mismatch');
     setMounted(true);
   }, []);
 

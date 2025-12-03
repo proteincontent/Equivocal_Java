@@ -23,7 +23,7 @@ export function MBTIBackground({ selectedType, backgroundClass }: MBTIBackground
       ) : (
         <motion.div
           key="default-bg"
-          className="absolute inset-0 bg-white dark:bg-background"
+          className="absolute inset-0 bg-background"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
