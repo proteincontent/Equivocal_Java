@@ -82,25 +82,13 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
       }}
     >
       {/* Spline 3D Robot Scene */}
-      <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-2xl overflow-hidden bg-[rgb(250,250,252)] dark:bg-slate-900/60 border border-black/5 dark:border-white/10">
+      <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] -my-12">
         <SplineScene
           scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
           className="w-full h-full"
           eyePosition={eyePosition}
           maxPointerOffset={POINTER_OFFSET}
         />
-
-        {/* Interactive overlay effects */}
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-gradient-to-t from-blue-500/10 to-purple-500/10 pointer-events-none"
-            />
-          )}
-        </AnimatePresence>
 
         {/* Floating particles */}
         <div className="absolute inset-0 pointer-events-none">
@@ -125,36 +113,21 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
           ))}
         </div>
 
-        {/* Interactive prompt */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <motion.div
-            className={cn(
-              "px-4 py-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/50 text-slate-100 text-sm font-medium shadow-lg",
-            )}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: isHovered ? 1 : 0.8, y: isHovered ? 0 : 10 }}
-            transition={{ duration: 0.3 }}
-            role="status"
-            aria-live="polite"
-          >
-            {isHovered ? "Click to interact!" : "Hover to activate"}
-          </motion.div>
-        </div>
       </div>
 
-      {/* Glow effect */}
+      {/* Glow effect - Shopify Style Magenta/Purple */}
       <motion.div
-        className="absolute inset-0 rounded-2xl"
+        className="absolute inset-0 rounded-full -z-10"
         style={{
           background:
-            "radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%)",
-          filter: "blur(20px)",
+            "radial-gradient(circle at center, rgba(192, 38, 211, 0.25) 0%, rgba(147, 51, 234, 0.1) 40%, transparent 70%)",
+          filter: "blur(60px)",
         }}
         animate={{
-          opacity: isHovered ? 0.8 : 0.3,
-          scale: isHovered ? 1.1 : 1,
+          opacity: isHovered ? 1 : 0.6,
+          scale: isHovered ? 1.1 : 0.95,
         }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.8 }}
       />
     </div>
   );

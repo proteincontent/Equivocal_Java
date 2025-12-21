@@ -1,0 +1,67 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/equivocal?useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      # 连接超时时间（毫秒）- 等待连接池分配连接的最大时间
+      connection-timeout: 30000
+      # 最大连接池大小
+      maximum-pool-size: 30
+      # 最小空闲连接数
+      minimum-idle: 5
+      # 空闲连接超时时间（毫秒）- 30秒，TiDB Cloud 对于空闲连接非常敏感
+      idle-timeout: 30000
+      # 连接最大生命周期（毫秒）- 60秒，强制频繁刷新连接
+      max-lifetime: 60000
+      # 连接验证超时时间（毫秒）
+      validation-timeout: 3000
+      # 连接测试查询 - 用于验证连接是否有效
+      connection-test-query: SELECT 1
+      # 保持连接活跃的时间间隔（毫秒）- 30秒 (必须 >= 30000ms)
+      keepalive-time: 30000
+      # 显式指定事务隔离级别，跳过自动检测 (解决 TiDB Serverless 启动报错)
+      transaction-isolation: TRANSACTION_REPEATABLE_READ
+      # 连接泄漏检测阈值（毫秒）- 用于检测未关闭的连接
+      leak-detection-threshold: 60000
+      # 连接池名称
+      pool-name: TiDBHikariPool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        # 连接释放模式 - 每次事务后释放连接
+        connection.release_mode: after_transaction
+        # JDBC 批量大小
+        jdbc.batch_size: 25
+
+jwt:
+  secret: ${JWT_SECRET:please-change-this-secret-key-in-production-must-be-at-least-256-bits}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from-email: ${RESEND_FROM_EMAIL:noreply@example.com}
+
+coze:
+  api-url: ${COZE_API_URL:https://api.coze.com}
+  api-key: ${COZE_API_KEY:}
+  title-token: ${COZE_TITLE_TOKEN:}
+  bot-id: ${COZE_BOT_ID:}
+  project-id: ${COZE_PROJECT_ID:}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,http://localhost:3100}

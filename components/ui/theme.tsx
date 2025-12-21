@@ -87,28 +87,29 @@ export function Theme({
       <motion.button
         onClick={() => setTheme(nextTheme)}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-lg border transition-all duration-200",
-          theme === "light"
-            ? "border-slate-300 bg-slate-900 text-white shadow-lg hover:bg-slate-800 hover:border-slate-400"
-            : "border-white/20 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20",
-          "hover:scale-105 active:scale-95",
-          "focus:outline-none focus:ring-2 focus:ring-offset-2",
-          theme === "light"
-            ? "focus:ring-slate-500 focus:ring-offset-white"
-            : "focus:ring-white/30 focus:ring-offset-transparent",
+          // 统一的按钮基础样式
+          "inline-flex items-center justify-center gap-2 rounded-xl",
+          "border border-border/50 dark:border-white/10",
+          "bg-background/80 dark:bg-white/5",
+          "backdrop-blur-xl shadow-sm",
+          "text-foreground/80 dark:text-white/80",
+          "transition-all duration-300",
+          "hover:bg-secondary dark:hover:bg-white/10",
+          "hover:border-border dark:hover:border-white/20",
+          "hover:shadow-md",
+          "focus:outline-none focus:ring-2 focus:ring-primary/20",
           sizeClasses[size],
           className,
         )}
-        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         aria-label={`Switch to ${nextTheme} theme`}
       >
         <motion.div
           key={safeTheme}
-          initial={{ rotate: -180, opacity: 0 }}
+          initial={{ rotate: -90, opacity: 0 }}
           animate={{ rotate: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className={theme === "light" ? "text-yellow-400" : ""}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className={theme === "light" ? "text-amber-500" : "text-blue-400"}
         >
           <Icon size={iconSizes[size]} />
         </motion.div>

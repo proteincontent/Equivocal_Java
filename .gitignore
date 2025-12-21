@@ -25,3 +25,28 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# user data
+/data/users.json
+
+# Java/Maven backend
+backend/target/
+backend/*.log
+
+# Backend sensitive files - keep local config private
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# IDE
+.idea/
+*.iml
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kilo Code / Claude
+.claude/settings.local.json
+.kilocode/settings.local.json

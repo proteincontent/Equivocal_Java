@@ -1,0 +1,72 @@
+# ============================================
+# Equivocal Legal Backend - 配置模板
+# ============================================
+# 复制此文件为 application-local.yml 或设置环境变量
+# 敏感信息请勿提交到版本控制系统
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  datasource:
+    # 数据库连接配置 - 请设置以下环境变量
+    # SPRING_DATASOURCE_URL: 完整的 JDBC URL
+    # SPRING_DATASOURCE_USERNAME: 数据库用户名
+    # SPRING_DATASOURCE_PASSWORD: 数据库密码
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/equivocal?useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 30
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 60000
+      validation-timeout: 3000
+      connection-test-query: SELECT 1
+      keepalive-time: 30000
+      transaction-isolation: TRANSACTION_REPEATABLE_READ
+      leak-detection-threshold: 60000
+      pool-name: TiDBHikariPool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        connection.release_mode: after_transaction
+        jdbc.batch_size: 25
+
+jwt:
+  # JWT 密钥 - 生产环境必须更改！
+  # 至少 256 位（32 字符）的随机字符串
+  secret: ${JWT_SECRET:please-change-this-secret-key-in-production-must-be-at-least-256-bits}
+  # Token 过期时间（毫秒），默认 24 小时
+  expiration: ${JWT_EXPIRATION:86400000}
+
+resend:
+  # Resend 邮件服务配置
+  # 从 https://resend.com 获取 API 密钥
+  api-key: ${RESEND_API_KEY:}
+  from-email: ${RESEND_FROM_EMAIL:noreply@example.com}
+
+coze:
+  # Coze AI 配置
+  # 从 https://www.coze.com 获取以下信息
+  api-url: ${COZE_API_URL:https://api.coze.com}
+  api-key: ${COZE_API_KEY:}
+  title-token: ${COZE_TITLE_TOKEN:}
+  bot-id: ${COZE_BOT_ID:}
+  project-id: ${COZE_PROJECT_ID:}
+
+app:
+  cors:
+    # 允许的跨域来源，多个用逗号分隔
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,http://localhost:3100}

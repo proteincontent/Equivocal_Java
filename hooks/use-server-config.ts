@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
+import { buildApiUrl } from "@/lib/api";
 
 interface ServerConfigResponse {
-  hasOpenAIKey: boolean;
+  hasCozeKey: boolean;
   defaults: {
-    model: string;
-    baseUrl: string;
-    apiKeyHeader: string;
+    cozeBotId: string;
   };
 }
 
@@ -27,7 +26,7 @@ export function useServerConfig(): UseServerConfigState {
 
     const load = async () => {
       try {
-        const response = await fetch("/api/config");
+        const response = await fetch(buildApiUrl("/api/config"));
         if (!response.ok) {
           throw new Error(`Failed to load server config (${response.status})`);
         }
