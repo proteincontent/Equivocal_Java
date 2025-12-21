@@ -1,5 +1,6 @@
-import { MBTIChatPage } from "@/components/mbti-chat-page";
+import { LegalChatPage } from "@/components/legal-chat-page";
 
 export default function Home() {
-  return <MBTIChatPage />;
+  // 根路径只显示介绍页 (Intro)
+  return <LegalChatPage initialShowChat={false} />;
 }

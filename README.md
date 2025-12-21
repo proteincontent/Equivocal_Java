@@ -18,10 +18,10 @@
 
 ## Highlights
 
-- **MBTI-first conversations** – guide users through temperament overviews, strengths, and growth prompts tailored to each MBTI type.
-- **Bring your own OpenAI key** – configure an OpenAI-compatible endpoint via `.env.local` or the in-app Settings drawer; nothing is stored on our servers.
+- **AI-powered legal services** – intelligent legal consultation, contract review, and document generation powered by Coze AI.
+- **Built-in Coze integration** – no API key configuration needed; Coze credentials are pre-configured on the server.
 - **Immersive onboarding UI** – a new landing page plus animated chat surface, spotlight interactions, and 3D-friendly panels built with Next.js + Tailwind.
-- **Extensible data model** – personality copy, prompts, and group metadata (moved into typed modules) keep UI components focused on presentation.
+- **Extensible data model** – legal service types, prompts, and metadata (moved into typed modules) keep UI components focused on presentation.
 - **Vercel ready** – zero-config deployment pipeline and analytics already wired up.
 
 ## Table of Contents
@@ -55,10 +55,10 @@ pnpm install
    ```bash
    cp .env.local.example .env.local
    ```
-2. Add `OPENAI_API_KEY` to `.env.local` (or configure provider-specific overrides such as `OPENAI_API_BASE_URL`).
+2. Configure Coze API credentials (`COZE_API_KEY`, `COZE_BOT_ID`) in `.env.local` or the backend configuration.
 3. Restart the dev server after changing server-side environment variables.
 
-> Prefer not to store secrets on disk? Leave `.env.local` blank and paste your key into **Settings → API Key** at runtime. Keys are saved only to the current browser.
+> The Coze API credentials are pre-configured on the server. Users do not need to provide their own API keys.
 
 ## Usage
 
@@ -81,31 +81,27 @@ pnpm build  # Next.js production build
 
 | Variable | Description | Default |
 | --- | --- | --- |
-| `OPENAI_API_KEY` | Server-side key used when clients do not supply their own. | _required_ |
-| `OPENAI_MODEL` | Default model for chat completions. | `gpt-4o-mini` |
-| `OPENAI_API_BASE_URL` | Base URL for OpenAI-compatible providers. | `https://api.openai.com/v1` |
-| `OPENAI_CHAT_COMPLETIONS_PATH` | Path appended to the base URL when constructing requests. | `chat/completions` |
-| `OPENAI_CHAT_COMPLETIONS_URL` | Full override URL (skips base URL + path). | — |
-| `OPENAI_API_KEY_HEADER` | Header name that carries the API key. | `Authorization` |
-| `OPENAI_API_VERSION` | Optional API version header (for Azure/OpenAI). | — |
-| `NEXT_PUBLIC_OPENAI_*` | Public overrides for client defaults (model, base URL, key header). | — |
+| `COZE_API_KEY` | Coze API key for AI chat services. | _required_ |
+| `COZE_BOT_ID` | Coze Bot ID for the legal assistant. | _required_ |
+| `COZE_API_URL` | Coze API base URL. | `https://api.coze.cn` |
 
 ## Project Structure
 
 ```
-app/                 # Next.js app router, landing page, chat route, API endpoints
-components/          # UI primitives and feature surfaces (chat, MBTI selector, animations)
-data/mbti/           # Personality metadata, prompts, and helpers (extracted from UI components)
-hooks/               # Client-side state (OpenAI config, server config fetchers, etc.)
+app/                 # Next.js app router, landing page, chat route
+backend/             # Java Spring Boot backend (authentication, Coze API, database)
+components/          # UI primitives and feature surfaces (chat, animations)
+data/legal-services/ # Legal service metadata and helpers
+hooks/               # Client-side state (auth, config fetchers, etc.)
+lib/                 # Utility functions and API helpers
 public/              # Static assets (logo, placeholders, manifest)
-tools/               # Scripts and tooling helpers
 ```
 
 _Notable flows_
 
-- **Chat API** – `app/api/chat/route.ts` forwards requests to OpenAI-compatible providers, detects missing API keys, and returns assistant messages + usage metrics.
-- **OpenAI config state** – `hooks/use-config.ts` stores per-browser overrides; `hooks/use-server-config.ts` exposes server defaults to the UI.
-- **Settings panel** – `components/ui/settings.tsx` surfaces key, model, base URL, and header controls with reset + documentation links.
+- **Chat API** – Java backend (`backend/src/main/java/com/equivocal/controller/CozeChatController.java`) handles Coze AI requests.
+- **Authentication** – Java backend (`backend/src/main/java/com/equivocal/service/AuthService.java`) manages user login/registration with JWT.
+- **Config state** – `hooks/use-config.ts` stores configuration; `hooks/use-auth.ts` manages authentication state.
 
 ## Contributing
 

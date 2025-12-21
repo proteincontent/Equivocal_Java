@@ -3,80 +3,116 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * 法律AI服务品牌设计系统
+ * 核心理念：专业、信任、权威、高效
+ *
+ * 色彩心理学：
+ * - 深海蓝：权威、专业、可信赖
+ * - 琥珀金：高端、价值、信任
+ * - 暖白：温暖、亲和、专业
+ */
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* === 品牌核心色 === */
+  --brand-navy: #0A1628;
+  --brand-navy-light: #1A2744;
+  --brand-royal: #2563EB;
+  --brand-gold: #D4A853;
+  --brand-gold-light: #E8C878;
+  --brand-warm-white: #F8F6F3;
+  --brand-warm-gray: #9CA3AF;
+  
+  /* === 语义化颜色 (Light Mode - Paper & Ink) === */
+  --background: #F9FAFB; /* 极淡的冷灰，更现代 */
+  --foreground: #0F172A; /* 深岩灰，比纯黑更柔和 */
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #0F172A; /* 主色调改为深色，强调墨水感 */
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #334155;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #D4A853;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #2563EB;
+  
+  /* === 图表色彩 === */
+  --chart-1: #2563EB;
+  --chart-2: #D4A853;
+  --chart-3: #10B981;
+  --chart-4: #8B5CF6;
+  --chart-5: #F59E0B;
+  
+  /* === 圆角系统 === */
+  --radius: 0.5rem;
+  
+  /* === 侧边栏 === */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A1A1A;
+  --sidebar-primary: #2563EB;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F3F4F6;
+  --sidebar-accent-foreground: #374151;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #2563EB;
+
+  /* 全局缩放因子：用于统一放大/缩小 rem 体系 */
+  --app-scale: 1;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* === 深色模式 - 专业法律风格 === */
+  --background: #0A1628;
+  --foreground: #F8F6F3;
+  --card: #1A2744;
+  --card-foreground: #F8F6F3;
+  --popover: #1A2744;
+  --popover-foreground: #F8F6F3;
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1E3A5F;
+  --secondary-foreground: #F8F6F3;
+  --muted: #1E3A5F;
+  --muted-foreground: #9CA3AF;
+  --accent: #D4A853;
+  --accent-foreground: #0A1628;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #2A3F5F;
+  --input: #2A3F5F;
+  --ring: #3B82F6;
+  
+  /* === 图表色彩 === */
+  --chart-1: #3B82F6;
+  --chart-2: #D4A853;
+  --chart-3: #10B981;
+  --chart-4: #A78BFA;
+  --chart-5: #FBBF24;
+  
+  /* === 侧边栏 === */
+  --sidebar: #0F1D32;
+  --sidebar-foreground: #F8F6F3;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1E3A5F;
+  --sidebar-accent-foreground: #F8F6F3;
+  --sidebar-border: #2A3F5F;
+  --sidebar-ring: #3B82F6;
 }
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Avoid build-time dependency on Google Fonts (next/font/google). */
+  --font-serif: var(--font-noto-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -113,16 +149,28 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* 注册品牌色到 Tailwind 主题 */
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-light: var(--brand-navy-light);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-light: var(--brand-gold-light);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scrollbar-gutter: stable; /* 始终预留滚动条空间，防止布局抖动 */
+    font-size: calc(16px * var(--app-scale));
+  }
   body {
     @apply bg-background text-foreground;
   }
 }
+
+/* === 品牌动画系统 === */
 
 @keyframes spotlight {
   0% {
@@ -139,9 +187,313 @@
   animation: spotlight 2s ease 0.75s 1 forwards;
 }
 
-.lab-bg::before {
-  overflow: hidden;
-  max-width: 100vw;
-  max-height: 100vh;
-  box-sizing: border-box;
+/* 优雅的淡入动画 */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* 金色光晕脉冲 */
+@keyframes gold-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    box-shadow: 0 0 20px rgba(212, 168, 83, 0.3);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 40px rgba(212, 168, 83, 0.5);
+  }
+}
+
+.animate-gold-pulse {
+  animation: gold-pulse 3s ease-in-out infinite;
+}
+
+/* 细腻的噪点纹理 - 增加质感 */
+.noise-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.dark .noise-bg {
+  opacity: 0.025;
+}
+
+/* 专业法律风格的玻璃面板 */
+.glass-panel {
+  @apply backdrop-blur-xl border shadow-2xl;
+  background: rgba(255, 255, 255, 0.85); /* 增加不透明度 */
+  border-color: rgba(0, 0, 0, 0.08); /* 加深边框 */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), /* 加深阴影 */
+    0 20px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-panel {
+  background: rgba(26, 39, 68, 0.8);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* 输入框样式 */
+.glass-input {
+  @apply backdrop-blur-xl border transition-all duration-300;
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass-input {
+  background: rgba(26, 39, 68, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.glass-input:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dark .glass-input:focus-within {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 金色边框装饰 */
+.gold-border {
+  position: relative;
+}
+
+.gold-border::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 168, 83, 0.5),
+    rgba(212, 168, 83, 0.1) 30%,
+    rgba(212, 168, 83, 0) 50%,
+    rgba(212, 168, 83, 0.1) 70%,
+    rgba(212, 168, 83, 0.5)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 缓慢的呼吸动画 */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.05);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 优雅的漂浮动画 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* === 精致滚动条 === */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 100vh;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+/* === 品牌专属样式 === */
+
+/* 标题渐变效果 - 哑光烫金质感 (更内敛、更高端) */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #A67C37 0%, #D4A853 50%, #A67C37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.dark .text-gradient-gold {
+  background: linear-gradient(135deg, #C5A059 0%, #F3D081 50%, #C5A059 100%);
+  filter: drop-shadow(0 0 15px rgba(212, 168, 83, 0.2));
+}
+
+/* 超薄磨砂玻璃 */
+.glass-premium {
+  @apply backdrop-blur-2xl border transition-all duration-500;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-premium {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.text-gradient-blue {
+  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #60A5FA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 高端按钮样式 */
+.btn-premium {
+  @apply relative overflow-hidden transition-all duration-300;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  box-shadow:
+    0 4px 6px -1px rgba(37, 99, 235, 0.2),
+    0 10px 15px -3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 12px -2px rgba(37, 99, 235, 0.25),
+    0 16px 24px -4px rgba(37, 99, 235, 0.2);
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+}
+
+/* 金色高端按钮 */
+.btn-gold {
+  @apply relative overflow-hidden transition-all duration-300;
+  background: linear-gradient(135deg, #D4A853 0%, #B8923F 100%);
+  color: #0A1628;
+  box-shadow:
+    0 4px 6px -1px rgba(212, 168, 83, 0.3),
+    0 10px 15px -3px rgba(212, 168, 83, 0.2);
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 12px -2px rgba(212, 168, 83, 0.35),
+    0 16px 24px -4px rgba(212, 168, 83, 0.25);
+}
+
+/* 专业法律服务卡片 */
+.legal-card {
+  @apply rounded-xl border transition-all duration-300;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.legal-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 20px 40px -10px rgba(0, 0, 0, 0.05);
+}
+
+.dark .legal-card {
+  background: rgba(26, 39, 68, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 信任徽章 */
+.trust-badge {
+  @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium;
+  background: rgba(212, 168, 83, 0.1);
+  color: #B8923F;
+  border: 1px solid rgba(212, 168, 83, 0.2);
+}
+
+.dark .trust-badge {
+  background: rgba(212, 168, 83, 0.15);
+  color: #E8C878;
+  border-color: rgba(212, 168, 83, 0.3);
+}
+
+/* 分隔线 */
+.divider-gold {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #D4A853, transparent);
+}
+
+/* 选中状态指示器 */
+.selection-indicator {
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full;
+  background: linear-gradient(180deg, #D4A853 0%, #B8923F 100%);
 }

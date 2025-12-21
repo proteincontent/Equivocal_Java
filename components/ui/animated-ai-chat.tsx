@@ -3,22 +3,33 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
-  ImageIcon,
-  Figma,
-  MonitorIcon,
   Paperclip,
   SendIcon,
   XIcon,
   LoaderIcon,
-  Sparkles,
-  Command,
-  ShieldAlert,
+  ChevronDown,
+  Copy,
+  Check,
+  FileIcon,
+  ImageIcon as ImageFileIcon,
+  Download,
+  Globe,
+  BrainCircuit,
+  Search,
+  Scale,
+  Shield,
+  FileText,
+  Square,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import { useConfig } from "@/hooks/use-config";
-import { useServerConfig } from "@/hooks/use-server-config";
+import { useAuth } from "@/hooks/use-auth";
+import { AuthModal } from "@/components/ui/auth-modal";
+import { buildApiUrl } from "@/lib/api";
 
 interface UseAutoResizeTextareaProps {
   minHeight: number;
@@ -74,51 +85,25 @@ interface CommandSuggestion {
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   containerClassName?: string;
-  showRing?: boolean;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, containerClassName, showRing = true, ...props }, ref) => {
-    const [isFocused, setIsFocused] = React.useState(false);
-
+  ({ className, containerClassName, ...props }, ref) => {
     return (
       <div className={cn("relative", containerClassName)}>
         <textarea
           className={cn(
-            "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+            "flex min-h-[60px] w-full bg-transparent px-3 py-2 text-sm font-mono",
             "transition-all duration-200 ease-in-out",
-            "placeholder:text-muted-foreground",
+            "placeholder:text-muted-foreground/60",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            showRing
-              ? "focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              : "",
+            "focus:outline-none",
             className,
           )}
           ref={ref}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          spellCheck={false}
           {...props}
         />
-
-        {showRing && isFocused && (
-          <motion.span
-            className="absolute inset-0 rounded-md pointer-events-none ring-2 ring-offset-0 ring-violet-500/30"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          />
-        )}
-
-        {props.onChange && (
-          <div
-            className="absolute bottom-2 right-2 opacity-0 w-2 h-2 bg-violet-500 rounded-full"
-            style={{
-              animation: "none",
-            }}
-            id="textarea-ripple"
-          />
-        )}
       </div>
     );
   },
@@ -130,68 +115,238 @@ interface ChatMessage {
   content: string;
 }
 
-export function AnimatedAIChat() {
-  const { apiKey, model, baseUrl, apiKeyHeader } = useConfig();
-  const { config: serverConfig } = useServerConfig();
-  const trimmedApiKey = apiKey.trim();
-  const requiresUserApiKey = serverConfig ? !serverConfig.hasOpenAIKey : null;
-  const showMissingKeyNotice = requiresUserApiKey === true && trimmedApiKey.length === 0;
-  const missingKeyMessage = "Add your OpenAI API key in Settings before starting a conversation.";
+interface AnimatedAIChatProps {
+  sessionId?: string | null;
+  onSessionChange?: (_sessionId: string) => void;
+  onNewMessage?: () => void;
+}
+
+// 文件附件类型
+interface FileAttachment {
+  id: string;           // Coze 文件 ID
+  fileName: string;     // 文件名
+  fileSize: number;     // 文件大小
+  fileType: string;     // 文件类型
+  isUploading: boolean; // 是否正在上传
+  error?: string;       // 上传错误信息
+  localFile?: File;     // 本地文件对象（上传前）
+}
+
+export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: AnimatedAIChatProps) {
+  const { botId } = useConfig();
+  const { user, token, login } = useAuth();
+
   const [value, setValue] = useState("");
-  const [attachments, setAttachments] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [_recentCommand, setRecentCommand] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 60,
     maxHeight: 200,
   });
   const [inputFocused, setInputFocused] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const commandPaletteRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: "👋 你好，我是 Equivocal 的聊天助手，随时可以回答你的 MBTI 或体验相关问题。",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const prevMessageCountRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const prevSessionIdRef = useRef<string | null | undefined>(sessionId);
+
+  // 判断是否开始聊天（是否有消息，或者有非默认的欢迎消息）
+  const isChatStarted = useMemo(() => {
+    return messages.length > 0;
+  }, [messages]);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+    const container = messageListRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior });
+  }, []);
+
+  const handleMessageListScroll = useCallback(() => {
+    const container = messageListRef.current;
+    if (!container) return;
+
+    const thresholdPx = 80;
+    const distanceToBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    const atBottom = distanceToBottom <= thresholdPx;
+
+    setIsAtBottom(atBottom);
+    if (atBottom) {
+      setUnreadCount(0);
+    }
+  }, []);
+
+  const handleCopy = useCallback((text: string, index: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }, []);
+
+  const handleStopGenerating = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setIsTyping(false);
+  }, []);
 
   useEffect(() => {
-    if (trimmedApiKey.length > 0 || requiresUserApiKey !== true) {
-      setErrorMessage((current) => (current === missingKeyMessage ? null : current));
-    }
-  }, [trimmedApiKey, requiresUserApiKey, missingKeyMessage]);
+    return () => {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+    };
+  }, []);
 
-  const commandSuggestions: CommandSuggestion[] = useMemo(() => [
-    {
-      icon: <ImageIcon className="w-4 h-4" />,
-      label: "Clone UI",
-      description: "Generate a UI from a screenshot",
-      prefix: "/clone",
-    },
-    {
-      icon: <Figma className="w-4 h-4" />,
-      label: "Import Figma",
-      description: "Import a design from Figma",
-      prefix: "/figma",
-    },
-    {
-      icon: <MonitorIcon className="w-4 h-4" />,
-      label: "Create Page",
-      description: "Generate a new web page",
-      prefix: "/page",
-    },
-    {
-      icon: <Sparkles className="w-4 h-4" />,
-      label: "Improve",
-      description: "Improve existing UI design",
-      prefix: "/improve",
-    },
-  ], []);
+  useEffect(() => {
+    const prevSessionId = prevSessionIdRef.current;
+    prevSessionIdRef.current = sessionId;
+
+    // Only stop generating if we are switching from one valid session to another.
+    // We do NOT want to stop if we are transitioning from null -> sessionId (Session Creation).
+    if (prevSessionId && prevSessionId !== sessionId && isTyping) {
+      handleStopGenerating();
+    }
+  }, [handleStopGenerating, isTyping, sessionId]);
+
+  useEffect(() => {
+    // Removed API key validation logic
+    setErrorMessage(null);
+  }, []);
+
+  // 用于跟踪 fetchHistory 的上一个 sessionId，独立于全局 prevSessionIdRef
+  const fetchHistorySessionIdRef = useRef<string | null | undefined>(sessionId);
+
+  // 加载聊天历史记录
+  useEffect(() => {
+    const prevSessionId = fetchHistorySessionIdRef.current;
+    fetchHistorySessionIdRef.current = sessionId;
+
+    const fetchHistory = async () => {
+      if (!token) return;
+
+      // 如果没有 sessionId，重置为空数组，显示初始界面
+      if (!sessionId) {
+        setMessages([]);
+        setUnreadCount(0);
+        setIsAtBottom(true);
+        prevMessageCountRef.current = 0;
+        return;
+      }
+
+      // 🚨 关键修复：防止发送消息时的闪烁
+      // 如果正在输入(流式传输中)，或者是刚刚发送了消息导致 sessionId 变化
+      // 我们都不应该重新拉取历史，因为当前内存中的 messages 才是最新的
+      if (isTyping) {
+        // 如果 sessionId 变了，更新 ref 以便下次正确判断，但不拉取数据
+        if (sessionId) {
+            fetchHistorySessionIdRef.current = sessionId;
+        }
+        return;
+      }
+
+      // 如果是从无 SessionId 变为有 SessionId (通常是第一条消息发送后)
+      // 且当前已经有消息在展示了，说明是本地状态更新，不需要拉取历史
+      if (!prevSessionId && sessionId && messages.length > 0) {
+        return;
+      }
+
+      try {
+        // 使用新的 API 端点获取指定会话的消息
+        const response = await fetch(buildApiUrl(`/api/chat/sessions/${sessionId}`), {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+            setMessages(data.messages.map((msg: any) => ({
+              role: msg.role,
+              content: msg.content
+            })));
+            
+            // 滚动到底部
+            setUnreadCount(0);
+            setIsAtBottom(true);
+            setTimeout(() => scrollToBottom("auto"), 0);
+          } else {
+            // 会话存在但没有消息
+            setMessages([]);
+            setUnreadCount(0);
+            setIsAtBottom(true);
+            prevMessageCountRef.current = 0;
+          }
+        } else {
+          // 会话不存在或出错
+          setMessages([]);
+          setUnreadCount(0);
+          setIsAtBottom(true);
+          prevMessageCountRef.current = 0;
+        }
+      } catch (error) {
+        console.error('Failed to fetch chat history:', error);
+        setMessages([]);
+        setUnreadCount(0);
+        setIsAtBottom(true);
+        prevMessageCountRef.current = 0;
+      }
+    };
+
+    fetchHistory();
+  }, [scrollToBottom, sessionId, token]);
+
+  const commandSuggestions: CommandSuggestion[] = useMemo(
+    () => [
+      {
+        icon: <Scale className="w-4 h-4" />,
+        label: "法律咨询",
+        description: "快速提问并获取风险与建议",
+        prefix: "/ask",
+      },
+      {
+        icon: <FileText className="w-4 h-4" />,
+        label: "合同起草",
+        description: "生成合同/条款草案与注意事项",
+        prefix: "/contract",
+      },
+      {
+        icon: <Shield className="w-4 h-4" />,
+        label: "合规审查",
+        description: "列出合规风险点与整改清单",
+        prefix: "/compliance",
+      },
+      {
+        icon: <Search className="w-4 h-4" />,
+        label: "案例检索",
+        description: "按事实要点梳理检索关键词",
+        prefix: "/cases",
+      },
+    ],
+    []
+  );
+
+  const featureSuggestions = [
+    { icon: <FileText className="w-5 h-5 text-brand-gold" />, label: "起草合同" },
+    { icon: <Scale className="w-5 h-5 text-brand-gold" />, label: "法律咨询" },
+    { icon: <Shield className="w-5 h-5 text-brand-gold" />, label: "合规审查" },
+    { icon: <Search className="w-5 h-5 text-brand-gold" />, label: "案例检索" },
+  ];
 
   useEffect(() => {
     if (value.startsWith("/") && !value.includes(" ")) {
@@ -243,10 +398,22 @@ export function AnimatedAIChat() {
   }, []);
 
   useEffect(() => {
-    if (!messageListRef.current) return;
-    const container = messageListRef.current;
-    container.scrollTop = container.scrollHeight;
-  }, [messages]);
+    const prevCount = prevMessageCountRef.current;
+    const nextCount = messages.length;
+
+    if (nextCount > prevCount && !isAtBottom) {
+      setUnreadCount((current) => current + (nextCount - prevCount));
+    }
+
+    prevMessageCountRef.current = nextCount;
+
+    if (isAtBottom) {
+      // 使用 requestAnimationFrame 确保在 DOM 更新后滚动
+      requestAnimationFrame(() => {
+        scrollToBottom("auto");
+      });
+    }
+  }, [isAtBottom, messages, scrollToBottom]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (showCommandPalette) {
@@ -270,139 +437,241 @@ export function AnimatedAIChat() {
         e.preventDefault();
         setShowCommandPalette(false);
       }
+    } else if (e.key === "Escape" && isTyping) {
+      e.preventDefault();
+      handleStopGenerating();
     } else if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      e.stopPropagation();
       void handleSendMessage();
     }
   };
 
-  const handleSendMessage = async () => {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      return;
-    }
-
-    if (requiresUserApiKey === true && trimmedApiKey.length === 0) {
-      setErrorMessage(missingKeyMessage);
-      return;
-    }
-
-    const userMessage: ChatMessage = {
-      role: "user",
-      content: trimmed,
+  /**
+   * 上传单个文件到 Coze
+   */
+  const uploadFile = useCallback(async (file: File): Promise<FileAttachment> => {
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    
+    // 创建临时附件对象
+    const tempAttachment: FileAttachment = {
+      id: tempId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      isUploading: true,
+      localFile: file,
     };
-    const nextMessages = [...messages, userMessage];
-
-    setMessages(nextMessages);
-    setValue("");
-    adjustHeight(true);
-    setAttachments([]);
-    setShowCommandPalette(false);
-    setRecentCommand(null);
-    setErrorMessage(null);
-    setIsTyping(true);
-
-    const trimmedModel = model.trim();
-    const trimmedBaseUrl = baseUrl.trim();
-    const trimmedHeader = apiKeyHeader.trim();
-
-    const configPayload: Record<string, string> = {};
-    if (trimmedApiKey) {
-      configPayload.apiKey = trimmedApiKey;
-    }
-    if (trimmedModel) {
-      configPayload.model = trimmedModel;
-    }
-    if (trimmedBaseUrl) {
-      configPayload.baseUrl = trimmedBaseUrl;
-    }
-    if (trimmedHeader) {
-      configPayload.apiKeyHeader = trimmedHeader;
-    }
-
-    const payload: Record<string, unknown> = {
-      messages: nextMessages,
-    };
-
-    if (attachments.length) {
-      payload.attachments = attachments;
-    }
-
-    if (Object.keys(configPayload).length > 0) {
-      payload.config = configPayload;
-    }
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const formData = new FormData();
+      formData.append('file', file);
+
+      console.log('[AnimatedAIChat] Starting file upload:', file.name);
+      const response = await fetch(buildApiUrl('/api/coze-upload'), {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: formData,
       });
 
-      if (!response.ok) {
-        let detail;
-        try {
-          const errorBody = await response.json();
-          detail =
-            typeof errorBody?.detail === "string"
-              ? errorBody.detail
-              : typeof errorBody?.error === "string"
-                ? errorBody.error
-                : undefined;
-        } catch {
-          detail = undefined;
-        }
-        throw new Error(detail ?? "Request failed with status " + response.status);
+      console.log('[AnimatedAIChat] Upload response status:', response.status);
+      if (response.status === 401) {
+        setErrorMessage('登录已过期，请重新登录');
+        setShowAuthModal(true);
+        throw new Error('未登录或登录已过期');
+      }
+      const responseText = await response.text();
+      console.log('[AnimatedAIChat] Upload response text:', responseText);
+
+      let result;
+      try {
+        result = responseText ? JSON.parse(responseText) : {};
+      } catch (e) {
+        console.error('[AnimatedAIChat] Failed to parse response as JSON:', e);
+        throw new Error(`服务器响应格式错误: ${response.status}`);
       }
 
-      const data = await response.json();
-      const assistantContent = extractMessageContent(data?.message);
-
-      if (
-        !assistantContent ||
-        (typeof assistantContent === "string" && assistantContent.trim() === "")
-      ) {
-        setMessages((current) => [
-          ...current,
-          {
-            role: "assistant",
-            content:
-              "Sorry, I couldn't generate a reply for that. Please try rephrasing your question.",
-          },
-        ]);
-        return;
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || '文件上传失败');
       }
 
-      setMessages((current) => [
-        ...current,
-        {
-          role: "assistant",
-          content: assistantContent,
-        },
-      ]);
+      const responseData = result?.data ?? {};
+      const uploadedId = responseData.id || responseData.file_id;
+      if (!uploadedId) {
+        throw new Error('上传成功但未返回文件ID');
+      }
+
+      // 返回成功的附件对象
+      return {
+        id: uploadedId,
+        fileName: responseData.file_name || result.filename || file.name,
+        fileSize: responseData.bytes || result.size || file.size,
+        fileType: file.type,
+        isUploading: false,
+      };
     } catch (error) {
-      console.error("[AnimatedAIChat] Failed to send message", error);
-      setMessages((current) => [
-        ...current,
-        {
-          role: "assistant",
-          content: "Sorry, we can't reach the server right now. Please try again later.",
-        },
-      ]);
-      setErrorMessage(error instanceof Error ? error.message : String(error));
+      console.error('[AnimatedAIChat] File upload error:', error);
+      return {
+        ...tempAttachment,
+        isUploading: false,
+        error: error instanceof Error ? error.message : '上传失败',
+      };
+    }
+  }, [token]);
+
+  /**
+   * 处理拖拽进入
+   */
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // 检查是否有文件
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  /**
+   * 处理拖拽离开
+   */
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // 只有当离开整个拖放区域时才取消高亮
+    const rect = dropZoneRef.current?.getBoundingClientRect();
+    if (rect) {
+      const { clientX, clientY } = e;
+      if (
+        clientX <= rect.left ||
+        clientX >= rect.right ||
+        clientY <= rect.top ||
+        clientY >= rect.bottom
+      ) {
+        setIsDragging(false);
+      }
+    }
+  }, []);
+
+  /**
+   * 处理拖拽悬停
+   */
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  /**
+   * 处理文件放置
+   */
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+
+    // 限制最多上传 5 个文件
+    const maxFiles = 5;
+    const currentCount = attachments.length;
+    const availableSlots = maxFiles - currentCount;
+
+    if (availableSlots <= 0) {
+      setErrorMessage('最多只能上传 5 个文件');
       return;
-    } finally {
-      setIsTyping(false);
+    }
+
+    const filesToUpload = Array.from(files).slice(0, availableSlots);
+
+    // 为每个文件创建临时附件并开始上传
+    for (const file of filesToUpload) {
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      // 添加临时附件（显示上传中状态）
+      const tempAttachment: FileAttachment = {
+        id: tempId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        isUploading: true,
+        localFile: file,
+      };
+      
+      setAttachments(prev => [...prev, tempAttachment]);
+
+      // 异步上传文件
+      uploadFile(file).then(uploadedAttachment => {
+        setAttachments(prev => 
+          prev.map(att => 
+            att.id === tempId ? uploadedAttachment : att
+          )
+        );
+      });
+    }
+  }, [attachments.length, uploadFile]);
+
+  /**
+   * 处理文件选择
+   */
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // 限制最多上传 5 个文件
+    const maxFiles = 5;
+    const currentCount = attachments.length;
+    const availableSlots = maxFiles - currentCount;
+
+    if (availableSlots <= 0) {
+      setErrorMessage('最多只能上传 5 个文件');
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, availableSlots);
+
+    // 为每个文件创建临时附件并开始上传
+    for (const file of filesToUpload) {
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      // 添加临时附件（显示上传中状态）
+      const tempAttachment: FileAttachment = {
+        id: tempId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        isUploading: true,
+        localFile: file,
+      };
+      
+      setAttachments(prev => [...prev, tempAttachment]);
+
+      // 异步上传文件
+      uploadFile(file).then(uploadedAttachment => {
+        setAttachments(prev => 
+          prev.map(att => 
+            att.id === tempId ? uploadedAttachment : att
+          )
+        );
+      });
+    }
+
+    // 清空文件输入
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
+  /**
+   * 点击附件按钮
+   */
   const handleAttachFile = () => {
-    const mockFileName = `file-${Math.floor(Math.random() * 1000)}.pdf`;
-    setAttachments((prev) => [...prev, mockFileName]);
+    fileInputRef.current?.click();
   };
 
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  const removeAttachment = (attachmentId: string) => {
+    setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
   };
 
   const selectCommandSuggestion = (index: number) => {
@@ -414,319 +683,989 @@ export function AnimatedAIChat() {
     setTimeout(() => setRecentCommand(null), 2000);
   };
 
-  return (
-    <div className="min-h-screen flex flex-col w-full items-center justify-center bg-transparent text-foreground p-6 relative overflow-hidden">
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/5 dark:bg-violet-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse delay-700" />
-        <div className="absolute top-1/4 right-1/3 w-64 h-64 bg-fuchsia-500/5 dark:bg-fuchsia-500/10 rounded-full mix-blend-normal filter blur-[96px] animate-pulse delay-1000" />
-      </div>
-      <div className="w-full max-w-2xl mx-auto relative">
-        <motion.div
-          className="relative z-10 space-y-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <div className="text-center space-y-3">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-block"
-            >
-              <h1 className="text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground/90 to-foreground/40 pb-1">
-                How can I help today?
-              </h1>
-              <motion.div
-                className="h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "100%", opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              />
-            </motion.div>
-            <motion.p
-              className="text-sm text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              Type a command or ask a question
-            </motion.p>
-          </div>
-          {showMissingKeyNotice && (
-            <Alert variant="destructive" className="bg-destructive/10 border-destructive/40">
-              <ShieldAlert className="mt-0.5" aria-hidden="true" />
-              <AlertTitle>API key required</AlertTitle>
-              <AlertDescription>
-                Open Settings (top right) and add your OpenAI-compatible key to continue.
-              </AlertDescription>
-            </Alert>
+  /**
+   * 发送消息 - 使用 SSE 流式响应
+   */
+  const handleSendMessage = async (e?: React.MouseEvent | React.FormEvent) => {
+    // 阻止默认提交行为（防止页面刷新）
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 🚨 发送前检查登录状态
+    if (!user || !token) {
+      setErrorMessage('请先登录后再使用聊天功能');
+      setShowAuthModal(true);
+      return;
+    }
+
+    const trimmed = value.trim();
+    
+    // 检查是否有正在上传的文件
+    const uploadingFiles = attachments.filter(att => att.isUploading);
+    if (uploadingFiles.length > 0) {
+      setErrorMessage('请等待文件上传完成');
+      return;
+    }
+
+    // 检查是否有上传失败的文件
+    const failedFiles = attachments.filter(att => att.error);
+    if (failedFiles.length > 0) {
+      setErrorMessage('部分文件上传失败，请移除后重试');
+      return;
+    }
+
+    // 如果没有文本也没有附件，不发送
+    if (!trimmed && attachments.length === 0) {
+      return;
+    }
+
+    // 构建消息内容
+    let messageContent = trimmed;
+    let contentType: "text" | "object_string" = "text";
+
+    // 如果有附件，构建 object_string 格式的内容
+    const uploadedFileIds = attachments.map(att => att.id);
+    if (attachments.length > 0) {
+      const contentParts: any[] = [];
+      
+      // 添加文件
+      for (const att of attachments) {
+        const isImage = att.fileType.startsWith('image/');
+        contentParts.push({
+          type: isImage ? 'image' : 'file',
+          file_id: att.id,
+        });
+      }
+      
+      // 添加文本：如果用户没输入内容，也要给一个默认指令，避免“只上传文件”时模型不知道要做什么
+      const promptText =
+        trimmed ||
+        (attachments.some(att => att.fileType.startsWith("image/"))
+          ? "请识别并分析我上传的图片内容，并给出要点总结。"
+          : "请阅读并分析我上传的文件（如合同/材料），提取关键信息，指出风险点，并给出修改或应对建议。");
+
+      contentParts.push({
+        type: 'text',
+        text: promptText,
+      });
+      
+      messageContent = JSON.stringify(contentParts);
+      contentType = "object_string";
+    }
+
+    const userMessage: ChatMessage = {
+      role: "user",
+      content: trimmed || `[已上传 ${attachments.length} 个文件]`,
+    };
+    const nextMessages = [...messages, userMessage];
+
+    setMessages(nextMessages);
+    setValue("");
+    adjustHeight(true);
+    setAttachments([]);
+    setShowCommandPalette(false);
+    setRecentCommand(null);
+    setErrorMessage(null);
+    setIsTyping(true);
+    setUnreadCount(0);
+    setIsAtBottom(true);
+    setTimeout(() => scrollToBottom("auto"), 0);
+
+    abortControllerRef.current?.abort();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    const configPayload: Record<string, string> = {};
+    if (botId) {
+      configPayload.botId = botId;
+    }
+
+    // 构建发送给后端的消息
+    const apiMessages = nextMessages.map((msg, index) => {
+      // 只有最后一条用户消息需要包含文件
+      if (index === nextMessages.length - 1 && msg.role === 'user' && uploadedFileIds.length > 0) {
+        return {
+          role: msg.role,
+          content: messageContent,
+          content_type: contentType,
+        };
+      }
+      return {
+        role: msg.role,
+        content: msg.content,
+        content_type: "text" as const,
+      };
+    });
+
+    const payload: Record<string, unknown> = {
+      messages: apiMessages,
+      sessionId: sessionId || undefined,
+    };
+
+    if (Object.keys(configPayload).length > 0) {
+      payload.config = configPayload;
+    }
+
+    try {
+      // 使用流式端点
+      const apiEndpoint = buildApiUrl("/api/coze-chat");
+      
+      // 🔑 添加 Authorization 头
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers,
+        signal: abortController.signal,
+        body: JSON.stringify(payload),
+      });
+
+      // 🚫 处理错误响应
+      if (!response.ok) {
+        if (response.status === 401) {
+          setErrorMessage('登录已过期，请重新登录');
+          setShowAuthModal(true);
+          setIsTyping(false);
+          return;
+        }
+
+        let friendlyMessage = "请求失败，请稍后重试";
+        
+        if (response.status === 403) {
+          friendlyMessage = "抱歉，您没有权限执行此操作";
+        } else if (response.status === 404) {
+          friendlyMessage = "未找到相关资源或服务";
+        } else if (response.status === 429) {
+          friendlyMessage = "请求过于频繁，请喝杯茶稍后再试";
+        } else if (response.status >= 500) {
+          friendlyMessage = "服务器正在开小差，工程师正在紧急修复中";
+        }
+
+        let detail;
+        try {
+          const errorBody = await response.json();
+          detail =
+            typeof errorBody?.detail === "string"
+              ? errorBody.detail
+              : typeof errorBody?.error === "string"
+                ? errorBody.error
+                : undefined;
+        } catch {
+          // ignore json parse error
+        }
+
+        // 优先使用后端返回的详细错误，如果没有则使用友好的状态码提示
+        throw new Error(detail || friendlyMessage);
+      }
+
+      // 检查是否是 SSE 流式响应
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('text/event-stream')) {
+        // 处理 SSE 流式响应
+        await handleStreamResponse(response);
+      } else {
+        // 处理普通 JSON 响应（兼容旧版）
+        const data = await response.json();
+        
+        let assistantContent = "";
+        
+        if (data?.choices && Array.isArray(data.choices) && data.choices.length > 0) {
+          assistantContent = extractMessageContent(data.choices[0].message);
+        } else {
+          assistantContent = extractMessageContent(data?.message);
+        }
+
+        if (
+          !assistantContent ||
+          (typeof assistantContent === "string" && assistantContent.trim() === "")
+        ) {
+          setMessages((current) => [
+            ...current,
+            {
+              role: "assistant",
+              content:
+                "抱歉，我没有生成有效回复。可以换一种说法再试试。",
+            },
+          ]);
+          return;
+        }
+
+        setMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content: assistantContent,
+          },
+        ]);
+
+        onNewMessage?.();
+
+        if (data.sessionId && data.sessionId !== sessionId) {
+          onSessionChange?.(data.sessionId);
+        }
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setErrorMessage(null);
+        return;
+      }
+      console.error("[AnimatedAIChat] Failed to send message", error);
+      
+      const errorMsg = error instanceof Error ? error.message : "未知错误";
+      const isNetworkError = errorMsg.includes("Failed to fetch") || errorMsg.includes("Network");
+
+      // 只有在确实是网络层面的严重错误时，才在对话流中插入错误消息
+      // 这样用户知道是因为网络问题导致对话中断
+      if (isNetworkError) {
+        setMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content: "网络连接似乎断开了，请检查您的网络设置。",
+          },
+        ]);
+      }
+      
+      setErrorMessage(errorMsg);
+      return;
+    } finally {
+      setIsTyping(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  /**
+   * 处理 SSE 流式响应 (优化版：分离网络接收与 UI 渲染，实现平滑打字机效果)
+   */
+  const handleStreamResponse = async (response: Response) => {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("No response body");
+    }
+
+    const decoder = new TextDecoder();
+    
+    // 渲染状态
+    let displayedContent = ""; // 屏幕上实际显示的内容
+    let bufferContent = "";    // 待显示的缓冲内容（蓄水池）
+    let hasAddedAssistantMessage = false;
+    
+    // 流状态
+    let isStreamEnded = false;
+    let newSessionId: string | null = null;
+
+    // 1. 生产者：全速从网络读取数据
+    const pumpNetworkStream = async () => {
+      let networkBuffer = ""; // SSE 数据包解析缓冲
+      
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          networkBuffer += decoder.decode(value, { stream: true });
+          
+          const events = networkBuffer.split('\n\n');
+          networkBuffer = events.pop() || "";
+
+          for (const eventBlock of events) {
+            const lines = eventBlock.split('\n');
+            for (const line of lines) {
+              if (!line.startsWith('data:')) continue;
+              
+              const dataStr = line.substring(5).trim();
+              if (!dataStr || dataStr === '[DONE]') continue;
+
+              try {
+                const event = JSON.parse(dataStr);
+                
+                if (event.type === 'session') {
+                  newSessionId = event.sessionId;
+                  if (newSessionId && newSessionId !== sessionId) {
+                    onSessionChange?.(newSessionId);
+                  }
+                } else if (event.type === 'content') {
+                  // 关键点：只写入缓冲池，不直接更新 UI
+                  bufferContent += event.content;
+                } else if (event.type === 'error') {
+                  throw new Error(event.message || 'Unknown error from stream');
+                }
+              } catch (e) {
+                // ignore parse error
+              }
+            }
+          }
+        }
+        
+        // 处理剩余 buffer
+        if (networkBuffer.trim()) {
+           // 简单处理剩余数据，通常不重要
+        }
+      } catch (err) {
+        console.error("Stream reading error:", err);
+      } finally {
+        isStreamEnded = true;
+        reader.releaseLock();
+      }
+    };
+
+    // 启动网络读取（不等待它完成，而是并行执行）
+    pumpNetworkStream();
+
+    // 2. 消费者：以平滑的节奏渲染 UI
+    await new Promise<void>((resolve) => {
+      const renderTimer = setInterval(() => {
+        // 如果缓冲区有数据，移动一部分到 displayedContent
+        if (bufferContent.length > 0) {
+          // 动态速度控制（Cognitive Pacing）：
+          // 积压越多，吐字越快，避免用户等待过久
+          const backlog = bufferContent.length;
+          let chunkSize = 1;
+
+          if (backlog > 200) chunkSize = 20;      // 极速追赶
+          else if (backlog > 100) chunkSize = 10; // 快速追赶
+          else if (backlog > 50) chunkSize = 5;   // 中速
+          else if (backlog > 20) chunkSize = 2;   // 稍快
+          // 默认 chunkSize = 1，提供最细腻的打字感
+
+          const chunk = bufferContent.slice(0, chunkSize);
+          bufferContent = bufferContent.slice(chunkSize);
+          displayedContent += chunk;
+
+          // 更新 UI
+          if (!hasAddedAssistantMessage) {
+            setMessages((current) => [
+              ...current,
+              {
+                role: "assistant",
+                content: displayedContent,
+              },
+            ]);
+            hasAddedAssistantMessage = true;
+          } else {
+            setMessages((current) => {
+              const updated = [...current];
+              if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+                updated[updated.length - 1] = {
+                  ...updated[updated.length - 1],
+                  content: displayedContent,
+                };
+              }
+              return updated;
+            });
+          }
+        } else if (isStreamEnded) {
+          // 缓冲区空了，且网络流也结束了 -> 任务完成
+          clearInterval(renderTimer);
+          resolve();
+        }
+        // 如果缓冲区空了但流还没结束，说明在等待网络数据，继续空转
+      }, 20); // 20ms 间隔 = 50fps，非常平滑
+    });
+
+    // 3. 收尾处理
+    if (!displayedContent) {
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "抱歉，我没有生成有效回复。可以换一种说法再试试。",
+        },
+      ]);
+    }
+
+    onNewMessage?.();
+  };
+
+  /**
+   * 获取文件图标
+   */
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) {
+      return <ImageFileIcon className="w-3 h-3" />;
+    }
+    return <FileIcon className="w-3 h-3" />;
+  };
+
+  const renderInputArea = (centered = false) => (
+    <div className={cn(
+      "relative group flex flex-col transition-all duration-500",
+      centered ? "w-full max-w-3xl mx-auto" : "w-full"
+    )}>
+      <div className={cn(
+        "relative rounded-2xl border transition-all duration-300 overflow-hidden backdrop-blur-xl",
+        inputFocused
+          ? "bg-background/95 border-brand-gold shadow-[0_0_50px_-12px_rgba(0,0,0,0.2)] ring-1 ring-brand-gold/30"
+          : "bg-background/60 border-border/50 hover:border-brand-gold/40 hover:bg-background/80"
+      )}>
+        <Textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            adjustHeight();
+          }}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
+          placeholder={
+            centered
+              ? "简单说说你的情况：发生了什么、你希望达成什么结果？"
+              : "输入消息…（Enter 发送，Shift+Enter 换行）"
+          }
+          className={cn(
+            "text-foreground placeholder:text-muted-foreground/60 px-6 font-sans text-[16px] leading-relaxed resize-none bg-transparent",
+            centered ? "min-h-[80px] py-6" : "min-h-[52px] py-4"
           )}
-          <motion.div
-            className="relative backdrop-blur-2xl bg-background/80 dark:bg-white/[0.02] rounded-2xl border border-border/50 dark:border-white/[0.05] shadow-xl dark:shadow-2xl"
-            initial={{ scale: 0.98 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <AnimatePresence>
-              {showCommandPalette && (
+        />
+
+        {/* Attachments Preview */}
+        <AnimatePresence>
+          {attachments.length > 0 && (
+            <motion.div
+              className="flex gap-2 flex-wrap px-6 pb-2"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              {attachments.map((attachment) => (
                 <motion.div
-                  ref={commandPaletteRef}
-                  className="absolute left-4 right-4 bottom-full mb-2 backdrop-blur-xl bg-background/95 dark:bg-black/90 rounded-lg z-50 shadow-lg border border-border/50 dark:border-white/10 overflow-hidden"
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
+                  key={attachment.id}
+                  className={cn(
+                    "flex items-center gap-2 text-xs py-1.5 px-3 rounded-md border",
+                    attachment.error
+                      ? "bg-red-500/10 border-red-500/20 text-red-400"
+                      : "bg-brand-gold/5 border-brand-gold/10 text-brand-gold/80"
+                  )}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                >
+                  {attachment.isUploading ? (
+                    <LoaderIcon className="w-3 h-3 animate-spin" />
+                  ) : (
+                    getFileIcon(attachment.fileType)
+                  )}
+                  <span className="max-w-[120px] truncate font-mono">{attachment.fileName}</span>
+                  {attachment.error && (
+                    <span className="text-red-400 text-[10px]">失败</span>
+                  )}
+                  <button
+                    onClick={() => removeAttachment(attachment.id)}
+                    className="text-white/40 hover:text-white transition-colors"
+                  >
+                    <XIcon className="w-3 h-3" />
+                  </button>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Toolbar */}
+        <div className="flex items-center justify-between px-4 pb-3">
+           <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleAttachFile}
+                className="p-2 text-muted-foreground/40 hover:text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-all"
+                title="上传文件"
+                aria-label="上传文件"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+              <div className="h-4 w-px bg-border/40 mx-2" />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs text-muted-foreground/40 opacity-60 cursor-not-allowed"
+                  title="即将上线"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>联网</span>
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs text-muted-foreground/40 opacity-60 cursor-not-allowed"
+                  title="即将上线"
+                >
+                  <BrainCircuit className="w-3.5 h-3.5" />
+                  <span>深度</span>
+                </button>
+              </div>
+           </div>
+           
+            {isTyping ? (
+              <button
+                type="button"
+                onClick={handleStopGenerating}
+                aria-label="停止生成"
+                title="停止生成（Esc）"
+                className={cn(
+                  "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
+                  "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                <Square className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSendMessage}
+                disabled={(!value.trim() && attachments.length === 0) || attachments.some(att => att.isUploading)}
+                aria-label="发送"
+                title="发送（Enter）"
+                className={cn(
+                  "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
+                  (value.trim() || attachments.length > 0) && !attachments.some(att => att.isUploading)
+                    ? "bg-brand-gold text-brand-navy hover:bg-brand-gold-light shadow-lg hover:shadow-brand-gold/20"
+                    : "bg-muted text-muted-foreground/40 cursor-not-allowed"
+                )}
+              >
+                <SendIcon className="w-4 h-4" />
+              </button>
+            )}
+        </div>
+      </div>
+      
+      {/* Decorative Focus Glow */}
+      <div className={cn(
+        "absolute -inset-[1px] -z-10 rounded-[17px] bg-gradient-to-r from-brand-gold/0 via-brand-gold/30 to-brand-gold/0 opacity-0 transition-opacity duration-500 blur-sm",
+        inputFocused && "opacity-100"
+      )} />
+    </div>
+  );
+
+  return (
+    <div className="h-full flex flex-col w-full relative overflow-hidden">
+      
+      {/* 🔐 认证模态框 */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={(authUser) => {
+          // 🔑 更新全局认证状态
+          const savedToken = localStorage.getItem('auth_token');
+          if (savedToken) {
+            login(authUser, savedToken);
+          }
+          setShowAuthModal(false);
+          setErrorMessage(null);
+        }}
+        initialMode="login"
+      />
+
+      {/* 隐藏的文件输入 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileSelect}
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.json,.xml,.jpg,.jpeg,.png,.gif,.webp,.bmp,.mp3,.wav,.m4a,.mp4,.mov,.avi,.mkv,.zip,.rar,.7z"
+      />
+
+      <div className="w-full h-full flex flex-col relative z-10">
+        <motion.div
+          className="flex-1 flex flex-col h-full"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          {/* Header - Only show in chat mode */}
+          {isChatStarted && (
+            <div className="flex items-center justify-between px-6 py-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                <span className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest">
+                  系统在线
+                </span>
+              </div>
+            </div>
+          )}
+
+          <motion.div
+            ref={dropZoneRef}
+            className={cn(
+              "relative flex-1 flex flex-col min-h-0",
+              isDragging && "ring-2 ring-violet-500/50 inset-0 z-50 bg-black/50"
+            )}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            {/* 拖拽提示覆盖层 */}
+            <AnimatePresence>
+              {isDragging && (
+                <motion.div
+                  className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <div className="py-1 bg-background/95 dark:bg-black/95">
-                    {commandSuggestions.map((suggestion, index) => (
-                      <motion.div
-                        key={suggestion.prefix}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-2 text-xs transition-colors cursor-pointer",
-                          activeSuggestion === index
-                            ? "bg-accent text-accent-foreground"
-                            : "text-muted-foreground hover:bg-accent/50",
-                        )}
-                        onClick={() => selectCommandSuggestion(index)}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: index * 0.03 }}
-                      >
-                        <div className="w-5 h-5 flex items-center justify-center text-muted-foreground">
-                          {suggestion.icon}
-                        </div>
-                        <div className="font-medium">{suggestion.label}</div>
-                        <div className="text-muted-foreground/60 text-xs ml-1">
-                          {suggestion.prefix}
-                        </div>
-                      </motion.div>
-                    ))}
+                  <div className="flex flex-col items-center gap-4 text-white">
+                    <div className="p-4 rounded-full bg-white/10 border border-white/20">
+                       <Paperclip className="w-8 h-8" />
+                    </div>
+                    <span className="text-lg font-medium">松开即可上传文件</span>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div ref={messageListRef} className="px-4 pt-6 space-y-4 max-h-[320px] overflow-y-auto">
-              {messages.map((message, index) => {
-                const isUser = message.role === "user";
-                return (
-                  <motion.div
-                    key={`${message.role}-${index}`}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={cn("flex", isUser ? "justify-end" : "justify-start")}
-                  >
-                    <div
-                      className={cn(
-                        "rounded-2xl px-4 py-3 text-sm leading-relaxed max-w-[80%] shadow-sm",
-                        isUser
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/70 dark:bg-white/[0.04] text-foreground",
-                      )}
-                    >
-                      {message.content}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+            {/* Main Content Area */}
+            {isChatStarted ? (
+              // Chat Mode
+              <>
+                <div
+                  ref={messageListRef}
+                  onScroll={handleMessageListScroll}
+                  className="flex-1 px-6 py-6 space-y-8 overflow-y-auto custom-scrollbar"
+                >
+                  {messages.map((message, index) => {
+                    const isUser = message.role === "user";
+                    return (
+                      <motion.div
+                        key={`${message.role}-${index}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={cn("flex w-full mb-8 flex-col group", isUser ? "items-end" : "items-start")}
+                      >
+                        <div
+                          className={cn(
+                            "relative transition-all duration-500",
+                            isUser
+                              ? "max-w-[85%] px-5 py-3.5 bg-brand-gold/[0.08] dark:bg-brand-gold/[0.12] text-foreground rounded-2xl rounded-tr-md border border-brand-gold/15 dark:border-brand-gold/20"
+                              : "w-full px-0 py-4 text-foreground"
+                          )}
+                        >
+                          {!isUser && (
+                             <div className="flex items-center gap-3 mb-4 border-b border-border/40 pb-3">
+                                <div className="p-1.5 rounded bg-brand-gold/10">
+                                   <Scale className="w-4 h-4 text-brand-gold" />
+                                </div>
+                                <span className="text-xs font-bold text-brand-gold tracking-widest uppercase">Legal Advisor</span>
+                             </div>
+                          )}
+                          <div className={cn(
+                            "prose max-w-none prose-p:leading-8 prose-li:marker:text-brand-gold/50",
+                            !isUser ? "font-serif text-[16px] text-foreground/90" : "text-foreground font-sans text-sm"
+                          )}>
+                            {isUser ? message.content : renderMessageContent(message.content)}
+                          </div>
+                        </div>
+                        {isUser && (
+                          <div className="flex items-center gap-1 mt-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleCopy(message.content, index)}
+                              className="p-1.5 rounded-lg text-muted-foreground/30 hover:text-brand-gold hover:bg-brand-gold/10 transition-all"
+                              title="复制消息"
+                            >
+                              {copiedIndex === index ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                  
+                  {isTyping && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex justify-start w-full relative pl-0"
+                      >
+                         <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-3 text-brand-gold/60">
+                                <Scale className="w-4 h-4" />
+                                <span className="text-xs font-bold tracking-widest">分析中</span>
+                             </div>
+                             <div className="text-muted-foreground text-sm font-mono flex items-center gap-2 pl-7">
+                                <TypingDots />
+                             </div>
+                         </div>
+                      </motion.div>
+                  )}
+                </div>
 
-            {errorMessage && (
-              <div className="px-4 pt-2 text-xs text-destructive/80 dark:text-rose-400/80">
-                {errorMessage}
+                {!isAtBottom && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      scrollToBottom("smooth");
+                      setUnreadCount(0);
+                      setIsAtBottom(true);
+                    }}
+                    className="absolute right-6 bottom-28 md:bottom-32 z-40 inline-flex items-center gap-2 rounded-full bg-background/90 backdrop-blur-xl border border-border/50 shadow-lg px-4 py-2 text-xs text-foreground hover:bg-background transition-colors"
+                    aria-label="跳到最新消息"
+                    title="跳到最新消息"
+                  >
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">回到最新</span>
+                    {unreadCount > 0 && (
+                      <span className="ml-1 min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy text-[10px] font-bold tabular-nums">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {/* Bottom Input Area */}
+                <div className="p-4 md:p-6 bg-gradient-to-t from-background via-background/95 to-transparent">
+                  {renderInputArea(false)}
+                  <div className="text-center mt-3">
+                     <span className="text-[10px] text-muted-foreground/40 font-mono tracking-widest">对话内容仅用于咨询，请勿上传敏感隐私</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // Initial/Empty State (Legal Console Style)
+              <div className="flex-1 flex flex-col items-center justify-center p-8 max-w-3xl mx-auto w-full relative">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="mb-16 text-center space-y-6"
+                >
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-gold/10 border border-brand-gold/20 mb-4">
+                    <Scale className="w-8 h-8 text-brand-gold" />
+                  </div>
+                  <h1 className="text-4xl md:text-5xl font-serif font-medium text-foreground tracking-tight">
+                    我能怎么帮你处理 <br />
+                    <span className="text-brand-gold italic">法律问题</span>？
+                  </h1>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                  className="w-full mb-12"
+                >
+                  {renderInputArea(true)}
+                </motion.div>
+
+                {/* Feature Suggestions - Minimalist */}
+                <motion.div
+                  className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  {featureSuggestions.map((feature, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setValue(`帮我${feature.label}...`);
+                        textareaRef.current?.focus();
+                        setTimeout(() => adjustHeight(), 0);
+                      }}
+                      className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-background/60 backdrop-blur-md border border-border/80 hover:border-brand-gold/50 hover:bg-background/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.15)] transition-all duration-300"
+                    >
+                      <div className="p-2.5 rounded-lg bg-muted/50 group-hover:bg-brand-gold/20 transition-colors">
+                        {feature.icon}
+                      </div>
+                      <span className="text-sm text-foreground group-hover:text-brand-gold font-medium transition-colors">{feature.label}</span>
+                    </button>
+                  ))}
+                </motion.div>
               </div>
             )}
 
-            <div className="p-4">
-              <Textarea
-                ref={textareaRef}
-                value={value}
-                onChange={(e) => {
-                  setValue(e.target.value);
-                  adjustHeight();
-                }}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                placeholder="Ask zap a question..."
-                containerClassName="w-full"
-                className={cn(
-                  "w-full px-4 py-3",
-                  "resize-none",
-                  "bg-transparent",
-                  "border-none",
-                  "text-foreground text-sm",
-                  "focus:outline-none",
-                  "placeholder:text-muted-foreground/50",
-                  "min-h-[60px]",
-                )}
-                style={{
-                  overflow: "hidden",
-                }}
-                showRing={false}
-              />
-            </div>
-
-            <AnimatePresence>
-              {attachments.length > 0 && (
-                <motion.div
-                  className="px-4 pb-3 flex gap-2 flex-wrap"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  {attachments.map((file, index) => (
-                    <motion.div
-                      key={index}
-                      className="flex items-center gap-2 text-xs bg-white/[0.03] py-1.5 px-3 rounded-lg text-white/70"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                    >
-                      <span>{file}</span>
-                      <button
-                        onClick={() => removeAttachment(index)}
-                        className="text-white/40 hover:text-white transition-colors"
-                      >
-                        <XIcon className="w-3 h-3" />
-                      </button>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="p-4 border-t border-border/20 dark:border-white/[0.05] flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <motion.button
+            {errorMessage && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 text-xs backdrop-blur-md flex flex-wrap items-center gap-2 max-w-[90vw] sm:max-w-[720px] break-words">
+                <span className="font-medium">提示：</span>
+                <span className="font-mono">{errorMessage}</span>
+                <button
                   type="button"
-                  onClick={handleAttachFile}
-                  whileTap={{ scale: 0.94 }}
-                  className="p-2 text-muted-foreground hover:text-foreground rounded-lg transition-colors relative group"
+                  onClick={() => setErrorMessage(null)}
+                  className="ml-1 p-1 rounded-full hover:bg-red-500/10 transition-colors"
+                  aria-label="关闭提示"
                 >
-                  <Paperclip className="w-4 h-4" />
-                  <motion.span
-                    className="absolute inset-0 bg-accent/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    layoutId="button-highlight"
-                  />
-                </motion.button>
-                <motion.button
-                  type="button"
-                  data-command-button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowCommandPalette((prev) => !prev);
-                  }}
-                  whileTap={{ scale: 0.94 }}
-                  className={cn(
-                    "p-2 text-muted-foreground hover:text-foreground rounded-lg transition-colors relative group",
-                    showCommandPalette && "bg-accent/20 text-foreground",
-                  )}
-                >
-                  <Command className="w-4 h-4" />
-                  <motion.span
-                    className="absolute inset-0 bg-accent/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    layoutId="button-highlight"
-                  />
-                </motion.button>
+                  <XIcon className="w-3.5 h-3.5" />
+                </button>
               </div>
-
-              <motion.button
-                type="button"
-                onClick={handleSendMessage}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={isTyping || !value.trim() || showMissingKeyNotice}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                  "flex items-center gap-2",
-                  value.trim() && !showMissingKeyNotice
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "bg-muted text-muted-foreground",
-                )}
-              >
-                {isTyping ? (
-                  <LoaderIcon className="w-4 h-4 animate-[spin_2s_linear_infinite]" />
-                ) : (
-                  <SendIcon className="w-4 h-4" />
-                )}
-                <span>Send</span>
-              </motion.button>
-            </div>
+            )}
           </motion.div>
-
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {commandSuggestions.map((suggestion, index) => (
-              <motion.button
-                key={suggestion.prefix}
-                onClick={() => selectCommandSuggestion(index)}
-                className="flex items-center gap-2 px-3 py-2 bg-background/50 dark:bg-white/[0.02] hover:bg-background/80 dark:hover:bg-white/[0.05] rounded-lg text-sm text-muted-foreground hover:text-foreground transition-all relative group border border-border/30 dark:border-transparent"
+          
+          {/* Command Palette */}
+          <AnimatePresence>
+            {showCommandPalette && (
+              <motion.div
+                ref={commandPaletteRef}
+                className="absolute left-0 right-0 bottom-[100px] mb-2 glass-panel rounded-lg z-50 overflow-hidden"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.15 }}
               >
-                {suggestion.icon}
-                <span>{suggestion.label}</span>
-                <motion.div
-                  className="absolute inset-0 border border-border/20 dark:border-white/[0.05] rounded-lg"
-                  initial={false}
-                  animate={{
-                    opacity: [0, 1],
-                    scale: [0.98, 1],
-                  }}
-                  transition={{
-                    duration: 0.3,
-                    ease: "easeOut",
-                  }}
-                />
-              </motion.button>
-            ))}
-          </div>
+                <div className="py-1">
+                  {commandSuggestions.map((suggestion, index) => (
+                    <motion.div
+                      key={suggestion.prefix}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 text-sm transition-colors cursor-pointer border-l-2",
+                        activeSuggestion === index
+                          ? "bg-brand-gold/10 border-brand-gold text-foreground"
+                          : "border-transparent text-muted-foreground hover:bg-muted",
+                      )}
+                      onClick={() => selectCommandSuggestion(index)}
+                    >
+                      <div className="w-5 h-5 flex items-center justify-center text-muted-foreground/60">
+                        {suggestion.icon}
+                      </div>
+                      <div className="flex flex-col">
+                         <span className="font-medium">{suggestion.label}</span>
+                         <span className="text-xs text-muted-foreground/50 font-mono">{suggestion.prefix}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </motion.div>
       </div>
 
-      <AnimatePresence>
-        {isTyping && (
-          <motion.div
-            className="fixed bottom-8 mx-auto transform -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-7 rounded-full bg-white/[0.05] flex items-center justify-center text-center">
-                <span className="text-xs font-medium text-white/90 mb-0.5">zap</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-white/70">
-                <span>Thinking</span>
-                <TypingDots />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {inputFocused && (
         <motion.div
-          className="fixed w-[50rem] h-[50rem] rounded-full pointer-events-none z-0 opacity-[0.02] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500 blur-[96px]"
+          className="fixed w-[60rem] h-[60rem] rounded-full pointer-events-none z-0 opacity-[0.015] bg-gradient-to-r from-brand-gold via-fuchsia-500 to-indigo-500 blur-[150px]"
           animate={{
-            x: mousePosition.x - 400,
-            y: mousePosition.y - 400,
+            x: mousePosition.x - 480,
+            y: mousePosition.y - 480,
           }}
           transition={{
             type: "spring",
-            damping: 25,
-            stiffness: 150,
-            mass: 0.5,
+            damping: 40,
+            stiffness: 100,
+            mass: 1,
           }}
         />
       )}
     </div>
   );
 }
+
+/**
+ * 判断 URL 是否是文件链接
+ */
+const isFileUrl = (url: string): boolean => {
+  const fileExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z', '.txt', '.csv'];
+  const lowerUrl = url.toLowerCase();
+  return fileExtensions.some(ext => lowerUrl.includes(ext));
+};
+
+/**
+ * 从 URL 中提取文件名
+ */
+const extractFileName = (url: string): string => {
+  try {
+    // 尝试从 URL 路径中提取文件名
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    const segments = pathname.split('/');
+    const lastSegment = segments[segments.length - 1];
+    
+    if (lastSegment && lastSegment.includes('.')) {
+      // 解码 URL 编码的文件名
+      return decodeURIComponent(lastSegment);
+    }
+    
+    // 如果无法提取，返回通用名称
+    return '下载文件';
+  } catch {
+    return '下载文件';
+  }
+};
+
+/**
+ * 渲染消息内容，使用 ReactMarkdown 支持 Markdown 和 HTML (如 <u> 标签)
+ * 同时保留对文件下载链接的特殊处理
+ */
+const renderMessageContent = (content: string): React.ReactNode => {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw]}
+      components={{
+        a: ({ href, children }) => {
+          const url = href || "";
+          const isFile = isFileUrl(url);
+          const fileName = extractFileName(url);
+
+          if (isFile) {
+            return (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  fetch(url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                      const blobUrl = window.URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = blobUrl;
+                      link.download = fileName;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(blobUrl);
+                    })
+                    .catch(err => {
+                      console.error('下载失败:', err);
+                      window.open(url, '_blank');
+                    });
+                }}
+                className="text-violet-400 hover:text-violet-300 hover:underline inline-flex items-center gap-1 break-all transition-colors cursor-pointer"
+              >
+                <Download className="w-3 h-3 flex-shrink-0" />
+                <span>{children || fileName}</span>
+              </a>
+            );
+          }
+
+          return (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-violet-400 hover:text-violet-300 hover:underline transition-colors"
+            >
+              {children}
+            </a>
+          );
+        },
+        // 确保 <u> 标签正常显示
+        u: ({ children }) => <u className="decoration-brand-gold/40 underline-offset-4">{children}</u>,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+};
 
 function extractMessageContent(message: unknown): string {
   if (!message) {
@@ -765,37 +1704,24 @@ function extractMessageContent(message: unknown): string {
 
 function TypingDots() {
   return (
-    <div className="flex items-center ml-1">
-      {[1, 2, 3].map((dot) => (
+    <div className="flex items-center gap-1 h-4">
+      {[1, 2, 3, 4].map((i) => (
         <motion.div
-          key={dot}
-          className="w-1.5 h-1.5 bg-white/90 rounded-full mx-0.5"
-          initial={{ opacity: 0.3 }}
+          key={i}
+          className="w-0.5 bg-brand-gold/60 rounded-full"
+          initial={{ height: 4, opacity: 0.5 }}
           animate={{
-            opacity: [0.3, 0.9, 0.3],
-            scale: [0.85, 1.1, 0.85],
+            height: [4, 12, 4],
+            opacity: [0.5, 1, 0.5],
           }}
           transition={{
-            duration: 1.2,
+            duration: 1,
             repeat: Number.POSITIVE_INFINITY,
-            delay: dot * 0.15,
+            delay: i * 0.1,
             ease: "easeInOut",
-          }}
-          style={{
-            boxShadow: "0 0 4px rgba(255, 255, 255, 0.3)",
           }}
         />
       ))}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-

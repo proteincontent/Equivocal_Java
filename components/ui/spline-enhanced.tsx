@@ -1,6 +1,6 @@
 "use client"; // Client-side only component
 
-import { Suspense, lazy, useRef, useEffect } from "react";
+import { Suspense, lazy, useRef, useEffect, useState } from "react";
 import { Application, type SPEObject } from "@splinetool/runtime";
 
 // lazy: defer loading until needed for render
@@ -9,6 +9,8 @@ const Spline = lazy(() => import("@splinetool/react-spline"));
 
 const POINTER_OFFSET_FALLBACK = 8;
 const HEAD_MAX_ROTATION = Math.PI / 18;
+// 抽象几何体无需延迟
+const SPLINE_ANIMATION_DELAY = 100;
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
@@ -24,6 +26,7 @@ export function SplineScene({ scene, className, eyePosition, maxPointerOffset }:
   const spline = useRef<Application>();
   const headRef = useRef<SPEObject | null>(null);
   const defaultHeadRotation = useRef<{ x: number; y: number; z: number } | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   function onLoad(splineApp: Application) {
     spline.current = splineApp;
@@ -44,9 +47,14 @@ export function SplineScene({ scene, className, eyePosition, maxPointerOffset }:
       };
     }
 
-    if (!foundHead) {
-      console.warn("[SplineScene] Unable to find a head object in the Spline scene.");
-    }
+    // if (!foundHead) {
+    //   console.warn("[SplineScene] Unable to find a head object in the Spline scene.");
+    // }
+
+    // 延迟显示，等待 Spline 内置的入场动画完成
+    setTimeout(() => {
+      setIsReady(true);
+    }, SPLINE_ANIMATION_DELAY);
   }
 
   const pointerX = eyePosition?.x ?? 0;
@@ -89,7 +97,12 @@ export function SplineScene({ scene, className, eyePosition, maxPointerOffset }:
         </div>
       }
     >
-      <Spline scene={scene} className={className} onLoad={onLoad} />
+      <div
+        className={`transition-opacity duration-700 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <Spline scene={scene} className={className} onLoad={onLoad} />
+      </div>
     </Suspense>
   );
 }
@@ -112,7 +125,7 @@ export function SplineSceneBasic() {
         {/* Right content */}
         <div className="flex-1 relative">
           <SplineScene
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
             className="w-full h-full"
           />
         </div>

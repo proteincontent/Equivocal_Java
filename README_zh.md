@@ -4,8 +4,8 @@
 
 <div align="center">
   <img src="./public/placeholder-logo.png" alt="Equivocal logo" width="180" />
-  <h1>Equivocal MBTI 助手</h1>
-  <p>一款融合 AI 对话与沉浸式动画界面的 MBTI 聊天体验，支持自带 OpenAI 密钥。</p>
+  <h1>Equivocal Legal 法律助手</h1>
+  <p>一款融合 AI 对话与沉浸式动画界面的智能法律服务助手。</p>
   <p>
     <a href="https://github.com/proteincontent/Equivocal/blob/main/LICENSE">
       <img src="https://img.shields.io/github/license/proteincontent/Equivocal?color=brightgreen" alt="license" />
@@ -18,10 +18,10 @@
 
 ## 项目亮点
 
-- **MBTI 核心体验**：针对 16 型人格提供性格概览、优势与成长建议，帮助用户快速建立自我画像。
-- **自带密钥**：通过 `.env.local` 或界面内的设置面板配置 OpenAI 兼容服务，密钥仅保存在本地浏览器。
+- **智能法律服务**：提供法律咨询、合同审查、文书生成等多种法律服务，帮助用户快速解决法律问题。
+- **AI 驱动**：集成 Coze AI 平台，提供智能化的法律问答和文书处理能力。
 - **动效与 3D 交互**：全新落地页与聊天界面共同呈现动画、光影与 3D 效果，让对话过程更沉浸。
-- **数据与展示分离**：MBTI 文案、分类、提示词抽离到独立模块，组件专注于交互展示。
+- **数据与展示分离**：法律服务类型、分类抽离到独立模块，组件专注于交互展示。
 - **一键部署**：默认集成 Vercel 分析，支持零配置上线。
 
 ## 目录
@@ -55,10 +55,10 @@ pnpm install
    ```bash
    cp .env.local.example .env.local
    ```
-2. 在 `.env.local` 中填入 `OPENAI_API_KEY`（或配置 `OPENAI_API_BASE_URL` 等兼容服务参数）。
+2. 在 `.env.local` 或后端配置中填入 Coze API 凭证（`COZE_API_KEY`、`COZE_BOT_ID`）。
 3. 修改服务端环境变量后请重启开发服务器。
 
-> 如果不想在磁盘上存储密钥，可在运行时打开设置面板填写。密钥仅保存于当前浏览器的本地存储。
+> Coze API 凭证已在服务器端预配置，用户无需提供自己的 API 密钥。
 
 ## 开发与调试
 
@@ -79,31 +79,28 @@ pnpm build  # Next.js 生产构建
 
 | 变量 | 说明 | 默认值 |
 | --- | --- | --- |
-| `OPENAI_API_KEY` | 服务端默认使用的 OpenAI 密钥 | _必须配置_ |
-| `OPENAI_MODEL` | 默认使用的模型 | `gpt-4o-mini` |
-| `OPENAI_API_BASE_URL` | OpenAI 兼容服务的基础地址 | `https://api.openai.com/v1` |
-| `OPENAI_CHAT_COMPLETIONS_PATH` | Chat Completions 请求路径 | `chat/completions` |
-| `OPENAI_CHAT_COMPLETIONS_URL` | 完整 URL 覆盖（优先级最高） | — |
-| `OPENAI_API_KEY_HEADER` | 携带 API Key 的请求头名称 | `Authorization` |
-| `OPENAI_API_VERSION` | 可选的 API 版本（Azure 等场景） | — |
-| `NEXT_PUBLIC_OPENAI_*` | 客户端默认值的公开覆盖项（模型/地址/请求头） | — |
+| `COZE_API_KEY` | Coze API 密钥 | _必须配置_ |
+| `COZE_BOT_ID` | Coze 法律助手 Bot ID | _必须配置_ |
+| `COZE_API_URL` | Coze API 基础地址 | `https://api.coze.cn` |
 
 ## 项目结构
 
 ```
-app/                 # 应用路由、落地页、聊天页面、API 接口
-components/          # UI 组件与功能模块（聊天界面、MBTI 选择器、动效等）
-data/mbti/           # MBTI 人格文案、分类与工具函数（与界面解耦）
-hooks/               # 客户端状态管理（OpenAI 配置、服务端默认值等）
+app/                 # 应用路由、落地页、聊天页面
+backend/             # Java Spring Boot 后端（认证、Coze API、数据库）
+components/          # UI 组件与功能模块（聊天界面、动效等）
+data/legal-services/ # 法律服务类型、分类与工具函数（与界面解耦）
+hooks/               # 客户端状态管理（认证、配置等）
+lib/                 # 工具函数和 API 辅助
 public/              # 静态资源（Logo、占位图、manifest 等）
-tools/               # 工具脚本
 ```
 
 **关键流程**
 
-- `app/api/chat/route.ts`：转发聊天请求，检查密钥配置并返回模型响应。
-- `hooks/use-config.ts`：在浏览器端持久化模型、密钥、Base URL 等设置。
-- `components/ui/settings.tsx`：提供密钥填写、默认值重置与文档入口。
+- Java 后端 (`backend/src/main/java/com/equivocal/controller/CozeChatController.java`)：处理 Coze AI 聊天请求。
+- Java 后端 (`backend/src/main/java/com/equivocal/service/AuthService.java`)：管理用户登录/注册和 JWT 认证。
+- `hooks/use-config.ts`：在浏览器端持久化配置。
+- `hooks/use-auth.ts`：管理用户认证状态。
 
 ## 参与贡献
 

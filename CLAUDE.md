@@ -2,7 +2,7 @@
 
 ## 项目信息
 
-这是一个基于 Next.js 的 MBTI 个性测试和聊天应用，名为 Equivocal。
+这是一个基于 Next.js 的法律服务 AI 助手应用，名为 Equivocal Legal。
 
 ## 代码规范
 
