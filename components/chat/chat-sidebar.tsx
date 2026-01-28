@@ -250,8 +250,8 @@ return (
             whileTap={{ scale: 0.98 }}
             title="返回首页"
           >
-            <div className="w-8 h-8 rounded-lg bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center flex-shrink-0">
-              <LayoutTemplate className="w-4 h-4 text-brand-gold" />
+            <div className="w-8 h-8 rounded-lg bg-[#2563EB]/10 border border-[#2563EB]/20 flex items-center justify-center flex-shrink-0">
+              <LayoutTemplate className="w-4 h-4 text-[#2563EB]" />
             </div>
             
             <AnimatePresence>
@@ -263,8 +263,8 @@ return (
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <span className="text-sm font-serif font-medium tracking-wide text-foreground leading-none mb-1">Equivocal</span>
-                  <span className="text-[10px] text-brand-gold/80 uppercase tracking-widest leading-none">Legal AI</span>
+                  <span className="text-sm font-serif font-medium tracking-wide text-foreground leading-none mb-1">智法顾问</span>
+                  <span className="text-[10px] text-[#2563EB]/80 uppercase tracking-widest leading-none">法律 AI</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -286,8 +286,8 @@ return (
           onClick={onNewSession}
           className={cn(
             "w-full flex items-center gap-2 px-3 py-3 rounded-lg mt-4 mb-2",
-            "bg-brand-gold text-brand-navy font-medium",
-            "transition-all duration-200 shadow-md shadow-brand-gold/10 hover:shadow-brand-gold/20 hover:bg-brand-gold-light",
+            "bg-[#2563EB] text-white font-medium",
+            "transition-all duration-200 shadow-md shadow-[#2563EB]/20 hover:shadow-[#2563EB]/30 hover:bg-[#3B82F6]",
             collapsed && "justify-center px-2"
           )}
           whileHover={{ scale: 1.01 }}
@@ -303,7 +303,7 @@ return (
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                New Consultation
+                新建咨询
               </motion.span>
             )}
           </AnimatePresence>
@@ -320,7 +320,7 @@ return (
           </div>
         ) : sessions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground/40 text-xs font-mono">
-            {!collapsed && "No history"}
+            {!collapsed && "暂无历史"}
           </div>
         ) : (
           <div className="space-y-4">
@@ -346,7 +346,7 @@ return (
                         "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer mx-2",
                         "transition-all duration-200 border border-transparent",
                         currentSessionId === session.id
-                          ? "bg-brand-gold/10 text-brand-gold border-brand-gold/20 shadow-sm"
+                          ? "bg-[#2563EB]/10 text-[#2563EB] border-[#2563EB]/20 shadow-sm"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                         collapsed && "justify-center px-2 mx-1"
                       )}
@@ -379,7 +379,7 @@ return (
                                     setEditingTitle("");
                                   }
                                 }}
-                                className="w-full bg-transparent border-b border-brand-gold/30 outline-none text-sm font-mono text-foreground"
+                                className="w-full bg-transparent border-b border-[#2563EB]/30 outline-none text-sm font-mono text-foreground"
                                 autoFocus
                                 onClick={(e) => e.stopPropagation()}
                               />

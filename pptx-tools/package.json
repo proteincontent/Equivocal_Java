@@ -1,0 +1,14 @@
+{
+  "name": "equivocal-legal-pptx-tools",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build:proposal": "node ./generate-proposal-defense.cjs",
+    "build:proposal:art": "node ./generate-proposal-defense-art.cjs",
+    "build:proposal:v2": "node ./generate-proposal-defense-aurora.cjs",
+    "build:proposal:apple": "node ./generate-proposal-defense-apple.cjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "^3.12.0"
+  }
+}

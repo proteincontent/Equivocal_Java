@@ -9,15 +9,15 @@ import {
 import type { LegalServiceType } from "@/data/legal-services";
 
 const categoryCardClasses: Record<string, string> = {
-  "文书生成": "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-800/40",
-  "合同审查": "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700 dark:hover:bg-red-800/40",
-  "法律咨询": "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-800/40",
+  "文书生成": "bg-[#2563EB]/5 text-[#2563EB] border-[#2563EB]/20 hover:bg-[#2563EB]/10 dark:bg-[#2563EB]/10 dark:text-[#3B82F6] dark:border-[#2563EB]/30 dark:hover:bg-[#2563EB]/20",
+  "合同审查": "bg-cyan-500/5 text-cyan-600 border-cyan-500/20 hover:bg-cyan-500/10 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/30 dark:hover:bg-cyan-500/20",
+  "法律咨询": "bg-indigo-500/5 text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/10 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 dark:hover:bg-indigo-500/20",
 };
 
 const categoryBadgeClasses: Record<string, string> = {
-  "文书生成": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  "合同审查": "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  "法律咨询": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  "文书生成": "bg-[#2563EB]/10 text-[#2563EB] dark:bg-[#2563EB]/20 dark:text-[#3B82F6]",
+  "合同审查": "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400",
+  "法律咨询": "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400",
 };
 
 interface LegalServiceSelectorProps {

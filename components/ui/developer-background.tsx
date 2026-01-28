@@ -30,22 +30,8 @@ export function DeveloperBackground({ className }: { className?: string }) {
       <div className="absolute bottom-0 right-0 w-[35vw] h-[1px] bg-gradient-to-l from-transparent via-slate-400/30 to-transparent dark:via-white/10" />
       <div className="absolute bottom-0 right-0 w-[1px] h-[25vh] bg-gradient-to-t from-transparent via-slate-400/30 to-transparent dark:via-white/10" />
       
-      {/* 4. 金色光晕点缀 - 高端信任感 - 浅色模式下稍微加深一点 */}
-      <div className="absolute top-[15%] right-[10%] w-[300px] h-[300px] rounded-full opacity-[0.05] dark:opacity-[0.05] animate-breathe"
-           style={{ background: 'radial-gradient(circle, #D4A853 0%, transparent 70%)' }} />
-      <div className="absolute bottom-[20%] left-[5%] w-[200px] h-[200px] rounded-full opacity-[0.04] dark:opacity-[0.04] animate-breathe animation-delay-4000"
-           style={{ background: 'radial-gradient(circle, #D4A853 0%, transparent 70%)' }} />
-      
-      {/* 5. 蓝色专业光晕 - 可信赖感 */}
-      <div className="absolute top-[30%] left-[20%] w-[500px] h-[500px] rounded-full opacity-[0.02] dark:opacity-[0.06] animate-breathe animation-delay-2000"
-           style={{ background: 'radial-gradient(circle, #2563EB 0%, transparent 70%)' }} />
-      
-      {/* 6. 底部渐变遮罩 - 内容聚焦 */}
+      {/* 4. 底部渐变遮罩 - 内容聚焦 */}
       <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
-      
-      {/* 7. 顶部微妙的光晕 */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[40vh] opacity-[0.02] dark:opacity-[0.04]"
-           style={{ background: 'radial-gradient(ellipse at top, #2563EB 0%, transparent 70%)' }} />
       
       {/* 8. 中心径向渐变 - 创造深度 */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_40%,transparent_0%,var(--background)_100%)] opacity-60" />

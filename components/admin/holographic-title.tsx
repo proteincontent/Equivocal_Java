@@ -35,13 +35,13 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
   }, []);
 
   const statusColors = {
-    online: "text-emerald-400",
+    online: "text-cyan-400",
     warning: "text-amber-400",
     critical: "text-red-400",
   };
 
   const statusGlow = {
-    online: "shadow-emerald-500/50",
+    online: "shadow-cyan-500/50",
     warning: "shadow-amber-500/50",
     critical: "shadow-red-500/50",
   };
@@ -97,10 +97,10 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
           {/* 主文字 */}
           <span className="relative inline-block">
             {/* 底层光晕 */}
-            <span className="absolute inset-0 blur-2xl bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30" />
+            <span className="absolute inset-0 blur-2xl bg-gradient-to-r from-cyan-500/30 via-[#2563EB]/30 to-blue-500/30" />
             
             {/* 主文字层 */}
-            <span className="relative bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,255,255,0.5)]">
+            <span className="relative bg-gradient-to-r from-cyan-400 via-[#2563EB] to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,255,255,0.5)]">
               {title}
             </span>
             

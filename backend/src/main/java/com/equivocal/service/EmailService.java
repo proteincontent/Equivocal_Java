@@ -28,6 +28,25 @@ public class EmailService {
     
     public boolean sendVerificationCode(String email, String code) {
         try {
+            // 【调试日志】检查配置是否正确加载
+            log.info("[EmailService] ===== 邮件发送调试信息 =====");
+            log.info("[EmailService] Resend API Key 是否配置: {}", (resendApiKey != null && !resendApiKey.isEmpty() && !resendApiKey.equals("${RESEND_API_KEY:}")));
+            log.info("[EmailService] Resend API Key 长度: {}", resendApiKey != null ? resendApiKey.length() : 0);
+            log.info("[EmailService] Resend API Key 前10字符: {}", resendApiKey != null && resendApiKey.length() > 10 ? resendApiKey.substring(0, 10) + "..." : resendApiKey);
+            log.info("[EmailService] 发件人邮箱: {}", fromEmail);
+            log.info("[EmailService] 收件人邮箱: {}", email);
+            
+            // 检查 API Key 是否为空
+            if (resendApiKey == null || resendApiKey.isEmpty()) {
+                log.error("[EmailService] 错误: Resend API Key 未配置！请设置环境变量 RESEND_API_KEY");
+                return false;
+            }
+            
+            // 检查发件人邮箱是否为默认值
+            if (fromEmail == null || fromEmail.isEmpty() || fromEmail.equals("noreply@example.com")) {
+                log.warn("[EmailService] 警告: 发件人邮箱为默认值或未配置，Resend 可能拒绝发送");
+            }
+            
             WebClient webClient = webClientBuilder
                     .baseUrl("https://api.resend.com")
                     .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + resendApiKey)
@@ -42,30 +61,43 @@ public class EmailService {
             requestBody.put("subject", "Your Verification Code - Equivocal");
             requestBody.put("html", htmlContent);
             
+            log.info("[EmailService] 正在调用 Resend API...");
+            
             @SuppressWarnings("rawtypes")
             Map response = webClient.post()
                     .uri("/emails")
                     .bodyValue(requestBody)
                     .retrieve()
+                    .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> {
+                            return clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("[EmailService] Resend API 返回错误: status={}, body={}",
+                                        clientResponse.statusCode(), errorBody);
+                                    return Mono.error(new RuntimeException("Resend API 错误: " + errorBody));
+                                });
+                        }
+                    )
                     .bodyToMono(Map.class)
                     .onErrorResume(new java.util.function.Function<Throwable, Mono<Map>>() {
                         @Override
                         public Mono<Map> apply(Throwable e) {
-                            log.error("[EmailService] Failed to send email: {}", e.getMessage());
+                            log.error("[EmailService] API 调用失败: {}", e.getMessage(), e);
                             return Mono.empty();
                         }
                     })
                     .block();
             
             if (response != null && response.containsKey("id")) {
-                log.info("[EmailService] Verification email sent: {}, messageId: {}", email, response.get("id"));
+                log.info("[EmailService] ✓ 邮件发送成功: {}, messageId: {}", email, response.get("id"));
                 return true;
             } else {
-                log.error("[EmailService] Failed to send email, response: {}", response);
+                log.error("[EmailService] ✗ 邮件发送失败, response: {}", response);
                 return false;
             }
         } catch (Exception e) {
-            log.error("[EmailService] Exception: {}", e.getMessage(), e);
+            log.error("[EmailService] ✗ 发生异常: {}", e.getMessage(), e);
             return false;
         }
     }

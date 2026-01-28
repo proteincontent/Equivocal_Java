@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { buildApiUrl } from "@/lib/api";
+import { buildApiUrl, fetchWithTimeout, isNetworkOrTimeoutError, readResponseJsonSafe } from "@/lib/api";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -61,22 +61,26 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
     setIsSendingCode(true);
 
     try {
-      const response = await fetch(buildApiUrl("/api/auth/send-code"), {
+      const response = await fetchWithTimeout(buildApiUrl("/api/auth/send-code"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
-      });
+      }, 15000);
 
-      const data = await response.json();
+      const data = await readResponseJsonSafe<{ error?: string; message?: string }>(response);
 
       if (!response.ok) {
-        throw new Error(data.error || "发送验证码失败");
+        throw new Error(data?.error || data?.message || "发送验证码失败");
       }
 
       setCodeMessage("验证码已发送到您的邮箱，请查收");
       setCountdown(60); // 60秒倒计时
     } catch (err) {
-      setError(err instanceof Error ? err.message : "发送验证码失败");
+      if (isNetworkOrTimeoutError(err)) {
+        setError("请求超时或无法连接服务器，请确认后端服务可用后重试");
+      } else {
+        setError(err instanceof Error ? err.message : "发送验证码失败");
+      }
     } finally {
       setIsSendingCode(false);
     }
@@ -96,12 +100,13 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
       return;
     }
 
-    if (password.length < 6) {
-      setError("密码至少需要6个字符");
-      return;
-    }
-
     if (mode === "register") {
+      // 只在注册时验证密码长度
+      if (password.length < 6) {
+        setError("密码至少需要6个字符");
+        return;
+      }
+
       if (password !== confirmPassword) {
         setError("两次输入的密码不一致");
         return;
@@ -121,7 +126,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
     setIsLoading(true);
 
     try {
-      const response = await fetch(buildApiUrl("/api/auth"), {
+      const response = await fetchWithTimeout(buildApiUrl("/api/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -130,15 +135,23 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
           password,
           ...(mode === "register" && { code: verificationCode }),
         }),
-      });
+      }, 15000);
 
-      const data = await response.json();
+      const data = await readResponseJsonSafe<any>(response);
 
       if (!response.ok) {
-        throw new Error(data.error || (mode === "login" ? "登录失败" : "注册失败"));
+        throw new Error(
+          data?.error ||
+            data?.message ||
+            (mode === "login" ? "登录失败" : "注册失败")
+        );
       }
 
       // 保存到 localStorage
+      if (!data?.token) {
+        throw new Error("服务端未返回 token，请联系管理员检查后端响应");
+      }
+
       localStorage.setItem("auth_token", data.token);
       
       // 适配 Java 后端响应结构 (data.user) 或旧版扁平结构
@@ -154,7 +167,11 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
       onAuthSuccess(userToSave);
       handleClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "操作失败，请稍后再试");
+      if (isNetworkOrTimeoutError(err)) {
+        setError("请求超时或无法连接服务器，请确认后端服务可用后重试");
+      } else {
+        setError(err instanceof Error ? err.message : "操作失败，请稍后再试");
+      }
     } finally {
       setIsLoading(false);
     }

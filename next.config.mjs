@@ -9,10 +9,22 @@ const nextConfig = {
   },
 
   async rewrites() {
-    const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+    const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8080";
     const normalizedBackendBaseUrl = backendBaseUrl.replace(/\/$/, "");
+    const aiAgentBaseUrl = process.env.NEXT_PUBLIC_AI_AGENT_URL ?? "http://127.0.0.1:8000";
+    const normalizedAiAgentBaseUrl = aiAgentBaseUrl.replace(/\/$/, "");
 
     return [
+      // Bypass route for direct AI Agent access (skipping Java backend)
+      {
+        source: "/api/bypass/chat",
+        destination: "http://localhost:8000/api/v1/chat/completions",
+      },
+      // Contract review should hit AI Agent (not Java backend)
+      {
+        source: "/api/contract/review",
+        destination: `${normalizedAiAgentBaseUrl}/v1/contract/review`,
+      },
       {
         source: "/api/:path*",
         destination: `${normalizedBackendBaseUrl}/api/:path*`,

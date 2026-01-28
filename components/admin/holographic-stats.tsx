@@ -58,16 +58,16 @@ function ArcGauge({
       bg: "from-cyan-500/20"
     },
     purple: {
-      stroke: "stroke-purple-400",
-      glow: "drop-shadow-[0_0_10px_rgba(192,132,252,0.8)]",
-      text: "text-purple-400",
-      bg: "from-purple-500/20"
+      stroke: "stroke-[#2563EB]",
+      glow: "drop-shadow-[0_0_10px_rgba(37,99,235,0.8)]",
+      text: "text-[#2563EB]",
+      bg: "from-[#2563EB]/20"
     },
     emerald: {
-      stroke: "stroke-emerald-400",
-      glow: "drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]",
-      text: "text-emerald-400",
-      bg: "from-emerald-500/20"
+      stroke: "stroke-indigo-400",
+      glow: "drop-shadow-[0_0_10px_rgba(129,140,248,0.8)]",
+      text: "text-indigo-400",
+      bg: "from-indigo-500/20"
     }
   };
 
@@ -242,11 +242,11 @@ export function HolographicStats({ stats, loading }: HolographicStatsProps) {
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        <span>SYS.USERS.TOTAL: {stats.total}</span>
+        <span>用户总数：{stats.total}</span>
         <span className="text-cyan-500/50">|</span>
-        <span>SYS.USERS.ADMIN: {stats.admins}</span>
+        <span>管理员数：{stats.admins}</span>
         <span className="text-cyan-500/50">|</span>
-        <span>SYS.USERS.NORMAL: {stats.users}</span>
+        <span>普通用户数：{stats.users}</span>
       </motion.div>
     </div>
   );

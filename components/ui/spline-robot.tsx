@@ -61,7 +61,7 @@ function RobotFallback() {
           >
             {/* Chest panel */}
             <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-slate-600 rounded border-2 border-slate-500" />
-            <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-green-400 rounded animate-pulse" />
+            <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-[#2563EB] rounded animate-pulse shadow-[0_0_10px_#2563EB]" />
           </motion.div>
 
           {/* Arms */}

@@ -82,6 +82,7 @@ export function Theme({
 
     const nextTheme = themes[(themes.indexOf(safeTheme) + 1) % themes.length];
     const Icon = themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light;
+    const nextThemeLabel = themeConfigs[nextTheme as Theme]?.label ?? "主题";
 
     return (
       <motion.button
@@ -102,18 +103,18 @@ export function Theme({
           className,
         )}
         whileTap={{ scale: 0.95 }}
-        aria-label={`Switch to ${nextTheme} theme`}
+        aria-label={`切换到${nextThemeLabel}主题`}
       >
         <motion.div
           key={safeTheme}
           initial={{ rotate: -90, opacity: 0 }}
           animate={{ rotate: 0, opacity: 1 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className={theme === "light" ? "text-amber-500" : "text-blue-400"}
+          className={theme === "light" ? "text-[#2563EB]" : "text-blue-400"}
         >
           <Icon size={iconSizes[size]} />
         </motion.div>
-        {showLabel && <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "Theme"}</span>}
+        {showLabel && <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "主题"}</span>}
       </motion.button>
     );
   }
@@ -150,7 +151,7 @@ export function Theme({
             {isLight ? (
               <Sun
                 size={size === "sm" ? 10 : size === "md" ? 12 : 14}
-                className="text-yellow-500"
+                className="text-[#2563EB] dark:text-[#3B82F6]"
               />
             ) : (
               <Moon
@@ -192,7 +193,7 @@ export function Theme({
                   {React.createElement(themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light, {
                     size: iconSizes[size],
                   })}
-                  <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "Theme"}</span>
+                  <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "主题"}</span>
                 </div>
                 <ChevronDown size={iconSizes[size]} />
               </motion.button>
@@ -232,7 +233,7 @@ export function Theme({
                   <div className="flex items-center gap-2">
                     <Icon size={iconSizes[size]} />
 
-                    <span className="font-medium">{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "Theme"}</span>
+                    <span className="font-medium">{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "主题"}</span>
                   </div>
                   {isSelected && <Check size={iconSizes[size]} />}
                 </DropdownMenuItem>
@@ -276,7 +277,7 @@ export function Theme({
                 )}
                 <div className="relative z-10 flex items-center gap-1">
                   <Icon size={size === "sm" ? 12 : size === "md" ? 14 : 16} />
-                  {showLabel && <span>{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "Theme"}</span>}
+                  {showLabel && <span>{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "主题"}</span>}
                 </div>
               </TabsTrigger>
             );
@@ -475,13 +476,13 @@ export type ThemeConfig = {
 export const themeConfigs: Record<Theme, ThemeConfig> = {
   light: {
     name: "light",
-    label: "Light",
+    label: "浅色",
     colors: {
       background: "#ffffff",
       foreground: "#0f172a",
-      primary: "#3b82f6",
+      primary: "#2563EB",
       secondary: "#64748b",
-      accent: "#f59e0b",
+      accent: "#2563EB",
       muted: "#f8fafc",
       border: "#e2e8f0",
       card: "#ffffff",
@@ -489,7 +490,7 @@ export const themeConfigs: Record<Theme, ThemeConfig> = {
   },
   dark: {
     name: "dark",
-    label: "Dark",
+    label: "深色",
     colors: {
       background: "#0f172a",
       foreground: "#f8fafc",
@@ -503,13 +504,13 @@ export const themeConfigs: Record<Theme, ThemeConfig> = {
   },
   system: {
     name: "system",
-    label: "System",
+    label: "跟随系统",
     colors: {
       background: "#ffffff",
       foreground: "#0f172a",
-      primary: "#3b82f6",
+      primary: "#2563EB",
       secondary: "#64748b",
-      accent: "#f59e0b",
+      accent: "#2563EB",
       muted: "#f8fafc",
       border: "#e2e8f0",
       card: "#ffffff",
@@ -517,7 +518,7 @@ export const themeConfigs: Record<Theme, ThemeConfig> = {
   },
   sunset: {
     name: "sunset",
-    label: "Sunset",
+    label: "日落",
     colors: {
       background: "#fef3c7",
       foreground: "#451a03",
@@ -531,7 +532,7 @@ export const themeConfigs: Record<Theme, ThemeConfig> = {
   },
   ocean: {
     name: "ocean",
-    label: "Ocean",
+    label: "海洋",
     colors: {
       background: "#cffafe",
       foreground: "#164e63",
@@ -545,7 +546,7 @@ export const themeConfigs: Record<Theme, ThemeConfig> = {
   },
   forest: {
     name: "forest",
-    label: "Forest",
+    label: "森林",
     colors: {
       background: "#dcfce7",
       foreground: "#14532d",

@@ -19,15 +19,15 @@ export function Settings() {
         {loading ? (
           <span className="flex items-center gap-1.5">
             <Loader2 className="size-3 animate-spin" aria-hidden="true" />
-            Checking server configuration…
+            正在检查服务器配置…
           </span>
         ) : (
-          <span>Using built-in Coze integration. No configuration required.</span>
+          <span>使用内置 Coze 集成，无需配置。</span>
         )}
       </div>
 
       <div className="space-y-2.5">
-        <Label htmlFor="bot-id" className="text-sm font-medium">Bot ID</Label>
+        <Label htmlFor="bot-id" className="text-sm font-medium">机器人 ID</Label>
         <Input
           id="bot-id"
           value={botId}
@@ -35,7 +35,7 @@ export function Settings() {
           className="font-mono bg-muted"
         />
         <p className="text-xs text-muted-foreground/80">
-          Using built-in Coze Bot ID
+          使用内置 Coze 机器人 ID
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export function Settings() {
             className="sm:flex-1"
           >
             <RefreshCcw className="mr-2 size-4" aria-hidden="true" />
-            Reset to defaults
+            恢复默认设置
           </Button>
         </div>
       </div>

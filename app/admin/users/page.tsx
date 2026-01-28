@@ -237,7 +237,7 @@ export default function AdminUsersPage() {
           <div className="inline-block mb-4">
             <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-gradient-to-r from-pink-100 to-purple-100 text-purple-600 text-sm font-bold tracking-wide uppercase">
               <Sparkles className="w-4 h-4" />
-              Admin Dashboard
+              管理控制台
             </span>
           </div>
           <h1 className="text-6xl md:text-7xl font-black text-gray-900 tracking-tight mb-6">
