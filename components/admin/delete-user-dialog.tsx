@@ -86,15 +86,15 @@ export function DeleteUserDialog({
           <AlertDialogDescription>
             您即将删除用户 <span className="font-semibold text-foreground">{user.email}</span>。
             此操作将：
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>永久删除该用户的账号信息</li>
-              <li>删除该用户的所有聊天会话</li>
-              <li>删除该用户的所有聊天消息</li>
-            </ul>
-            <span className="block mt-3 font-semibold text-destructive">
-              此操作无法撤销，请谨慎操作！
-            </span>
           </AlertDialogDescription>
+          <ul className="list-disc list-inside mt-2 space-y-1 text-sm text-muted-foreground">
+            <li>永久删除该用户的账号信息</li>
+            <li>删除该用户的所有聊天会话</li>
+            <li>删除该用户的所有聊天消息</li>
+          </ul>
+          <p className="mt-3 text-sm font-semibold text-destructive">
+            此操作无法撤销，请谨慎操作！
+          </p>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>取消</AlertDialogCancel>

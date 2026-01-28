@@ -130,7 +130,7 @@ public class AuthService {
                 .email(email)
                 .password(hashedPassword)
                 .role(role)
-                .emailVerified(false)
+                .emailVerified(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

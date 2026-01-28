@@ -17,9 +17,9 @@ public class AuthController {
     private final AuthService authService;
     
     /**
-     * POST /api/auth - 登录或注册
+     * POST /api/auth/login - 登录或注册
      */
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
         log.info("[AuthController] 收到认证请求: email={}", request.getEmail());
         

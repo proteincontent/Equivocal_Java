@@ -4,8 +4,8 @@
 
 <div align="center">
   <img src="./public/placeholder-logo.png" alt="Equivocal logo" width="180" />
-  <h1>Equivocal Legal 法律助手</h1>
-  <p>一款融合 AI 对话与沉浸式动画界面的智能法律服务助手。</p>
+  <h1>Equivocal Legal 法律智能体</h1>
+  <p>基于 LangGraph 的法律智能体系统，提供法律咨询、合同审查与文书生成服务。</p>
   <p>
     <a href="https://github.com/proteincontent/Equivocal/blob/main/LICENSE">
       <img src="https://img.shields.io/github/license/proteincontent/Equivocal?color=brightgreen" alt="license" />
@@ -18,11 +18,11 @@
 
 ## 项目亮点
 
-- **智能法律服务**：提供法律咨询、合同审查、文书生成等多种法律服务，帮助用户快速解决法律问题。
-- **AI 驱动**：集成 Coze AI 平台，提供智能化的法律问答和文书处理能力。
-- **动效与 3D 交互**：全新落地页与聊天界面共同呈现动画、光影与 3D 效果，让对话过程更沉浸。
-- **数据与展示分离**：法律服务类型、分类抽离到独立模块，组件专注于交互展示。
-- **一键部署**：默认集成 Vercel 分析，支持零配置上线。
+- **LangGraph 智能体架构**：基于 LangGraph 构建可编排的对话与审查工作流，支持状态记忆与多工具调用。
+- **RAG 检索增强**：集成 Cloudflare Vectorize 与智谱 AI Embedding，实现精准的法律条文检索与溯源。
+- **沉浸式法律工作台**：提供流式对话与分屏合同审查功能（左文右析），兼顾美观与高效。
+- **混合微服务架构**：Java Spring Boot 处理业务与安全，Python 承载 AI 核心能力，Next.js 构建现代化前端。
+- **一键部署**：支持 Vercel 与 Docker 部署，默认集成可观测性支持。
 
 ## 目录
 
@@ -55,10 +55,13 @@ pnpm install
    ```bash
    cp .env.local.example .env.local
    ```
-2. 在 `.env.local` 或后端配置中填入 Coze API 凭证（`COZE_API_KEY`、`COZE_BOT_ID`）。
+2. 在 `.env.local` 中配置 LLM 与向量库密钥。
+   - `LLM_MODEL`: 使用的 LLM 模型名称 (如 `glm-4`)
+   - `LLM_API_KEY`: LLM API 密钥
+   - `EMBEDDING_MODEL`: Embedding 模型名称
+   - `EMBEDDING_API_KEY`: Embedding API 密钥
+   - `CF_ACCOUNT_ID`, `CF_API_TOKEN`, `CF_VECTORIZE_INDEX`: Cloudflare Vectorize 配置
 3. 修改服务端环境变量后请重启开发服务器。
-
-> Coze API 凭证已在服务器端预配置，用户无需提供自己的 API 密钥。
 
 ## 开发与调试
 
@@ -79,28 +82,30 @@ pnpm build  # Next.js 生产构建
 
 | 变量 | 说明 | 默认值 |
 | --- | --- | --- |
-| `COZE_API_KEY` | Coze API 密钥 | _必须配置_ |
-| `COZE_BOT_ID` | Coze 法律助手 Bot ID | _必须配置_ |
-| `COZE_API_URL` | Coze API 基础地址 | `https://api.coze.cn` |
+| `LLM_MODEL` | 大语言模型名称 | `glm-4` |
+| `LLM_API_KEY` | 大语言模型 API 密钥 | _必须配置_ |
+| `EMBEDDING_MODEL` | Embedding 模型名称 | `embedding-2` |
+| `EMBEDDING_API_KEY` | Embedding API 密钥 | _必须配置_ |
+| `CF_VECTORIZE_INDEX` | Cloudflare Vectorize 索引名 | `legal-knowledge-base` |
 
 ## 项目结构
 
 ```
-app/                 # 应用路由、落地页、聊天页面
-backend/             # Java Spring Boot 后端（认证、Coze API、数据库）
-components/          # UI 组件与功能模块（聊天界面、动效等）
-data/legal-services/ # 法律服务类型、分类与工具函数（与界面解耦）
-hooks/               # 客户端状态管理（认证、配置等）
-lib/                 # 工具函数和 API 辅助
-public/              # 静态资源（Logo、占位图、manifest 等）
+app/                 # Next.js 前端应用
+ai-agent/            # Python LangGraph 智能体核心 (RAG, Tools, Agent)
+backend/             # Java Spring Boot 后端 (Auth, API Gateway, DB)
+components/          # UI 组件 (Shadcn/UI, Legal Chat, Contract Review)
+data/legal-services/ # 法律服务逻辑与配置
+hooks/               # React Hooks (Auth, Config)
+lib/                 # 工具函数
 ```
 
 **关键流程**
 
-- Java 后端 (`backend/src/main/java/com/equivocal/controller/CozeChatController.java`)：处理 Coze AI 聊天请求。
-- Java 后端 (`backend/src/main/java/com/equivocal/service/AuthService.java`)：管理用户登录/注册和 JWT 认证。
-- `hooks/use-config.ts`：在浏览器端持久化配置。
-- `hooks/use-auth.ts`：管理用户认证状态。
+- 智能体核心 (`ai-agent/app/graph/agent.py`)：基于 LangGraph 的对话状态机，编排 RAG 与工具调用。
+- 向量检索 (`ai-agent/app/services/vector_store.py`)：调用智谱 Embedding 与 Cloudflare Vectorize。
+- 后端网关 (`backend/src/main/java/com/equivocal/controller/ChatController.java`)：转发 AI 请求，管理 JWT 认证。
+- 前端交互 (`app/chat/page.tsx`, `app/contract-review/page.tsx`)：提供对话与审查界面。
 
 ## 参与贡献
 

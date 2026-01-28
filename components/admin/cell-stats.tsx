@@ -36,19 +36,19 @@ function Cell({
 }) {
   const colorStyles: Record<string, { bg: string; shadow: string; icon: string }> = {
     peach: {
-      bg: "bg-orange-100/50",
-      shadow: "shadow-[0_20px_50px_rgba(255,166,128,0.3)]",
-      icon: "text-orange-400"
+      bg: "bg-[#FFF7ED]/80", // Orange-50 with high opacity
+      shadow: "shadow-[0_20px_50px_rgba(249,115,22,0.15)]",
+      icon: "text-orange-500"
     },
     lavender: {
-      bg: "bg-purple-100/50",
-      shadow: "shadow-[0_20px_50px_rgba(192,132,252,0.3)]",
-      icon: "text-purple-400"
+      bg: "bg-[#FAF5FF]/80", // Purple-50 with high opacity
+      shadow: "shadow-[0_20px_50px_rgba(168,85,247,0.15)]",
+      icon: "text-purple-500"
     },
     mint: {
-      bg: "bg-emerald-100/50",
-      shadow: "shadow-[0_20px_50px_rgba(52,211,153,0.3)]",
-      icon: "text-emerald-400"
+      bg: "bg-[#ECFDF5]/80", // Emerald-50 with high opacity
+      shadow: "shadow-[0_20px_50px_rgba(16,185,129,0.15)]",
+      icon: "text-emerald-500"
     }
   };
 

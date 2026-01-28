@@ -1,0 +1,7 @@
+\beamer@sectionintoc {1}{目录}{2}{0}{1}
+\beamer@sectionintoc {2}{背景与问题}{3}{0}{2}
+\beamer@sectionintoc {3}{系统方案}{5}{0}{3}
+\beamer@sectionintoc {4}{实验与验收}{7}{0}{4}
+\beamer@sectionintoc {5}{计划与成果}{9}{0}{5}
+\beamer@sectionintoc {6}{致谢}{11}{0}{6}
+\beamer@sectionintoc {7}{参考文献}{12}{1}{7}

@@ -41,10 +41,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         
         try {
             final String jwt = authHeader.substring(7);
+            log.info("[JwtAuthFilter] 开始解析 JWT...");
             final String userId = jwtService.extractUserId(jwt);
+            log.info("[JwtAuthFilter] 解析到 userId: {}", userId);
             
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                log.info("[JwtAuthFilter] 开始查询用户...");
                 Optional<User> userOpt = userRepository.findById(userId);
+                log.info("[JwtAuthFilter] 用户查询完成: {}", userOpt.isPresent());
                 
                 if (userOpt.isPresent() && jwtService.isTokenValid(jwt)) {
                     User user = userOpt.get();

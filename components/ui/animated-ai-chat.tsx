@@ -29,7 +29,7 @@ import remarkGfm from "remark-gfm";
 import { useConfig } from "@/hooks/use-config";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthModal } from "@/components/ui/auth-modal";
-import { buildApiUrl } from "@/lib/api";
+import { buildApiUrl, fetchWithTimeout } from "@/lib/api";
 
 interface UseAutoResizeTextareaProps {
   minHeight: number;
@@ -162,6 +162,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   const [unreadCount, setUnreadCount] = useState(0);
   const prevMessageCountRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const lastSubmittedTextRef = useRef<string>("");
   const prevSessionIdRef = useRef<string | null | undefined>(sessionId);
 
   // 判断是否开始聊天（是否有消息，或者有非默认的欢迎消息）
@@ -342,10 +343,10 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   );
 
   const featureSuggestions = [
-    { icon: <FileText className="w-5 h-5 text-brand-gold" />, label: "起草合同" },
-    { icon: <Scale className="w-5 h-5 text-brand-gold" />, label: "法律咨询" },
-    { icon: <Shield className="w-5 h-5 text-brand-gold" />, label: "合规审查" },
-    { icon: <Search className="w-5 h-5 text-brand-gold" />, label: "案例检索" },
+    { icon: <FileText className="w-5 h-5 text-[#2563EB]" />, label: "起草合同" },
+    { icon: <Scale className="w-5 h-5 text-[#2563EB]" />, label: "法律咨询" },
+    { icon: <Shield className="w-5 h-5 text-[#2563EB]" />, label: "合规审查" },
+    { icon: <Search className="w-5 h-5 text-[#2563EB]" />, label: "案例检索" },
   ];
 
   useEffect(() => {
@@ -468,7 +469,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       formData.append('file', file);
 
       console.log('[AnimatedAIChat] Starting file upload:', file.name);
-      const response = await fetch(buildApiUrl('/api/coze-upload'), {
+      const response = await fetch(buildApiUrl('/api/upload'), {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData,
@@ -701,6 +702,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     }
 
     const trimmed = value.trim();
+    lastSubmittedTextRef.current = trimmed;
     
     // 检查是否有正在上传的文件
     const uploadingFiles = attachments.filter(att => att.isUploading);
@@ -810,7 +812,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
 
     try {
       // 使用流式端点
-      const apiEndpoint = buildApiUrl("/api/coze-chat");
+      const apiEndpoint = buildApiUrl("/api/chat");
       
       // 🔑 添加 Authorization 头
       const headers: HeadersInit = {
@@ -822,12 +824,20 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
-        headers,
-        signal: abortController.signal,
-        body: JSON.stringify(payload),
-      });
+      const chatTimeoutMs = Number.parseInt(
+        process.env.NEXT_PUBLIC_CHAT_TIMEOUT_MS ?? "600000",
+        10,
+      );
+      const response = await fetchWithTimeout(
+        apiEndpoint,
+        {
+          method: "POST",
+          headers,
+          signal: abortController.signal,
+          body: JSON.stringify(payload),
+        },
+        Number.isFinite(chatTimeoutMs) && chatTimeoutMs > 0 ? chatTimeoutMs : 600000,
+      );
 
       // 🚫 处理错误响应
       if (!response.ok) {
@@ -850,21 +860,50 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           friendlyMessage = "服务器正在开小差，工程师正在紧急修复中";
         }
 
-        let detail;
+        let detail: string | undefined;
         try {
-          const errorBody = await response.json();
-          detail =
-            typeof errorBody?.detail === "string"
-              ? errorBody.detail
-              : typeof errorBody?.error === "string"
-                ? errorBody.error
-                : undefined;
+          const rawText = await response.text();
+          if (rawText) {
+            try {
+              const errorBody = JSON.parse(rawText);
+              detail =
+                typeof errorBody?.detail === "string"
+                  ? errorBody.detail
+                  : typeof errorBody?.message === "string"
+                    ? errorBody.message
+                    : typeof errorBody?.title === "string"
+                      ? errorBody.title
+                      : typeof errorBody?.error === "string"
+                        ? errorBody.error
+                        : typeof errorBody?.error?.message === "string"
+                          ? errorBody.error.message
+                          : undefined;
+            } catch {
+              detail = rawText.trim();
+            }
+          }
         } catch {
-          // ignore json parse error
+          // ignore body parse error
         }
 
-        // 优先使用后端返回的详细错误，如果没有则使用友好的状态码提示
-        throw new Error(detail || friendlyMessage);
+        const finalMessage = detail || friendlyMessage;
+
+        // 避免在 dev 环境触发 Next 的 Console Error Overlay：这里不 throw，直接展示提示并退出。
+        console.warn("[AnimatedAIChat] Chat request failed", {
+          status: response.status,
+          statusText: response.statusText,
+          message: finalMessage,
+        });
+
+        setErrorMessage(finalMessage);
+        setMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            content: `请求失败（${response.status}）：${finalMessage}\n\n你可以稍后重试，或检查后端(8080)与 AI Agent(8000)是否正常运行。`,
+          },
+        ]);
+        return;
       }
 
       // 检查是否是 SSE 流式响应
@@ -915,25 +954,23 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
-        setErrorMessage(null);
+        setErrorMessage("请求已取消或超时，请重试");
         return;
       }
-      console.error("[AnimatedAIChat] Failed to send message", error);
+      console.warn("[AnimatedAIChat] Failed to send message", error);
       
       const errorMsg = error instanceof Error ? error.message : "未知错误";
       const isNetworkError = errorMsg.includes("Failed to fetch") || errorMsg.includes("Network");
 
-      // 只有在确实是网络层面的严重错误时，才在对话流中插入错误消息
-      // 这样用户知道是因为网络问题导致对话中断
-      if (isNetworkError) {
-        setMessages((current) => [
-          ...current,
-          {
-            role: "assistant",
-            content: "网络连接似乎断开了，请检查您的网络设置。",
-          },
-        ]);
-      }
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: isNetworkError
+            ? "网络连接似乎断开了，请检查您的网络设置，或确认后端服务是否可访问。"
+            : `请求出错：${errorMsg}`,
+        },
+      ]);
       
       setErrorMessage(errorMsg);
       return;
@@ -962,10 +999,12 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     // 流状态
     let isStreamEnded = false;
     let newSessionId: string | null = null;
+    let streamError: string | null = null;
 
     // 1. 生产者：全速从网络读取数据
     const pumpNetworkStream = async () => {
       let networkBuffer = ""; // SSE 数据包解析缓冲
+      let shouldStop = false;
       
       try {
         while (true) {
@@ -983,7 +1022,13 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
               if (!line.startsWith('data:')) continue;
               
               const dataStr = line.substring(5).trim();
-              if (!dataStr || dataStr === '[DONE]') continue;
+              if (!dataStr) continue;
+
+              // 兼容 OpenAI/Agent 的结束信号：不要只依赖连接关闭
+              if (dataStr === "[DONE]") {
+                shouldStop = true;
+                break;
+              }
 
               try {
                 const event = JSON.parse(dataStr);
@@ -993,16 +1038,32 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                   if (newSessionId && newSessionId !== sessionId) {
                     onSessionChange?.(newSessionId);
                   }
-                } else if (event.type === 'content') {
+                } else if (event.type === 'content' || event.type === 'answer') {
                   // 关键点：只写入缓冲池，不直接更新 UI
                   bufferContent += event.content;
+                } else if (event.type === "done") {
+                  shouldStop = true;
+                  break;
                 } else if (event.type === 'error') {
-                  throw new Error(event.message || 'Unknown error from stream');
+                  streamError = event.message || "Unknown error from stream";
+                  shouldStop = true;
+                  break;
                 }
               } catch (e) {
                 // ignore parse error
               }
             }
+
+            if (shouldStop) break;
+          }
+
+          if (shouldStop) {
+            try {
+              await reader.cancel();
+            } catch {
+              // ignore cancel error
+            }
+            break;
           }
         }
         
@@ -1011,7 +1072,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
            // 简单处理剩余数据，通常不重要
         }
       } catch (err) {
-        console.error("Stream reading error:", err);
+        console.warn("Stream reading error:", err);
       } finally {
         isStreamEnded = true;
         reader.releaseLock();
@@ -1073,6 +1134,18 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     });
 
     // 3. 收尾处理
+    if (streamError) {
+      setErrorMessage(streamError);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: `生成过程中服务返回错误：${streamError}`,
+        },
+      ]);
+      return;
+    }
+
     if (!displayedContent) {
       setMessages((current) => [
         ...current,
@@ -1104,8 +1177,8 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       <div className={cn(
         "relative rounded-2xl border transition-all duration-300 overflow-hidden backdrop-blur-xl",
         inputFocused
-          ? "bg-background/95 border-brand-gold shadow-[0_0_50px_-12px_rgba(0,0,0,0.2)] ring-1 ring-brand-gold/30"
-          : "bg-background/60 border-border/50 hover:border-brand-gold/40 hover:bg-background/80"
+          ? "bg-background/95 border-[#2563EB] shadow-[0_0_50px_-12px_rgba(37,99,235,0.2)] ring-1 ring-[#2563EB]/30"
+          : "bg-background/60 border-border/50 hover:border-[#2563EB]/40 hover:bg-background/80"
       )}>
         <Textarea
           ref={textareaRef}
@@ -1144,7 +1217,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                     "flex items-center gap-2 text-xs py-1.5 px-3 rounded-md border",
                     attachment.error
                       ? "bg-red-500/10 border-red-500/20 text-red-400"
-                      : "bg-brand-gold/5 border-brand-gold/10 text-brand-gold/80"
+                      : "bg-[#2563EB]/5 border-[#2563EB]/10 text-[#2563EB]/80"
                   )}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1177,7 +1250,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
               <button
                 type="button"
                 onClick={handleAttachFile}
-                className="p-2 text-muted-foreground/40 hover:text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-all"
+                className="p-2 text-muted-foreground/40 hover:text-[#2563EB] hover:bg-[#2563EB]/10 rounded-lg transition-all"
                 title="上传文件"
                 aria-label="上传文件"
               >
@@ -1231,7 +1304,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                 className={cn(
                   "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
                   (value.trim() || attachments.length > 0) && !attachments.some(att => att.isUploading)
-                    ? "bg-brand-gold text-brand-navy hover:bg-brand-gold-light shadow-lg hover:shadow-brand-gold/20"
+                    ? "bg-[#2563EB] text-white hover:bg-[#3B82F6] shadow-lg hover:shadow-[#2563EB]/20"
                     : "bg-muted text-muted-foreground/40 cursor-not-allowed"
                 )}
               >
@@ -1243,7 +1316,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       
       {/* Decorative Focus Glow */}
       <div className={cn(
-        "absolute -inset-[1px] -z-10 rounded-[17px] bg-gradient-to-r from-brand-gold/0 via-brand-gold/30 to-brand-gold/0 opacity-0 transition-opacity duration-500 blur-sm",
+        "absolute -inset-[1px] -z-10 rounded-[17px] bg-gradient-to-r from-[#2563EB]/0 via-[#2563EB]/30 to-[#2563EB]/0 opacity-0 transition-opacity duration-500 blur-sm",
         inputFocused && "opacity-100"
       )} />
     </div>
@@ -1286,22 +1359,25 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           {/* Header - Only show in chat mode */}
-          {isChatStarted && (
-            <div className="flex items-center justify-between px-6 py-4">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                <span className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest">
-                  系统在线
-                </span>
-              </div>
+      {isChatStarted && (
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#2563EB]/5 border border-[#2563EB]/10">
+            <div className="relative">
+              <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#2563EB] animate-ping opacity-50" />
+              <div className="relative w-2 h-2 rounded-full bg-[#2563EB] shadow-[0_0_10px_rgba(37,99,235,0.6)]" />
             </div>
-          )}
+            <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">
+              系统在线
+            </span>
+          </div>
+        </div>
+      )}
 
           <motion.div
             ref={dropZoneRef}
             className={cn(
               "relative flex-1 flex flex-col min-h-0",
-              isDragging && "ring-2 ring-violet-500/50 inset-0 z-50 bg-black/50"
+              isDragging && "ring-2 ring-[#2563EB]/50 inset-0 z-50 bg-black/50"
             )}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
@@ -1351,21 +1427,21 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                           className={cn(
                             "relative transition-all duration-500",
                             isUser
-                              ? "max-w-[85%] px-5 py-3.5 bg-brand-gold/[0.08] dark:bg-brand-gold/[0.12] text-foreground rounded-2xl rounded-tr-md border border-brand-gold/15 dark:border-brand-gold/20"
+                              ? "max-w-[85%] px-5 py-3.5 bg-[#2563EB]/[0.08] dark:bg-[#2563EB]/[0.12] text-foreground rounded-2xl rounded-tr-md border border-[#2563EB]/15 dark:border-[#2563EB]/20"
                               : "w-full px-0 py-4 text-foreground"
                           )}
                         >
                           {!isUser && (
-                             <div className="flex items-center gap-3 mb-4 border-b border-border/40 pb-3">
-                                <div className="p-1.5 rounded bg-brand-gold/10">
-                                   <Scale className="w-4 h-4 text-brand-gold" />
-                                </div>
-                                <span className="text-xs font-bold text-brand-gold tracking-widest uppercase">Legal Advisor</span>
-                             </div>
-                          )}
+                             <div className="flex items-center gap-3 mb-4 border-b border-[#2563EB]/20 pb-3">
+                                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#2563EB] to-[#3B82F6] shadow-md shadow-[#2563EB]/20">
+                                    <Scale className="w-4 h-4 text-white" />
+                                 </div>
+                                 <span className="text-xs font-bold text-[#2563EB] tracking-widest uppercase">法律顾问</span>
+                              </div>
+                           )}
                           <div className={cn(
-                            "prose max-w-none prose-p:leading-8 prose-li:marker:text-brand-gold/50",
-                            !isUser ? "font-serif text-[16px] text-foreground/90" : "text-foreground font-sans text-sm"
+                            "prose max-w-none prose-p:leading-7 prose-li:marker:text-[#2563EB]/50",
+                            !isUser ? "font-sans text-[15px] text-foreground/90 leading-relaxed" : "text-foreground font-sans text-sm"
                           )}>
                             {isUser ? message.content : renderMessageContent(message.content)}
                           </div>
@@ -1374,11 +1450,11 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                           <div className="flex items-center gap-1 mt-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => handleCopy(message.content, index)}
-                              className="p-1.5 rounded-lg text-muted-foreground/30 hover:text-brand-gold hover:bg-brand-gold/10 transition-all"
+                              className="p-1.5 rounded-lg text-muted-foreground/30 hover:text-[#2563EB] hover:bg-[#2563EB]/10 transition-all"
                               title="复制消息"
                             >
                               {copiedIndex === index ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                <Check className="w-3.5 h-3.5 text-[#2563EB]" />
                               ) : (
                                 <Copy className="w-3.5 h-3.5" />
                               )}
@@ -1389,22 +1465,22 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                     );
                   })}
                   
-                  {isTyping && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex justify-start w-full relative pl-0"
-                      >
-                         <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-3 text-brand-gold/60">
-                                <Scale className="w-4 h-4" />
-                                <span className="text-xs font-bold tracking-widest">分析中</span>
-                             </div>
-                             <div className="text-muted-foreground text-sm font-mono flex items-center gap-2 pl-7">
-                                <TypingDots />
-                             </div>
+                  {isTyping && messages[messages.length - 1]?.role !== "assistant" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start w-full relative pl-0 mb-8"
+                    >
+                      <ContractGenerationLoader />
+                    </motion.div>
+                  )}
+                  
+                  {isTyping && messages[messages.length - 1]?.role === "assistant" && (
+                     <div className="flex justify-start w-full relative pl-0 mb-2">
+                         <div className="flex items-center gap-2 text-[#2563EB]/60">
+                            <span className="text-xs font-mono animate-pulse">正在输入...</span>
                          </div>
-                      </motion.div>
+                     </div>
                   )}
                 </div>
 
@@ -1423,7 +1499,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
                     <span className="font-medium">回到最新</span>
                     {unreadCount > 0 && (
-                      <span className="ml-1 min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-brand-gold text-brand-navy text-[10px] font-bold tabular-nums">
+                      <span className="ml-1 min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-[#2563EB] text-white text-[10px] font-bold tabular-nums">
                         {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     )}
@@ -1447,12 +1523,12 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                   transition={{ duration: 0.8, ease: "easeOut" }}
                   className="mb-16 text-center space-y-6"
                 >
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-gold/10 border border-brand-gold/20 mb-4">
-                    <Scale className="w-8 h-8 text-brand-gold" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2563EB]/10 border border-[#2563EB]/20 mb-4">
+                    <Scale className="w-8 h-8 text-[#2563EB]" />
                   </div>
                   <h1 className="text-4xl md:text-5xl font-serif font-medium text-foreground tracking-tight">
                     我能怎么帮你处理 <br />
-                    <span className="text-brand-gold italic">法律问题</span>？
+                    <span className="text-[#2563EB] italic">法律问题</span>？
                   </h1>
                 </motion.div>
 
@@ -1480,12 +1556,12 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                         textareaRef.current?.focus();
                         setTimeout(() => adjustHeight(), 0);
                       }}
-                      className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-background/60 backdrop-blur-md border border-border/80 hover:border-brand-gold/50 hover:bg-background/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.15)] transition-all duration-300"
+                      className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-background/60 backdrop-blur-md border border-border/80 hover:border-[#2563EB]/50 hover:bg-background/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.15)] transition-all duration-300"
                     >
-                      <div className="p-2.5 rounded-lg bg-muted/50 group-hover:bg-brand-gold/20 transition-colors">
+                      <div className="p-2.5 rounded-lg bg-muted/50 group-hover:bg-[#2563EB]/10 transition-colors">
                         {feature.icon}
                       </div>
-                      <span className="text-sm text-foreground group-hover:text-brand-gold font-medium transition-colors">{feature.label}</span>
+                      <span className="text-sm text-foreground group-hover:text-[#2563EB] font-medium transition-colors">{feature.label}</span>
                     </button>
                   ))}
                 </motion.div>
@@ -1496,6 +1572,20 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
               <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 text-xs backdrop-blur-md flex flex-wrap items-center gap-2 max-w-[90vw] sm:max-w-[720px] break-words">
                 <span className="font-medium">提示：</span>
                 <span className="font-mono">{errorMessage}</span>
+                {lastSubmittedTextRef.current && !isTyping && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setValue(lastSubmittedTextRef.current);
+                      setErrorMessage(null);
+                      textareaRef.current?.focus();
+                      setTimeout(() => adjustHeight(), 0);
+                    }}
+                    className="ml-1 px-2 py-1 rounded-full border border-red-500/20 hover:bg-red-500/10 transition-colors"
+                  >
+                    重试
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setErrorMessage(null)}
@@ -1526,7 +1616,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 text-sm transition-colors cursor-pointer border-l-2",
                         activeSuggestion === index
-                          ? "bg-brand-gold/10 border-brand-gold text-foreground"
+                          ? "bg-[#2563EB]/10 border-[#2563EB] text-foreground"
                           : "border-transparent text-muted-foreground hover:bg-muted",
                       )}
                       onClick={() => selectCommandSuggestion(index)}
@@ -1550,7 +1640,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
 
       {inputFocused && (
         <motion.div
-          className="fixed w-[60rem] h-[60rem] rounded-full pointer-events-none z-0 opacity-[0.015] bg-gradient-to-r from-brand-gold via-fuchsia-500 to-indigo-500 blur-[150px]"
+          className="fixed w-[60rem] h-[60rem] rounded-full pointer-events-none z-0 opacity-[0.015] bg-gradient-to-r from-[#2563EB] via-blue-500 to-blue-600 blur-[150px]"
           animate={{
             x: mousePosition.x - 480,
             y: mousePosition.y - 480,
@@ -1615,34 +1705,35 @@ const renderMessageContent = (content: string): React.ReactNode => {
           const fileName = extractFileName(url);
 
           if (isFile) {
+            const isWord = fileName.endsWith('.doc') || fileName.endsWith('.docx');
+            const isPdf = fileName.endsWith('.pdf');
+            
             return (
               <a
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  fetch(url)
-                    .then(response => response.blob())
-                    .then(blob => {
-                      const blobUrl = window.URL.createObjectURL(blob);
-                      const link = document.createElement('a');
-                      link.href = blobUrl;
-                      link.download = fileName;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      window.URL.revokeObjectURL(blobUrl);
-                    })
-                    .catch(err => {
-                      console.error('下载失败:', err);
-                      window.open(url, '_blank');
-                    });
-                }}
-                className="text-violet-400 hover:text-violet-300 hover:underline inline-flex items-center gap-1 break-all transition-colors cursor-pointer"
+                download={fileName}
+                className="group flex items-center gap-3 p-3 my-2 rounded-xl bg-card border border-border hover:border-[#2563EB]/50 hover:shadow-md transition-all duration-300 no-underline max-w-sm"
               >
-                <Download className="w-3 h-3 flex-shrink-0" />
-                <span>{children || fileName}</span>
+                <span className={cn(
+                  "p-2.5 rounded-lg flex-shrink-0 transition-colors",
+                  isWord ? "bg-blue-50 text-blue-600" :
+                  isPdf ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600"
+                )}>
+                  {isWord ? <FileText className="w-5 h-5" /> :
+                   isPdf ? <FileIcon className="w-5 h-5" /> :
+                   <Download className="w-5 h-5" />}
+                </span>
+                <span className="flex flex-col min-w-0 overflow-hidden">
+                  <span className="text-sm font-medium text-foreground truncate pr-2 group-hover:text-[#2563EB] transition-colors">
+                    {children || fileName}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-mono uppercase">
+                    点击下载文件
+                  </span>
+                </span>
+                <Download className="w-4 h-4 text-muted-foreground/30 ml-auto group-hover:text-[#2563EB] transition-colors" />
               </a>
             );
           }
@@ -1652,14 +1743,14 @@ const renderMessageContent = (content: string): React.ReactNode => {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-violet-400 hover:text-violet-300 hover:underline transition-colors"
+              className="text-[#2563EB] hover:text-[#3B82F6] hover:underline transition-colors"
             >
               {children}
             </a>
           );
         },
         // 确保 <u> 标签正常显示
-        u: ({ children }) => <u className="decoration-brand-gold/40 underline-offset-4">{children}</u>,
+        u: ({ children }) => <u className="decoration-[#2563EB]/40 underline-offset-4">{children}</u>,
       }}
     >
       {content}
@@ -1708,7 +1799,7 @@ function TypingDots() {
       {[1, 2, 3, 4].map((i) => (
         <motion.div
           key={i}
-          className="w-0.5 bg-brand-gold/60 rounded-full"
+          className="w-0.5 bg-[#2563EB]/60 rounded-full"
           initial={{ height: 4, opacity: 0.5 }}
           animate={{
             height: [4, 12, 4],
@@ -1722,6 +1813,91 @@ function TypingDots() {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+function ContractGenerationLoader() {
+  const [step, setStep] = useState(0);
+  const steps = [
+    "解析合同需求与关键要素...",
+    "检索《民法典》相关法律法规...",
+    "构建标准合同框架...",
+    "拟定核心条款与补充协议...",
+    "进行合规性与风险审查...",
+    "正在生成最终文档..."
+  ];
+
+  useEffect(() => {
+    const times = [2000, 2500, 2000, 3000, 2500, 10000];
+    let currentStep = 0;
+    let timer: NodeJS.Timeout;
+    
+    const next = () => {
+      if (currentStep >= steps.length - 1) return;
+      timer = setTimeout(() => {
+        currentStep++;
+        setStep(currentStep);
+        next();
+      }, times[currentStep]);
+    };
+    
+    next();
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-4 py-2 max-w-md w-full">
+       <div className="flex items-center gap-3 text-[#2563EB]">
+          <div className="p-1.5 rounded-lg bg-[#2563EB]/10 border border-[#2563EB]/20">
+            <Scale className="w-4 h-4 animate-pulse" />
+          </div>
+          <span className="text-sm font-bold tracking-widest uppercase">AI 法律助理工作流</span>
+       </div>
+       
+       <div className="pl-11 space-y-3 w-full">
+          <div className="space-y-2">
+             {steps.map((s, i) => {
+                if (i > step) return null;
+                
+                const isCurrent = i === step;
+                
+                return (
+                   <motion.div
+                     key={i}
+                     initial={{ opacity: 0, x: -10 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     className="flex items-center gap-3"
+                   >
+                      <div className={cn(
+                        "w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-500",
+                        isCurrent ? "bg-[#2563EB] shadow-[0_0_8px_rgba(37,99,235,0.6)] scale-110" : "bg-[#2563EB]/30"
+                      )} />
+                      <span className={cn(
+                        "text-sm transition-colors duration-500",
+                        isCurrent ? "text-foreground font-medium" : "text-muted-foreground/60"
+                      )}>
+                        {s}
+                      </span>
+                      {isCurrent && (
+                        <span className="text-xs text-[#2563EB] font-mono animate-pulse ml-auto">处理中</span>
+                      )}
+                   </motion.div>
+                )
+             })}
+          </div>
+          
+          {/* 进度条 */}
+          <div className="h-1 w-full bg-muted/50 rounded-full overflow-hidden mt-4">
+             <motion.div
+               className="h-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6]"
+               initial={{ width: "0%" }}
+               animate={{ width: `${Math.min(((step + 1) / steps.length) * 100, 95)}%` }}
+               transition={{ duration: 0.5 }}
+             />
+          </div>
+       </div>
     </div>
   );
 }

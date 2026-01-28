@@ -198,7 +198,7 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
     <div className="space-y-6">
       {/* 搜索框 */}
       <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-[#2563EB]/20 to-cyan-500/20 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
         <div className="relative flex gap-2 p-1.5 bg-white/80 dark:bg-background/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-lg shadow-xl shadow-black/5">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -255,7 +255,7 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
                   >
                     <TableCell className="font-medium relative">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center text-xs font-bold text-primary border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563EB]/20 to-cyan-500/20 flex items-center justify-center text-xs font-bold text-[#2563EB] border border-white/10">
                           {user.email.substring(0, 2).toUpperCase()}
                         </div>
                         <span className="text-foreground/90 group-hover:text-primary transition-colors">{user.email}</span>

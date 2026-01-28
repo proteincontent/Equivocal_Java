@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedAIChat } from "@/components/ui/animated-ai-chat";
 import { LegalChatToolbar } from "@/components/legal-chat/toolbar";
@@ -9,6 +10,7 @@ import { DeveloperBackground } from "@/components/ui/developer-background";
 import {
   Sheet,
   SheetContent,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import {
   type LegalServiceType,
@@ -26,6 +28,7 @@ import { AuthModal } from "@/components/ui/auth-modal";
  * - 一致的品牌体验
  */
 export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: boolean }) {
+  const router = useRouter();
   const [selectedService, setSelectedService] = useState<LegalServiceType | null>(initialShowChat ? ("法律咨询" as LegalServiceType) : null);
   const [showChat, setShowChat] = useState(initialShowChat);
   const [showServiceSelector, setShowServiceSelector] = useState(false);
@@ -76,9 +79,13 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
   }, []);
 
   const handleServiceConfirm = useCallback((type: LegalServiceType) => {
+    if (type === "合同审查") {
+      router.push("/contract-review");
+      return;
+    }
     setSelectedService(type);
     setShowServiceSelector(false);
-  }, []);
+  }, [router]);
 
   const handleStartChat = useCallback(() => {
     setSelectedService("法律咨询");
@@ -179,10 +186,14 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
 
                   {/* 移动端侧边栏 (Sheet) */}
                   <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                    <SheetContent 
-                      side="left" 
+                    <SheetContent
+                      side="left"
                       className="p-0 w-[300px] border-none bg-background/95 backdrop-blur-2xl"
+                      aria-describedby={undefined}
                     >
+                      <div className="sr-only">
+                        <SheetTitle>导航菜单</SheetTitle>
+                      </div>
                       <div className="h-full w-full py-4">
                         <ChatSidebar
                           currentSessionId={currentSessionId}

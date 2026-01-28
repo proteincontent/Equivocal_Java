@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
+@lombok.extern.slf4j.Slf4j
 public class CorsConfig {
     
     @Value("${app.cors.allowed-origins}")
@@ -18,6 +19,7 @@ public class CorsConfig {
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        log.info("[CorsConfig] 初始化 CORS 配置, 允许的源: {}", allowedOrigins);
         CorsConfiguration configuration = new CorsConfiguration();
         
         // 解析允许的源

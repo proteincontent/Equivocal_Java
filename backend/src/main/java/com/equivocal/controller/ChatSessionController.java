@@ -40,15 +40,11 @@ public class ChatSessionController {
             }
             
             log.info("[ChatSessionController] Getting sessions for user: {}", user.getId());
-            
-            List<ChatSession> sessions = chatSessionRepository.findByUserIdOrderByUpdatedAtDesc(user.getId());
-            
-            // 只返回有消息的会话
+
+            // 只返回有消息的会话（使用 EXISTS 子查询，避免 N+1）
+            List<ChatSession> sessions = chatSessionRepository.findWithMessagesByUserIdOrderByUpdatedAtDesc(user.getId());
+
             List<Map<String, Object>> sessionList = sessions.stream()
-                    .filter(session -> {
-                        List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId());
-                        return !messages.isEmpty();
-                    })
                     .map(this::mapSession)
                     .collect(Collectors.toList());
             
@@ -242,6 +238,16 @@ public class ChatSessionController {
             response.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    /**
+     * 兼容前端使用 PATCH 更新会话标题
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchSession(@PathVariable String id,
+                                         @RequestBody Map<String, String> request,
+                                         @AuthenticationPrincipal User user) {
+        return updateSession(id, request, user);
     }
     
     /**

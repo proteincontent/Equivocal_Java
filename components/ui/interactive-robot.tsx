@@ -74,7 +74,7 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
       onClick={handleClick}
       role="button"
       tabIndex={0}
-      aria-label="Interactive robot assistant - click or hover to interact"
+      aria-label="交互式机器人助手 - 点击或悬停以互动"
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           handleClick();

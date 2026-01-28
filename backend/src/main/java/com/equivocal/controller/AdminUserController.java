@@ -45,9 +45,9 @@ public class AdminUserController {
                 return ResponseEntity.badRequest().body(error);
             }
             
-            if (request.getPassword() == null || request.getPassword().length() < 6) {
+            if (request.getPassword() == null || request.getPassword().isEmpty()) {
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "密码长度至少为6位");
+                error.put("error", "密码不能为空");
                 return ResponseEntity.badRequest().body(error);
             }
 
@@ -192,6 +192,12 @@ public class AdminUserController {
                 user.setEmailVerified(request.getEmailVerified());
             }
             
+            if (request.getNewPassword() != null && !request.getNewPassword().isEmpty()) {
+                String hashedPassword = passwordService.hashPassword(request.getNewPassword());
+                user.setPassword(hashedPassword);
+                log.info("[AdminUserController] Password reset for user: id={}", id);
+            }
+            
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
             
@@ -286,6 +292,7 @@ public class AdminUserController {
     public static class UpdateUserRequest {
         private Integer role;
         private Boolean emailVerified;
+        private String newPassword;
         
         public UpdateUserRequest() {}
         
@@ -293,6 +300,8 @@ public class AdminUserController {
         public void setRole(Integer role) { this.role = role; }
         public Boolean getEmailVerified() { return emailVerified; }
         public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 
     public static class CreateUserRequest {

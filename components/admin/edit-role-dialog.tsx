@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ interface User {
 interface EditRoleDialogProps {
   user: User | null;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   onSuccess: () => void;
   token: string;
 }
@@ -43,17 +43,35 @@ export function EditRoleDialog({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // 当对话框打开时，重置状态
-  const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && user) {
-      setSelectedRole(user.role >= 10 ? "10" : "1");
-      setNewPassword("");
-    }
-    onOpenChange(newOpen);
-  };
+  const normalizedCurrentRole = useMemo(() => {
+    if (!user) return 1;
+    const roleNum = Number.isFinite(user.role) ? user.role : Number.parseInt(String(user.role ?? "1"), 10);
+    return roleNum >= 10 ? 10 : 1;
+  }, [user]);
+
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (!open || !userId) return;
+    setSelectedRole(normalizedCurrentRole >= 10 ? "10" : "1");
+    setNewPassword("");
+  }, [open, userId, normalizedCurrentRole]);
 
   const handleSubmit = async () => {
     if (!user) return;
+
+    const trimmedPassword = newPassword.trim();
+    const newRole = Number.parseInt(selectedRole, 10);
+    const roleChanged = Number.isFinite(newRole) && newRole !== normalizedCurrentRole;
+    const passwordChanged = trimmedPassword.length > 0;
+
+    if (!roleChanged && !passwordChanged) {
+      toast({
+        title: "提示",
+        description: "未进行任何更改",
+      });
+      return;
+    }
 
     try {
       setLoading(true);
@@ -61,10 +79,9 @@ export function EditRoleDialog({
       let passwordUpdated = false;
 
       // 更新角色（如果改变了）
-      const newRole = parseInt(selectedRole);
-      if (newRole !== user.role) {
+      if (roleChanged) {
         const response = await fetch(buildApiUrl(`/api/admin/users/${user.id}`), {
-          method: 'PATCH',
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
@@ -80,18 +97,14 @@ export function EditRoleDialog({
       }
 
       // 重置密码（如果提供了新密码）
-      if (newPassword.trim()) {
-        if (newPassword.length < 6) {
-          throw new Error('密码至少需要6个字符');
-        }
-
+      if (passwordChanged) {
         const response = await fetch(buildApiUrl(`/api/admin/users/${user.id}`), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ newPassword }),
+          body: JSON.stringify({ newPassword: trimmedPassword }),
         });
 
         const data = await response.json();
@@ -117,11 +130,6 @@ export function EditRoleDialog({
           title: "成功",
           description: "用户密码已重置",
         });
-      } else {
-        toast({
-          title: "提示",
-          description: "未进行任何更改",
-        });
       }
 
       onSuccess();
@@ -141,7 +149,7 @@ export function EditRoleDialog({
   if (!user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>编辑用户信息</DialogTitle>
@@ -190,7 +198,7 @@ export function EditRoleDialog({
               onChange={(e) => setNewPassword(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              如需重置密码，请输入新密码（至少6个字符）
+              如需重置密码，请输入新密码
             </p>
           </div>
         </div>

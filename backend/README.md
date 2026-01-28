@@ -154,7 +154,7 @@ cd backend
 
 ### 认证
 
-- `POST /api/auth` - 登录/注册
+- `POST /api/auth/login` - 登录/注册（通过 `action=login|register` 区分）
 - `POST /api/auth/send-code` - 发送验证码
 - `POST /api/auth/verify-code` - 验证验证码
 
@@ -181,6 +181,8 @@ cd backend
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
+# 可选：前端请求超时（毫秒），避免网络异常时一直“加载中”
+# NEXT_PUBLIC_API_TIMEOUT_MS=15000
 ```
 
 2. 启动前端：

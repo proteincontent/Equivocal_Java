@@ -4,8 +4,8 @@
 
 <div align="center">
   <img src="./public/placeholder-logo.png" alt="Equivocal logo" width="180" />
-  <h1>Equivocal MBTI Companion</h1>
-  <p>A bring-your-own-key MBTI chatbot that mixes AI guidance with immersive, animated UI moments.</p>
+  <h1>Equivocal Legal 法律智能体</h1>
+  <p>A Legal Agent System based on LangGraph, providing legal consultation, contract review, and document generation.</p>
   <p>
     <a href="https://github.com/proteincontent/Equivocal/blob/main/LICENSE">
       <img src="https://img.shields.io/github/license/proteincontent/Equivocal?color=brightgreen" alt="license" />
@@ -18,11 +18,11 @@
 
 ## Highlights
 
-- **AI-powered legal services** – intelligent legal consultation, contract review, and document generation powered by Coze AI.
-- **Built-in Coze integration** – no API key configuration needed; Coze credentials are pre-configured on the server.
-- **Immersive onboarding UI** – a new landing page plus animated chat surface, spotlight interactions, and 3D-friendly panels built with Next.js + Tailwind.
-- **Extensible data model** – legal service types, prompts, and metadata (moved into typed modules) keep UI components focused on presentation.
-- **Vercel ready** – zero-config deployment pipeline and analytics already wired up.
+- **LangGraph Agent Architecture**: Workflow orchestration with state memory and multi-tool support.
+- **RAG Retrieval**: Cloudflare Vectorize & Zhipu AI Embedding for accurate legal text retrieval.
+- **Immersive Legal Workspace**: Streaming chat and split-screen contract review.
+- **Hybrid Microservices**: Java Spring Boot (Business/Security) + Python (AI Core) + Next.js (Frontend).
+- **One-click Deploy**: Supports Vercel and Docker.
 
 ## Table of Contents
 
@@ -40,6 +40,8 @@
 
 - [Node.js](https://nodejs.org/) 18.18 or later (LTS recommended)
 - [pnpm](https://pnpm.io/) 8+ (or your package manager of choice)
+- Python 3.10+ (for AI Agent)
+- Java 8+ (for Backend)
 
 ### Installation
 
@@ -55,10 +57,13 @@ pnpm install
    ```bash
    cp .env.local.example .env.local
    ```
-2. Configure Coze API credentials (`COZE_API_KEY`, `COZE_BOT_ID`) in `.env.local` or the backend configuration.
+2. Configure LLM and Vector Store keys in `.env.local`.
+   - `LLM_MODEL`: LLM model name (e.g., `glm-4`)
+   - `LLM_API_KEY`: LLM API Key
+   - `EMBEDDING_MODEL`: Embedding model name
+   - `EMBEDDING_API_KEY`: Embedding API Key
+   - `CF_ACCOUNT_ID`, `CF_API_TOKEN`, `CF_VECTORIZE_INDEX`: Cloudflare Vectorize config
 3. Restart the dev server after changing server-side environment variables.
-
-> The Coze API credentials are pre-configured on the server. Users do not need to provide their own API keys.
 
 ## Usage
 
@@ -68,7 +73,7 @@ pnpm install
 pnpm dev
 ```
 
-Visit `http://localhost:4000` (see `package.json` for the configured port). Use the Settings dialog in the top-right corner of the chat view to paste your API key if you did not configure one on the server.
+Visit `http://localhost:4000` (see `package.json` for the configured port).
 
 ### Recommended checks
 
@@ -81,27 +86,30 @@ pnpm build  # Next.js production build
 
 | Variable | Description | Default |
 | --- | --- | --- |
-| `COZE_API_KEY` | Coze API key for AI chat services. | _required_ |
-| `COZE_BOT_ID` | Coze Bot ID for the legal assistant. | _required_ |
-| `COZE_API_URL` | Coze API base URL. | `https://api.coze.cn` |
+| `LLM_MODEL` | LLM Model Name | `glm-4` |
+| `LLM_API_KEY` | LLM API Key | _Required_ |
+| `EMBEDDING_MODEL` | Embedding Model Name | `embedding-2` |
+| `EMBEDDING_API_KEY` | Embedding API Key | _Required_ |
+| `CF_VECTORIZE_INDEX` | Vectorize Index Name | `legal-knowledge-base` |
 
 ## Project Structure
 
 ```
-app/                 # Next.js app router, landing page, chat route
-backend/             # Java Spring Boot backend (authentication, Coze API, database)
-components/          # UI primitives and feature surfaces (chat, animations)
-data/legal-services/ # Legal service metadata and helpers
-hooks/               # Client-side state (auth, config fetchers, etc.)
-lib/                 # Utility functions and API helpers
-public/              # Static assets (logo, placeholders, manifest)
+app/                 # Next.js Frontend
+ai-agent/            # Python LangGraph Core (RAG, Tools, Agent)
+backend/             # Java Spring Boot Backend (Auth, API Gateway, DB)
+components/          # UI Components (Shadcn/UI, Legal Chat, Contract Review)
+data/legal-services/ # Legal Service Logic & Config
+hooks/               # React Hooks (Auth, Config)
+lib/                 # Utility Functions
 ```
 
 _Notable flows_
 
-- **Chat API** – Java backend (`backend/src/main/java/com/equivocal/controller/CozeChatController.java`) handles Coze AI requests.
-- **Authentication** – Java backend (`backend/src/main/java/com/equivocal/service/AuthService.java`) manages user login/registration with JWT.
-- **Config state** – `hooks/use-config.ts` stores configuration; `hooks/use-auth.ts` manages authentication state.
+- **Agent Core** (`ai-agent/app/graph/agent.py`): LangGraph-based state machine for conversation and tool orchestration.
+- **Vector Search** (`ai-agent/app/services/vector_store.py`): Zhipu AI Embedding & Cloudflare Vectorize integration.
+- **Backend Gateway** (`backend/src/main/java/com/equivocal/controller/ChatController.java`): Forwards AI requests, manages JWT auth.
+- **Frontend** (`app/chat/page.tsx`, `app/contract-review/page.tsx`): Chat and Review interfaces.
 
 ## Contributing
 
@@ -115,4 +123,3 @@ Pull requests are welcome! If you plan major changes (new landing flows, data mo
 ## License
 
 [MIT](./LICENSE)
-

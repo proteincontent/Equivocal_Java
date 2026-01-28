@@ -54,7 +54,7 @@ function StatCard({ title, icon: Icon, value, description, delay = 0 }: any) {
               <Counter value={value} />
             </div>
             <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5 font-medium">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="flex h-2 w-2 rounded-full bg-[#2563EB] animate-pulse" />
               {description}
             </p>
           </div>

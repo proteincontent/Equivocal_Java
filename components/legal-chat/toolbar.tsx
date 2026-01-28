@@ -119,12 +119,12 @@ export function LegalChatToolbar({
               transition={{ delay: 0.2 }}
             >
               {/* Logo */}
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-                <span className="text-primary-foreground font-bold text-sm">法</span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#3B82F6] flex items-center justify-center shadow-lg shadow-[#2563EB]/20">
+                <span className="text-white font-bold text-sm">法</span>
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-foreground">智法顾问</p>
-                <p className="text-xs text-muted-foreground">Legal AI Assistant</p>
+                <p className="text-xs text-muted-foreground">法律 AI 助手</p>
               </div>
             </motion.div>
           )}
@@ -200,9 +200,9 @@ export function LegalChatToolbar({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background/80 dark:bg-white/5 backdrop-blur-xl border border-border/50 dark:border-white/10 shadow-sm">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2563EB]/5 dark:bg-[#2563EB]/10 backdrop-blur-xl border border-[#2563EB]/20 dark:border-[#2563EB]/30 shadow-sm shadow-[#2563EB]/5">
+            <div className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+            <span className="text-xs font-semibold text-[#2563EB]">
               {selectedType}
             </span>
           </div>
