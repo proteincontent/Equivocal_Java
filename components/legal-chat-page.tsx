@@ -7,20 +7,14 @@ import { LegalChatToolbar } from "@/components/legal-chat/toolbar";
 import { IntroScreen } from "@/components/legal-chat/intro-screen";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { DeveloperBackground } from "@/components/ui/developer-background";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  type LegalServiceType,
-} from "@/data/legal-services";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { type LegalServiceType } from "@/data/legal-services";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthModal } from "@/components/ui/auth-modal";
 
 /**
  * 专业法律服务主页面
- * 
+ *
  * 设计理念：
  * - 简洁专业的视觉呈现
  * - 流畅的状态过渡动画
@@ -29,38 +23,43 @@ import { AuthModal } from "@/components/ui/auth-modal";
  */
 export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: boolean }) {
   const router = useRouter();
-  const [selectedService, setSelectedService] = useState<LegalServiceType | null>(initialShowChat ? ("法律咨询" as LegalServiceType) : null);
+  const [selectedService, setSelectedService] = useState<LegalServiceType | null>(
+    initialShowChat ? ("法律咨询" as LegalServiceType) : null,
+  );
   const [showChat, setShowChat] = useState(initialShowChat);
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
-  
+
   // 会话管理状态
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [refreshSessionsTrigger, setRefreshSessionsTrigger] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   const { user, login, logout, checkAuth } = useAuth();
-  
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-  
+
   const handleLogin = useCallback(() => {
     setAuthMode("login");
     setShowAuthModal(true);
   }, []);
-  
+
   const handleLogout = useCallback(() => {
     logout();
   }, [logout]);
-  
-  const handleAuthSuccess = useCallback((authUser: { userId: string; email: string; role?: number }) => {
-    login({ ...authUser, role: authUser.role || 1 }, localStorage.getItem("auth_token") || "");
-    setShowAuthModal(false);
-  }, [login]);
+
+  const handleAuthSuccess = useCallback(
+    (authUser: { userId: string; email: string; role?: number }) => {
+      login({ ...authUser, role: authUser.role || 1 }, localStorage.getItem("auth_token") || "");
+      setShowAuthModal(false);
+    },
+    [login],
+  );
 
   useEffect(() => {
     if (!selectedService) {
@@ -78,14 +77,17 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
     setShowServiceSelector(false);
   }, []);
 
-  const handleServiceConfirm = useCallback((type: LegalServiceType) => {
-    if (type === "合同审查") {
-      router.push("/contract-review");
-      return;
-    }
-    setSelectedService(type);
-    setShowServiceSelector(false);
-  }, [router]);
+  const handleServiceConfirm = useCallback(
+    (type: LegalServiceType) => {
+      if (type === "合同审查") {
+        router.push("/contract-review");
+        return;
+      }
+      setSelectedService(type);
+      setShowServiceSelector(false);
+    },
+    [router],
+  );
 
   const handleStartChat = useCallback(() => {
     setSelectedService("法律咨询");
@@ -103,11 +105,11 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
 
   const handleSessionChange = useCallback((sessionId: string) => {
     setCurrentSessionId(sessionId);
-    setRefreshSessionsTrigger(prev => prev + 1);
+    setRefreshSessionsTrigger((prev) => prev + 1);
   }, []);
 
   const handleNewMessage = useCallback(() => {
-    setRefreshSessionsTrigger(prev => prev + 1);
+    setRefreshSessionsTrigger((prev) => prev + 1);
   }, []);
 
   return (
@@ -122,7 +124,7 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
         onAuthSuccess={handleAuthSuccess}
         initialMode={authMode}
       />
-      
+
       {/* 主内容区 */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
         <AnimatePresence mode="wait">
@@ -147,14 +149,14 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
                 onLogout={handleLogout}
                 onMobileMenuOpen={() => setMobileMenuOpen(true)}
               />
-              
+
               {/* 介绍内容 */}
               <div className="flex-1 min-h-0">
                 <IntroScreen
                   showSelector={showServiceSelector}
-                onToggleSelector={setShowServiceSelector}
-                onConfirm={handleServiceConfirm}
-                selectedType={selectedService}
+                  onToggleSelector={setShowServiceSelector}
+                  onConfirm={handleServiceConfirm}
+                  selectedType={selectedService}
                   onStartChat={handleStartChat}
                 />
               </div>
@@ -211,7 +213,7 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
                   </Sheet>
                 </>
               )}
-              
+
               {/* 主聊天区域 */}
               <div className="flex-1 h-full min-w-0 relative flex flex-col">
                 {/* 导航栏 */}
@@ -225,7 +227,7 @@ export function LegalChatPage({ initialShowChat = false }: { initialShowChat?: b
                   onLogout={handleLogout}
                   onMobileMenuOpen={() => setMobileMenuOpen(true)}
                 />
-                
+
                 {/* 聊天组件 */}
                 <div className="flex-1 pt-20 min-h-0">
                   <AnimatedAIChat

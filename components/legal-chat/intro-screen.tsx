@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Lock, Activity, Globe, ShieldCheck } from "lucide-react";
+import { ArrowRight, Zap, Lock, Activity, Globe } from "lucide-react";
 import { CardSlide, type Card } from "@/components/ui/hero-preview-walls";
 import { Spotlight } from "@/components/ui/spotlight-aceternity";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface IntroScreenProps {
@@ -16,7 +17,7 @@ interface IntroScreenProps {
 
 /**
  * 法律服务着陆页 - "The Architect's Vision" 版
- * 
+ *
  * 设计理念：
  * 1. 非对称平衡 (Asymmetrical Balance): 左侧重信息密度，右侧重视觉张力。
  * 2. 功能主义 (Functionalism): 每一个像素都有其存在的理由。去除装饰性废话。
@@ -30,7 +31,7 @@ export function IntroScreen({
   onStartChat,
 }: IntroScreenProps) {
   const router = useRouter();
-  
+
   const cards: Card[] = [
     {
       id: 0,
@@ -75,10 +76,12 @@ export function IntroScreen({
 
   return (
     <div className="h-full w-full relative bg-[#F8F9FA] dark:bg-[#0A0A0A] overflow-hidden flex flex-col lg:flex-row font-sans">
-      
       {/* ===== 背景纹理 (The Noise) ===== */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply dark:mix-blend-overlay z-0"
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply dark:mix-blend-overlay z-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
       />
 
       {/* Spotlight Effect - Adds depth and focus */}
@@ -97,7 +100,6 @@ export function IntroScreen({
 
       {/* ===== 左侧：信息控制台 (The Console) ===== */}
       <div className="relative z-10 w-full lg:w-[45%] h-full flex flex-col justify-between px-8 sm:px-12 lg:px-16 py-12 lg:py-16">
-        
         {/* Top: Status Indicators */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -111,12 +113,16 @@ export function IntroScreen({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75 group-hover:bg-[#60A5FA] transition-colors"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#2563EB] group-hover:bg-[#3B82F6] transition-colors"></span>
             </span>
-            <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 dark:text-slate-400 uppercase group-hover:text-[#2563EB] dark:group-hover:text-[#3B82F6] transition-colors">系统在线</span>
+            <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 dark:text-slate-400 uppercase group-hover:text-[#2563EB] dark:group-hover:text-[#3B82F6] transition-colors">
+              系统在线
+            </span>
           </div>
           <div className="h-4 w-[1px] bg-slate-200 dark:bg-white/10" />
           <div className="flex items-center gap-2 text-slate-400 group cursor-pointer">
             <Globe className="w-3.5 h-3.5 group-hover:text-[#2563EB] transition-colors" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase group-hover:text-[#2563EB] dark:group-hover:text-[#3B82F6] transition-colors">全球访问</span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase group-hover:text-[#2563EB] dark:group-hover:text-[#3B82F6] transition-colors">
+              全球访问
+            </span>
           </div>
         </motion.div>
 
@@ -144,9 +150,15 @@ export function IntroScreen({
             <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-md border-l-2 border-slate-200 dark:border-white/10 pl-6">
               法律服务不应该只是昂贵的咨询。
               <br className="hidden sm:block" />
-              我们重新定义了<span className="text-slate-900 dark:text-white font-bold decoration-blue-500/30 underline decoration-2 underline-offset-4">获取正义的方式</span>。
+              我们重新定义了
+              <span className="text-slate-900 dark:text-white font-bold decoration-blue-500/30 underline decoration-2 underline-offset-4">
+                获取正义的方式
+              </span>
+              。
               <br />
-              <span className="text-sm uppercase tracking-widest text-slate-400 mt-2 block">即时 · 精准 · 无偏见</span>
+              <span className="text-sm uppercase tracking-widest text-slate-400 mt-2 block">
+                即时 · 精准 · 无偏见
+              </span>
             </p>
           </motion.div>
 
@@ -170,14 +182,16 @@ export function IntroScreen({
               {/* 按钮 Hover 态：使用更深的蓝色 */}
               <div className="absolute inset-0 bg-[#1D4ED8] dark:bg-[#2563EB] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out" />
             </button>
-            
+
             <button
               onClick={() => onConfirm("法律咨询")}
               className="group min-w-[200px] px-8 py-4 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 text-sm font-bold tracking-widest uppercase hover:bg-[#2563EB]/5 dark:hover:bg-[#2563EB]/10 transition-all duration-300 hover:border-[#2563EB]/20 dark:hover:border-[#2563EB]/30 hover:text-[#2563EB] dark:hover:text-[#3B82F6]"
             >
               <span className="flex items-center justify-center gap-2">
                 浏览模块
-                <span className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">↓</span>
+                <span className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                  ↓
+                </span>
               </span>
             </button>
           </motion.div>
@@ -217,7 +231,6 @@ export function IntroScreen({
 
       {/* ===== 右侧：视觉展示 (The Viewport) ===== */}
       <div className="relative w-full lg:w-[55%] h-full overflow-hidden flex items-center justify-center p-8 sm:p-16 lg:p-20 z-0">
-
         {/* Main Visual Container */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -229,40 +242,44 @@ export function IntroScreen({
           <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-[16/10] min-h-[500px] rounded-[2.5rem] overflow-hidden shadow-2xl border-[1px] border-white/20 dark:border-white/5 bg-neutral-200 dark:bg-neutral-900 transition-all duration-500 group">
             {/* Inner Glow */}
             <div className="absolute -inset-1 bg-gradient-to-r from-[#2563EB]/20 to-[#3B82F6]/20 rounded-[2.6rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-            
-            <img
+
+            <Image
               src="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/abstract-glass-walls.jpg"
               alt="法律智能背景"
-              className="relative z-10 w-full h-full object-cover rounded-[2.5rem] opacity-90 dark:opacity-80 grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              className="relative z-10 object-cover rounded-[2.5rem] opacity-90 dark:opacity-80 grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
             />
-            
+
             {/* Glass Overlay Effect */}
             <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/60 via-transparent to-white/5 rounded-[2.5rem] pointer-events-none" />
 
             {/* Anchored Card Stack - Positioned inside */}
             <div className="absolute -bottom-16 left-0 right-0 flex justify-center z-30 perspective-1000">
-               <div className="transform scale-90 sm:scale-95 lg:scale-100 origin-bottom">
-                 <CardSlide items={cards} scaleFactor={0.06} offset={15} />
-               </div>
+              <div className="transform scale-90 sm:scale-95 lg:scale-100 origin-bottom">
+                <CardSlide items={cards} scaleFactor={0.06} offset={15} />
+              </div>
             </div>
           </div>
         </motion.div>
-        
+
         {/* Bottom Right Badge */}
         <div className="absolute bottom-8 right-8 flex items-center gap-3 px-5 py-2.5 bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-full shadow-lg hover:scale-105 transition-transform cursor-default">
-           <div className="relative">
-             {/* 底部状态徽章：绿色 -> 蓝色 */}
-             <div className="absolute inset-0 bg-[#3B82F6] blur-sm opacity-50 animate-pulse" />
-             <Activity className="relative w-4 h-4 text-[#2563EB] dark:text-[#3B82F6]" />
-           </div>
-           <div className="flex flex-col">
-             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Status</span>
-             <span className="text-xs font-mono font-medium text-slate-700 dark:text-slate-200">
-               AI Core Active
-             </span>
-           </div>
-         </div>
-
+          <div className="relative">
+            {/* 底部状态徽章：绿色 -> 蓝色 */}
+            <div className="absolute inset-0 bg-[#3B82F6] blur-sm opacity-50 animate-pulse" />
+            <Activity className="relative w-4 h-4 text-[#2563EB] dark:text-[#3B82F6]" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+              Status
+            </span>
+            <span className="text-xs font-mono font-medium text-slate-700 dark:text-slate-200">
+              AI Core Active
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

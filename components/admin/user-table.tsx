@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -12,13 +12,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Edit, Trash2, ChevronLeft, ChevronRight, MessageSquare, MoreHorizontal, Shield, ShieldAlert, Calendar } from "lucide-react";
+import {
+  Search,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  MoreHorizontal,
+  ShieldAlert,
+  Calendar,
+} from "lucide-react";
 import { EditRoleDialog } from "./edit-role-dialog";
 import { DeleteUserDialog } from "./delete-user-dialog";
 import { UserChatHistoryDialog } from "./user-chat-history-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { buildApiUrl } from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,62 +67,62 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search, token]);
+  }, [fetchUsers]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('[UserTable] 开始获取用户列表，token:', token ? '存在' : '不存在');
+      console.log("[UserTable] 开始获取用户列表，token:", token ? "存在" : "不存在");
 
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: '20',
+        limit: "20",
       });
 
       if (search) {
-        params.append('search', search);
+        params.append("search", search);
       }
 
       const response = await fetch(`/api/admin/users?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log('[UserTable] API响应状态:', response.status);
+      console.log("[UserTable] API响应状态:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[UserTable] API错误:', response.status, errorText);
-        
+        console.error("[UserTable] API错误:", response.status, errorText);
+
         if (response.status === 401) {
-          throw new Error('认证失败，请重新登录');
+          throw new Error("认证失败，请重新登录");
         }
         throw new Error(`获取用户列表失败 (${response.status})`);
       }
 
       const data = await response.json();
-      console.log('[UserTable] 获取到数据:', data);
-      
+      console.log("[UserTable] 获取到数据:", data);
+
       // 确保数据格式正确
-      if (!data || typeof data !== 'object') {
-        throw new Error('API返回数据格式错误');
+      if (!data || typeof data !== "object") {
+        throw new Error("API返回数据格式错误");
       }
-      
+
       setUsers(Array.isArray(data.users) ? data.users : []);
       setTotal(data.total || 0);
       setTotalPages(data.totalPages || 1);
     } catch (err) {
-      console.error('[UserTable] 获取用户列表失败:', err);
-      setError(err instanceof Error ? err.message : '获取用户列表失败');
+      console.error("[UserTable] 获取用户列表失败:", err);
+      setError(err instanceof Error ? err.message : "获取用户列表失败");
       // 确保即使出错，users也是空数组而非undefined
       setUsers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, token]);
 
   const handleSearch = () => {
     setSearch(searchInput);
@@ -121,24 +130,27 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+    return date.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
   const getRoleBadge = (role: number) => {
     if (role >= 10) {
       return (
-        <Badge variant="default" className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/50 shadow-[0_0_10px_rgba(var(--primary),0.2)]">
+        <Badge
+          variant="default"
+          className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/50 shadow-[0_0_10px_rgba(var(--primary),0.2)]"
+        >
           <ShieldAlert className="w-3 h-3 mr-1" />
           管理员
         </Badge>
@@ -151,7 +163,7 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
       </Badge>
     );
   };
-  
+
   // 引入 User 图标用于 Badge
   const User = ({ className }: { className?: string }) => (
     <svg
@@ -185,7 +197,7 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
     return (
       <div className="rounded-lg border border-destructive bg-destructive/10 backdrop-blur-md p-4">
         <p className="text-destructive text-sm font-medium">{error}</p>
-        {error.includes('认证失败') && (
+        {error.includes("认证失败") && (
           <p className="text-destructive/70 text-xs mt-2">
             提示：您可能需要退出登录并重新登录以获取新的认证令牌
           </p>
@@ -232,12 +244,14 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(!users || users.length === 0) ? (
+            {!users || users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-16">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <Search className="h-12 w-12 mb-4 opacity-20" />
-                    <p className="text-lg font-medium">{search ? '未找到匹配的用户' : '暂无用户数据'}</p>
+                    <p className="text-lg font-medium">
+                      {search ? "未找到匹配的用户" : "暂无用户数据"}
+                    </p>
                     <p className="text-sm opacity-50">尝试调整搜索条件</p>
                   </div>
                 </TableCell>
@@ -258,7 +272,9 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563EB]/20 to-cyan-500/20 flex items-center justify-center text-xs font-bold text-[#2563EB] border border-white/10">
                           {user.email.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="text-foreground/90 group-hover:text-primary transition-colors">{user.email}</span>
+                        <span className="text-foreground/90 group-hover:text-primary transition-colors">
+                          {user.email}
+                        </span>
                       </div>
                       {/* 行高亮光效 */}
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -273,12 +289,18 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 data-[state=open]:opacity-100">
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 data-[state=open]:opacity-100"
+                          >
                             <span className="sr-only">打开菜单</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[160px] bg-background/80 backdrop-blur-xl border-white/10">
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-[160px] bg-background/80 backdrop-blur-xl border-white/10"
+                        >
                           <DropdownMenuLabel>操作</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => setViewHistoryUser(user)}>
                             <MessageSquare className="mr-2 h-4 w-4" />
@@ -318,7 +340,7 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1 || loading}
               className="bg-background/40 backdrop-blur-md border-primary/10 hover:bg-primary/10"
             >
@@ -328,7 +350,7 @@ export function UserTable({ token, currentUserId }: UserTableProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages || loading}
               className="bg-background/40 backdrop-blur-md border-primary/10 hover:bg-primary/10"
             >

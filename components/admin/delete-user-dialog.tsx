@@ -45,16 +45,16 @@ export function DeleteUserDialog({
       setLoading(true);
 
       const response = await fetch(buildApiUrl(`/api/admin/users/${user.id}`), {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || '删除用户失败');
+        throw new Error(data.error || "删除用户失败");
       }
 
       toast({
@@ -65,10 +65,10 @@ export function DeleteUserDialog({
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      console.error('删除用户失败:', error);
+      console.error("删除用户失败:", error);
       toast({
         title: "错误",
-        description: error instanceof Error ? error.message : '删除用户失败',
+        description: error instanceof Error ? error.message : "删除用户失败",
         variant: "destructive",
       });
     } finally {

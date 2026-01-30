@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 
 export function MagneticCursor() {
@@ -33,18 +33,18 @@ export function MagneticCursor() {
       // 自动检测可交互元素
       const target = e.target as HTMLElement;
       const clickable = target.closest("button, a, input, [role='button'], .magnetic-target");
-      
+
       if (clickable) {
         const rect = clickable.getBoundingClientRect();
         const style = window.getComputedStyle(clickable);
-        
+
         setIsHovering(true);
         setHoverTarget({
           width: rect.width,
           height: rect.height,
           x: rect.left,
           y: rect.top,
-          borderRadius: style.borderRadius === '0px' ? '8px' : style.borderRadius
+          borderRadius: style.borderRadius === "0px" ? "8px" : style.borderRadius,
         });
 
         // 磁性吸附：设置目标位置为元素中心
@@ -60,10 +60,10 @@ export function MagneticCursor() {
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    
+
     // 隐藏默认光标
     document.body.style.cursor = "none";
-    
+
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       document.body.style.cursor = "auto";

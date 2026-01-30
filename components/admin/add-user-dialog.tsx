@@ -25,12 +25,7 @@ interface AddUserDialogProps {
   token: string;
 }
 
-export function AddUserDialog({
-  open,
-  onOpenChange,
-  onSuccess,
-  token,
-}: AddUserDialogProps) {
+export function AddUserDialog({ open, onOpenChange, onSuccess, token }: AddUserDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("1");
@@ -48,7 +43,7 @@ export function AddUserDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast({
         title: "缺少信息",
@@ -60,12 +55,12 @@ export function AddUserDialog({
 
     try {
       setLoading(true);
-      
+
       const response = await fetch(buildApiUrl("/api/admin/users"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email,
@@ -111,7 +106,7 @@ export function AddUserDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden bg-white/90 backdrop-blur-2xl border-white/40 shadow-2xl rounded-[2rem]">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-white/50 to-blue-50/50 pointer-events-none" />
-        
+
         <form onSubmit={handleSubmit} className="relative z-10 p-6 sm:p-8">
           <DialogHeader className="mb-8">
             <div className="flex items-center gap-3 mb-2">
@@ -129,7 +124,10 @@ export function AddUserDialog({
 
           <div className="space-y-6">
             <div className="space-y-2 group">
-              <Label htmlFor="email" className="text-gray-600 font-medium ml-1 transition-colors group-focus-within:text-blue-600">
+              <Label
+                htmlFor="email"
+                className="text-gray-600 font-medium ml-1 transition-colors group-focus-within:text-blue-600"
+              >
                 电子邮箱
               </Label>
               <Input
@@ -144,7 +142,10 @@ export function AddUserDialog({
             </div>
 
             <div className="space-y-2 group">
-              <Label htmlFor="password" className="text-gray-600 font-medium ml-1 transition-colors group-focus-within:text-blue-600">
+              <Label
+                htmlFor="password"
+                className="text-gray-600 font-medium ml-1 transition-colors group-focus-within:text-blue-600"
+              >
                 初始密码
               </Label>
               <Input
@@ -160,11 +161,7 @@ export function AddUserDialog({
 
             <div className="space-y-3 pt-2">
               <Label className="text-gray-600 font-medium ml-1">权限等级</Label>
-              <RadioGroup
-                value={role}
-                onValueChange={setRole}
-                className="grid grid-cols-2 gap-4"
-              >
+              <RadioGroup value={role} onValueChange={setRole} className="grid grid-cols-2 gap-4">
                 <div>
                   <RadioGroupItem value="1" id="new-role-user" className="peer sr-only" />
                   <Label
@@ -202,7 +199,8 @@ export function AddUserDialog({
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-800 text-sm">
                     <ShieldAlert className="w-5 h-5 shrink-0 text-amber-600" />
                     <p>
-                      您正在创建一个<strong>管理员账号</strong>。该账号将拥有系统的完整控制权，包括删除其他用户和查看敏感数据的权限。请慎重操作。
+                      您正在创建一个<strong>管理员账号</strong>
+                      。该账号将拥有系统的完整控制权，包括删除其他用户和查看敏感数据的权限。请慎重操作。
                     </p>
                   </div>
                 </motion.div>

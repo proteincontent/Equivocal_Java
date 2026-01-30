@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="220" y1="100" x2="460" y2="290" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C084FC"/>
+      <stop offset="1" stop-color="#FB7185"/>
+    </linearGradient>
+  </defs>
+
+  <!-- QR block -->
+  <rect x="176" y="96" width="184" height="184" rx="20" stroke="url(#accent)" stroke-width="8"/>
+  <rect x="204" y="124" width="44" height="44" rx="8" fill="none" stroke="#C084FC" stroke-width="10"/>
+  <rect x="288" y="124" width="44" height="44" rx="8" fill="none" stroke="#C084FC" stroke-width="10"/>
+  <rect x="204" y="208" width="44" height="44" rx="8" fill="none" stroke="#C084FC" stroke-width="10"/>
+  <path d="M288 208H332V252H288V208Z" stroke="#FB7185" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M258 184H300" stroke="#FB7185" stroke-width="10" stroke-linecap="round"/>
+  <path d="M230 184H246" stroke="#FB7185" stroke-width="10" stroke-linecap="round"/>
+  <path d="M258 236H274" stroke="#FB7185" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Lock -->
+  <path d="M430 160C430 140 446 124 466 124C486 124 502 140 502 160V174H430V160Z" stroke="#FB7185" stroke-width="8"/>
+  <rect x="418" y="174" width="96" height="92" rx="18" stroke="#FB7185" stroke-width="8"/>
+  <path d="M466 206V234" stroke="#C084FC" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="466" cy="206" r="10" fill="#C084FC"/>
+</svg>

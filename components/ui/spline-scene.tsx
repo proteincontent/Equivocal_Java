@@ -22,7 +22,9 @@ function SplineSkeletonLoader() {
           <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-slate-400 animate-spin" />
           <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-slate-200/50 animate-ping" />
         </div>
-        <div className="text-sm text-slate-400 font-medium tracking-widest uppercase">正在加载 3D 体验</div>
+        <div className="text-sm text-slate-400 font-medium tracking-widest uppercase">
+          正在加载 3D 体验
+        </div>
       </div>
     </div>
   );

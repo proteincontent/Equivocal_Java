@@ -68,16 +68,15 @@ export function UploadZone() {
 
       const data = await response.json();
       const aiRisks = data.risks || [];
-      
+
       // 4. Inject Highlights (Initial)
       // Note: We do this in the component usually, but for initial load we can do it here or let the effect handle it.
       // Let's pass the raw risks and let the context/viewer handle the highlighting logic to keep it centralized.
-      // But wait, finishReview expects highlightedHtml. 
+      // But wait, finishReview expects highlightedHtml.
       // Let's perform initial highlighting here to avoid flash.
       const highlightedHtml = injectHighlightsIntoHtml(baseHtml, aiRisks);
-      
-      actions.finishReview(aiRisks, highlightedHtml);
 
+      actions.finishReview(aiRisks, highlightedHtml);
     } catch (error) {
       console.error("处理失败:", error);
       const message = error instanceof Error ? error.message : "未知错误";
@@ -117,10 +116,11 @@ export function UploadZone() {
       onDrop={handleDrop}
     >
       {/* Grid Background */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
           backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`,
-          backgroundSize: '40px 40px'
+          backgroundSize: "40px 40px",
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent pointer-events-none" />
@@ -166,7 +166,7 @@ export function UploadZone() {
         >
           <Upload className="h-10 w-10 text-primary/80" />
         </motion.div>
-        
+
         <h3 className="text-2xl font-bold mb-3 tracking-tight">上传合同文件</h3>
         <p className="text-muted-foreground mb-10 max-w-[300px] leading-relaxed">
           拖拽 .docx 文件到这里，开启 AI 智能审查之旅
@@ -189,7 +189,7 @@ export function UploadZone() {
           </div>
         )}
       </motion.div>
-      
+
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -203,24 +203,24 @@ export function UploadZone() {
           <span>隐私安全保护</span>
         </div>
         <div className="flex flex-col items-center gap-2 group cursor-default">
-           <div className="p-2 rounded-full bg-background/80 shadow-sm group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2 rounded-full bg-background/80 shadow-sm group-hover:scale-110 transition-transform duration-300">
             <Sparkles className="w-4 h-4 text-blue-600" />
           </div>
           <span>AI 智能解析</span>
         </div>
         <div className="flex flex-col items-center gap-2 group cursor-default">
-           <div className="p-2 rounded-full bg-background/80 shadow-sm group-hover:scale-110 transition-transform duration-300">
+          <div className="p-2 rounded-full bg-background/80 shadow-sm group-hover:scale-110 transition-transform duration-300">
             <FileText className="w-4 h-4 text-orange-600" />
           </div>
           <span>专业法律建议</span>
         </div>
       </motion.div>
 
-      {state.reviewStage === 'parsing' && (
-         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
-            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-            <h3 className="text-lg font-medium">正在解析文档结构...</h3>
-         </div>
+      {state.reviewStage === "parsing" && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
+          <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+          <h3 className="text-lg font-medium">正在解析文档结构...</h3>
+        </div>
       )}
     </div>
   );
@@ -243,19 +243,17 @@ function replaceFirstOccurrence(haystack: string, needle: string, replacement: s
 // Simple version for initial load
 function injectHighlightsIntoHtml(html: string, risks: any[]) {
   let processedHtml = html;
-  const risksSorted = [...risks].sort((a, b) => (b.originalText?.length ?? 0) - (a.originalText?.length ?? 0));
-  
+  const risksSorted = [...risks].sort(
+    (a, b) => (b.originalText?.length ?? 0) - (a.originalText?.length ?? 0),
+  );
+
   for (const risk of risksSorted) {
     const originalText = (risk.originalText ?? "").trim();
     if (!originalText) continue;
     if (!processedHtml.includes(originalText)) continue;
 
     const highlightClass =
-      risk.level === "high"
-        ? "risk-high"
-        : risk.level === "medium"
-          ? "risk-medium"
-          : "risk-safe";
+      risk.level === "high" ? "risk-high" : risk.level === "medium" ? "risk-medium" : "risk-safe";
 
     const replacement = `<span id="risk-text-${risk.id}" class="risk-highlight ${highlightClass}" data-risk-id="${risk.id}">${originalText}</span>`;
     processedHtml = replaceFirstOccurrence(processedHtml, originalText, replacement);

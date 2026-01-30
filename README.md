@@ -84,12 +84,12 @@ pnpm build  # Next.js production build
 
 ## Configuration Reference
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `LLM_MODEL` | LLM Model Name | `glm-4` |
-| `LLM_API_KEY` | LLM API Key | _Required_ |
-| `EMBEDDING_MODEL` | Embedding Model Name | `embedding-2` |
-| `EMBEDDING_API_KEY` | Embedding API Key | _Required_ |
+| Variable             | Description          | Default                |
+| -------------------- | -------------------- | ---------------------- |
+| `LLM_MODEL`          | LLM Model Name       | `glm-4`                |
+| `LLM_API_KEY`        | LLM API Key          | _Required_             |
+| `EMBEDDING_MODEL`    | Embedding Model Name | `embedding-2`          |
+| `EMBEDDING_API_KEY`  | Embedding API Key    | _Required_             |
 | `CF_VECTORIZE_INDEX` | Vectorize Index Name | `legal-knowledge-base` |
 
 ## Project Structure

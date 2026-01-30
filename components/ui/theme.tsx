@@ -75,10 +75,14 @@ export function Theme({
 
   if (variant === "button") {
     function isTheme(value: unknown): value is NextTheme {
-      return typeof value === "string" && ["light", "dark", "system", "sunset", "ocean", "forest"].includes(value);
+      return (
+        typeof value === "string" &&
+        ["light", "dark", "system", "sunset", "ocean", "forest"].includes(value)
+      );
     }
 
-    const safeTheme: NextTheme = isTheme(theme) && themes.includes(theme as Theme) ? (theme as NextTheme) : "light";
+    const safeTheme: NextTheme =
+      isTheme(theme) && themes.includes(theme as Theme) ? (theme as NextTheme) : "light";
 
     const nextTheme = themes[(themes.indexOf(safeTheme) + 1) % themes.length];
     const Icon = themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light;
@@ -114,7 +118,11 @@ export function Theme({
         >
           <Icon size={iconSizes[size]} />
         </motion.div>
-        {showLabel && <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "主题"}</span>}
+        {showLabel && (
+          <span className="font-medium">
+            {themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "主题"}
+          </span>
+        )}
       </motion.button>
     );
   }
@@ -190,10 +198,15 @@ export function Theme({
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="flex items-center gap-2">
-                  {React.createElement(themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light, {
-                    size: iconSizes[size],
-                  })}
-                  <span className="font-medium">{themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "主题"}</span>
+                  {React.createElement(
+                    themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light,
+                    {
+                      size: iconSizes[size],
+                    },
+                  )}
+                  <span className="font-medium">
+                    {themeConfigs[safeTheme as keyof typeof themeConfigs]?.label || "主题"}
+                  </span>
                 </div>
                 <ChevronDown size={iconSizes[size]} />
               </motion.button>
@@ -209,9 +222,12 @@ export function Theme({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {React.createElement(themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light, {
-                  size: iconSizes[size],
-                })}
+                {React.createElement(
+                  themeIcons[safeTheme as keyof typeof themeIcons] || themeIcons.light,
+                  {
+                    size: iconSizes[size],
+                  },
+                )}
               </motion.button>
             )}
           </DropdownMenuTrigger>
@@ -233,7 +249,9 @@ export function Theme({
                   <div className="flex items-center gap-2">
                     <Icon size={iconSizes[size]} />
 
-                    <span className="font-medium">{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "主题"}</span>
+                    <span className="font-medium">
+                      {themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "主题"}
+                    </span>
                   </div>
                   {isSelected && <Check size={iconSizes[size]} />}
                 </DropdownMenuItem>
@@ -277,7 +295,11 @@ export function Theme({
                 )}
                 <div className="relative z-10 flex items-center gap-1">
                   <Icon size={size === "sm" ? 12 : size === "md" ? 14 : 16} />
-                  {showLabel && <span>{themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "主题"}</span>}
+                  {showLabel && (
+                    <span>
+                      {themeConfigs[themeOption as keyof typeof themeConfigs]?.label || "主题"}
+                    </span>
+                  )}
                 </div>
               </TabsTrigger>
             );

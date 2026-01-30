@@ -257,7 +257,13 @@ function build() {
     });
 
     slide.addText(
-      ["姓名：__________", "学号：__________", "学院/专业：__________", "指导教师：__________", "日期：____年__月__日"].join("\n"),
+      [
+        "姓名：__________",
+        "学号：__________",
+        "学院/专业：__________",
+        "指导教师：__________",
+        "日期：____年__月__日",
+      ].join("\n"),
       {
         x: GRID.marginX,
         y: 4.5,
@@ -267,7 +273,7 @@ function build() {
         fontSize: 20,
         color: COLORS.muted,
         lineSpacingMultiple: 1.5,
-      }
+      },
     );
 
     addFooter(slide);
@@ -320,7 +326,11 @@ function build() {
       w,
       h: 3.2,
       title: "方法",
-      lines: ["LangGraph 把咨询拆成流程", "RAG 给出引用来源（Vectorize）", "工具链处理文件/OCR/文档（R2）"],
+      lines: [
+        "LangGraph 把咨询拆成流程",
+        "RAG 给出引用来源（Vectorize）",
+        "工具链处理文件/OCR/文档（R2）",
+      ],
     });
     addCard(slide, {
       x: xCol(4),
@@ -452,7 +462,7 @@ function build() {
         fontSize: 18,
         color: COLORS.muted,
         lineSpacingMultiple: 1.45,
-      }
+      },
     );
 
     slide.addShape("line", {
@@ -472,16 +482,23 @@ function build() {
       bold: true,
       color: COLORS.muted,
     });
-    slide.addText(["• 不替代律师，不提供最终法律意见", "• 不承诺覆盖全部法律领域", "• 不追求复杂动画与花哨特效"].join("\n"), {
-      x: xCol(0) + cmToIn(0.4),
-      y: 6.43,
-      w: wCols(4) - cmToIn(0.8),
-      h: 0.7,
-      fontFace: FONTS.zh,
-      fontSize: 14,
-      color: COLORS.muted,
-      lineSpacingMultiple: 1.35,
-    });
+    slide.addText(
+      [
+        "• 不替代律师，不提供最终法律意见",
+        "• 不承诺覆盖全部法律领域",
+        "• 不追求复杂动画与花哨特效",
+      ].join("\n"),
+      {
+        x: xCol(0) + cmToIn(0.4),
+        y: 6.43,
+        w: wCols(4) - cmToIn(0.8),
+        h: 0.7,
+        fontFace: FONTS.zh,
+        fontSize: 14,
+        color: COLORS.muted,
+        lineSpacingMultiple: 1.35,
+      },
+    );
 
     slide.addText("开题交付", {
       x: xCol(4) + cmToIn(0.35),
@@ -493,16 +510,24 @@ function build() {
       bold: true,
       color: COLORS.ink,
     });
-    slide.addText(["• 可跑通端到端 Demo", "• 可上传文档并可检索", "• 可复现实验与评测", "• 论文结构与计划确定"].join("\n"), {
-      x: xCol(4) + cmToIn(0.35),
-      y: 3.1,
-      w: wCols(2) - cmToIn(0.7),
-      h: 3.7,
-      fontFace: FONTS.zh,
-      fontSize: 18,
-      color: COLORS.muted,
-      lineSpacingMultiple: 1.5,
-    });
+    slide.addText(
+      [
+        "• 可跑通端到端 Demo",
+        "• 可上传文档并可检索",
+        "• 可复现实验与评测",
+        "• 论文结构与计划确定",
+      ].join("\n"),
+      {
+        x: xCol(4) + cmToIn(0.35),
+        y: 3.1,
+        w: wCols(2) - cmToIn(0.7),
+        h: 3.7,
+        fontFace: FONTS.zh,
+        fontSize: 18,
+        color: COLORS.muted,
+        lineSpacingMultiple: 1.5,
+      },
+    );
 
     addFooter(slide);
   }
@@ -559,7 +584,10 @@ function build() {
     const slide = pptx.addSlide();
     slide.background = { color: COLORS.bg };
     addHeader(slide, { section: "ARCHITECTURE", page: 6 });
-    addTitle(slide, { title: "系统架构：Web → Java → FastAPI → LangGraph", subtitle: "把鉴权、会话、资源管理放在 Java；把智能编排与检索放在 Agent。" });
+    addTitle(slide, {
+      title: "系统架构：Web → Java → FastAPI → LangGraph",
+      subtitle: "把鉴权、会话、资源管理放在 Java；把智能编排与检索放在 Agent。",
+    });
 
     const layers = [
       { name: "前端层（Next.js）", desc: "UI / SSE 流式展示 / 用户交互" },
@@ -634,7 +662,10 @@ function build() {
     const slide = pptx.addSlide();
     slide.background = { color: COLORS.bg };
     addHeader(slide, { section: "AGENT FLOW", page: 7 });
-    addTitle(slide, { title: "智能体工作流：检索—推理—生成—引用", subtitle: "工具调用优先：先取证，再组织答案与风险提示。" });
+    addTitle(slide, {
+      title: "智能体工作流：检索—推理—生成—引用",
+      subtitle: "工具调用优先：先取证，再组织答案与风险提示。",
+    });
 
     const steps = [
       { t: "01 输入", d: "用户问题 / 合同条款 / 文件" },
@@ -691,15 +722,18 @@ function build() {
       line: { color: COLORS.line, width: 0.5 },
       radius: cmToIn(0.32),
     });
-    slide.addText("失败/降级：检索为空 → 明确不确定性并引导补充材料；上游不可用 → 降级输出与重试。", {
-      x: x0 + cmToIn(0.65),
-      y: y0 + 4.2,
-      w: w - cmToIn(1.3),
-      h: 0.5,
-      fontFace: FONTS.zh,
-      fontSize: 14,
-      color: COLORS.muted,
-    });
+    slide.addText(
+      "失败/降级：检索为空 → 明确不确定性并引导补充材料；上游不可用 → 降级输出与重试。",
+      {
+        x: x0 + cmToIn(0.65),
+        y: y0 + 4.2,
+        w: w - cmToIn(1.3),
+        h: 0.5,
+        fontFace: FONTS.zh,
+        fontSize: 14,
+        color: COLORS.muted,
+      },
+    );
 
     addFooter(slide);
   }
@@ -709,7 +743,10 @@ function build() {
     const slide = pptx.addSlide();
     slide.background = { color: COLORS.bg };
     addHeader(slide, { section: "KNOWLEDGE", page: 8 });
-    addTitle(slide, { title: "知识库构建：文档入库到可检索", subtitle: "R2 存原文，Vectorize 存向量；两者用文档 ID 关联。" });
+    addTitle(slide, {
+      title: "知识库构建：文档入库到可检索",
+      subtitle: "R2 存原文，Vectorize 存向量；两者用文档 ID 关联。",
+    });
 
     slide.addShape("roundRect", {
       x: xCol(0),
@@ -794,7 +831,10 @@ function build() {
     const slide = pptx.addSlide();
     slide.background = { color: COLORS.bg };
     addHeader(slide, { section: "EVALUATION", page: 9 });
-    addTitle(slide, { title: "评测设计：正确性、引用、鲁棒性", subtitle: "开题阶段先把指标定义清楚，确保后续可验收。" });
+    addTitle(slide, {
+      title: "评测设计：正确性、引用、鲁棒性",
+      subtitle: "开题阶段先把指标定义清楚，确保后续可验收。",
+    });
 
     const y = 2.35;
     addCard(slide, {
@@ -830,7 +870,10 @@ function build() {
     const slide = pptx.addSlide();
     slide.background = { color: COLORS.bg };
     addHeader(slide, { section: "PLAN", page: 10 });
-    addTitle(slide, { title: "计划与预期成果", subtitle: "可演示 Demo + 可复现实验 + 可写入论文。  Q&A" });
+    addTitle(slide, {
+      title: "计划与预期成果",
+      subtitle: "可演示 Demo + 可复现实验 + 可写入论文。  Q&A",
+    });
 
     // Left: milestones + deliverables
     slide.addShape("roundRect", {
@@ -916,16 +959,24 @@ function build() {
       bold: true,
       color: COLORS.ink,
     });
-    slide.addText(["• 可运行系统与演示视频（可选）", "• 可上传/检索/引用的知识库", "• 评测报告（指标 + 消融）", "• 论文与开源说明文档"].join("\n"), {
-      x: xCol(0) + cmToIn(0.4),
-      y: 6.1,
-      w: wCols(4) - cmToIn(0.8),
-      h: 1.1,
-      fontFace: FONTS.zh,
-      fontSize: 14,
-      color: COLORS.muted,
-      lineSpacingMultiple: 1.35,
-    });
+    slide.addText(
+      [
+        "• 可运行系统与演示视频（可选）",
+        "• 可上传/检索/引用的知识库",
+        "• 评测报告（指标 + 消融）",
+        "• 论文与开源说明文档",
+      ].join("\n"),
+      {
+        x: xCol(0) + cmToIn(0.4),
+        y: 6.1,
+        w: wCols(4) - cmToIn(0.8),
+        h: 1.1,
+        fontFace: FONTS.zh,
+        fontSize: 14,
+        color: COLORS.muted,
+        lineSpacingMultiple: 1.35,
+      },
+    );
 
     // Right: Q&A panel
     slide.addShape("roundRect", {

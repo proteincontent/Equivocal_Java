@@ -1,21 +1,17 @@
 {
-	"servers": {
-		"TiDB": {
-			"type": "stdio",
-			"command": "uvx",
-			"args": [
-				"--from",
-				"pytidb[mcp]",
-				"tidb-mcp-server"
-			],
-			"env": {
-				"TIDB_HOST": "gateway01.ap-northeast-1.prod.aws.tidbcloud.com",
-				"TIDB_PORT": "4000",
-				"TIDB_USERNAME": "gdjqzvhsjk1agjw.root",
-				"TIDB_PASSWORD": "0upXu0riDOLiJPCk",
-				"TIDB_DATABASE": "test"
-			}
-		}
-	},
-	"inputs": []
+  "servers": {
+    "TiDB": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "pytidb[mcp]", "tidb-mcp-server"],
+      "env": {
+        "TIDB_HOST": "gateway01.ap-northeast-1.prod.aws.tidbcloud.com",
+        "TIDB_PORT": "4000",
+        "TIDB_USERNAME": "gdjqzvhsjk1agjw.root",
+        "TIDB_PASSWORD": "0upXu0riDOLiJPCk",
+        "TIDB_DATABASE": "test"
+      }
+    }
+  },
+  "inputs": []
 }

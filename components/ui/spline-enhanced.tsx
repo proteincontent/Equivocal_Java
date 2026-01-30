@@ -98,8 +98,8 @@ export function SplineScene({ scene, className, eyePosition, maxPointerOffset }:
       }
     >
       <div
-        className={`transition-opacity duration-700 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}
-        style={{ width: '100%', height: '100%' }}
+        className={`transition-opacity duration-700 ease-out ${isReady ? "opacity-100" : "opacity-0"}`}
+        style={{ width: "100%", height: "100%" }}
       >
         <Spline scene={scene} className={className} onLoad={onLoad} />
       </div>

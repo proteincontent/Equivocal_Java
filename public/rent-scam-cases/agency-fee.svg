@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="210" y1="110" x2="460" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#FB7185"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Contract sheet -->
+  <path
+    d="M238 88H390L438 136V282C438 294 428 304 416 304H238C226 304 216 294 216 282V110C216 98 226 88 238 88Z"
+    stroke="url(#accent)"
+    stroke-width="8"
+    stroke-linejoin="round"
+  />
+  <path d="M390 88V136H438" stroke="#FBBF24" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M256 168H398" stroke="#FBBF24" stroke-opacity="0.85" stroke-width="8" stroke-linecap="round"/>
+  <path d="M256 202H372" stroke="#FBBF24" stroke-opacity="0.55" stroke-width="8" stroke-linecap="round"/>
+  <path d="M256 236H388" stroke="#FBBF24" stroke-opacity="0.55" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Stamp -->
+  <circle cx="392" cy="254" r="36" stroke="#FB7185" stroke-width="8"/>
+  <path d="M372 254H412" stroke="#FB7185" stroke-width="8" stroke-linecap="round"/>
+  <path d="M392 234V274" stroke="#FB7185" stroke-width="8" stroke-linecap="round"/>
+</svg>

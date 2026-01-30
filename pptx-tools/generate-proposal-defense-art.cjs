@@ -552,14 +552,23 @@ function buildDeck() {
       body: "",
       accent: true,
     });
-    addBullets(slide, ["低成本获取初步法律信息与行动建议", "对关键风险点进行提示与追问引导", "提供“依据/引用”以便复核（可追溯）", "形成可检索的历史记录与审计留痕"], {
-      x: 1.12,
-      y: 2.95,
-      w: 5.7,
-      h: 3.5,
-      fontSize: 16,
-      color: COLORS.ink,
-    });
+    addBullets(
+      slide,
+      [
+        "低成本获取初步法律信息与行动建议",
+        "对关键风险点进行提示与追问引导",
+        "提供“依据/引用”以便复核（可追溯）",
+        "形成可检索的历史记录与审计留痕",
+      ],
+      {
+        x: 1.12,
+        y: 2.95,
+        w: 5.7,
+        h: 3.5,
+        fontSize: 16,
+        color: COLORS.ink,
+      },
+    );
 
     addCard(slide, {
       x: 7.35,
@@ -577,7 +586,7 @@ function buildDeck() {
         "敏感数据最小化存储，默认脱敏与权限控制",
         "在不确定时优先给出澄清问题与风险提示",
       ],
-      { x: 7.62, y: 2.95, w: 4.55, h: 3.5, fontSize: 15, color: COLORS.ink }
+      { x: 7.62, y: 2.95, w: 4.55, h: 3.5, fontSize: 15, color: COLORS.ink },
     );
 
     addFooter(slide, { page: page++ });
@@ -734,16 +743,73 @@ function buildDeck() {
     };
 
     box(0.85, 2.15, 3.1, 2.45, "前端层", ["Next.js / UI", "对话体验（SSE）", "表单与上传"], true);
-    box(4.1, 2.15, 4.15, 2.45, "后端核心", ["鉴权与权限", "会话/消息持久化", "审计日志与策略"], false);
-    box(8.45, 2.15, 4.05, 2.45, "智能体服务", ["提示工程与编排", "工具调用 / 降级", "引用与风险策略"], true);
-    box(0.85, 4.95, 11.65, 1.75, "数据层", ["MySQL：Users / Sessions / Messages / Verification", "面向追溯与合规：可检索、可审计、可统计"], false);
+    box(
+      4.1,
+      2.15,
+      4.15,
+      2.45,
+      "后端核心",
+      ["鉴权与权限", "会话/消息持久化", "审计日志与策略"],
+      false,
+    );
+    box(
+      8.45,
+      2.15,
+      4.05,
+      2.45,
+      "智能体服务",
+      ["提示工程与编排", "工具调用 / 降级", "引用与风险策略"],
+      true,
+    );
+    box(
+      0.85,
+      4.95,
+      11.65,
+      1.75,
+      "数据层",
+      [
+        "MySQL：Users / Sessions / Messages / Verification",
+        "面向追溯与合规：可检索、可审计、可统计",
+      ],
+      false,
+    );
 
     // connectors
-    slide.addShape("line", { x: 3.95, y: 3.38, w: 0.15, h: 0, line: { color: COLORS.hairline, width: px(2) } });
-    slide.addShape("line", { x: 8.3, y: 3.38, w: 0.15, h: 0, line: { color: COLORS.hairline, width: px(2) } });
-    slide.addShape("line", { x: 2.4, y: 4.65, w: 0, h: 0.25, line: { color: COLORS.hairline, width: px(2) } });
-    slide.addShape("line", { x: 6.2, y: 4.65, w: 0, h: 0.25, line: { color: COLORS.hairline, width: px(2) } });
-    slide.addShape("line", { x: 10.35, y: 4.65, w: 0, h: 0.25, line: { color: COLORS.hairline, width: px(2) } });
+    slide.addShape("line", {
+      x: 3.95,
+      y: 3.38,
+      w: 0.15,
+      h: 0,
+      line: { color: COLORS.hairline, width: px(2) },
+    });
+    slide.addShape("line", {
+      x: 8.3,
+      y: 3.38,
+      w: 0.15,
+      h: 0,
+      line: { color: COLORS.hairline, width: px(2) },
+    });
+    slide.addShape("line", {
+      x: 2.4,
+      y: 4.65,
+      w: 0,
+      h: 0.25,
+      line: { color: COLORS.hairline, width: px(2) },
+    });
+    slide.addShape("line", {
+      x: 6.2,
+      y: 4.65,
+      w: 0,
+      h: 0.25,
+      line: { color: COLORS.hairline, width: px(2) },
+    });
+    slide.addShape("line", {
+      x: 10.35,
+      y: 4.65,
+      w: 0,
+      h: 0.25,
+      line: { color: COLORS.hairline, width: px(2) },
+    });
 
     addFooter(slide, { page: page++ });
   }
@@ -800,9 +866,27 @@ function buildDeck() {
       });
     };
 
-    mkEntity(0.85, 2.15, "Users", ["id (PK)", "email (UQ)", "password_hash", "role", "verified_at"]);
-    mkEntity(4.05, 2.15, "Sessions", ["id (PK)", "user_id (FK)", "title", "context_meta", "created_at"]);
-    mkEntity(7.25, 2.15, "Messages", ["id (PK)", "session_id (FK)", "role (user/ai)", "content", "created_at"]);
+    mkEntity(0.85, 2.15, "Users", [
+      "id (PK)",
+      "email (UQ)",
+      "password_hash",
+      "role",
+      "verified_at",
+    ]);
+    mkEntity(4.05, 2.15, "Sessions", [
+      "id (PK)",
+      "user_id (FK)",
+      "title",
+      "context_meta",
+      "created_at",
+    ]);
+    mkEntity(7.25, 2.15, "Messages", [
+      "id (PK)",
+      "session_id (FK)",
+      "role (user/ai)",
+      "content",
+      "created_at",
+    ]);
     mkEntity(10.45, 2.15, "Verification", ["email", "code", "expires_at", "attempts"]);
 
     addCard(slide, {
@@ -829,25 +913,50 @@ function buildDeck() {
       pageLabel: "SECURITY",
     });
 
-    addCard(slide, { x: 0.85, y: 2.1, w: 5.75, h: 4.65, title: "鉴权与权限", body: "", accent: true });
-    addBullets(slide, ["邮箱验证码登录，Token/JWT 鉴权", "角色与权限控制（基础 RBAC）", "敏感操作审计：谁在何时做了什么"], {
-      x: 1.12,
-      y: 2.95,
-      w: 5.25,
-      h: 3.5,
-      fontSize: 16,
-      color: COLORS.ink,
+    addCard(slide, {
+      x: 0.85,
+      y: 2.1,
+      w: 5.75,
+      h: 4.65,
+      title: "鉴权与权限",
+      body: "",
+      accent: true,
     });
+    addBullets(
+      slide,
+      [
+        "邮箱验证码登录，Token/JWT 鉴权",
+        "角色与权限控制（基础 RBAC）",
+        "敏感操作审计：谁在何时做了什么",
+      ],
+      {
+        x: 1.12,
+        y: 2.95,
+        w: 5.25,
+        h: 3.5,
+        fontSize: 16,
+        color: COLORS.ink,
+      },
+    );
 
     addCard(slide, { x: 6.75, y: 2.1, w: 5.75, h: 4.65, title: "隐私与数据治理", body: "" });
-    addBullets(slide, ["最小化存储：只保存必要字段与摘要", "默认脱敏：手机号/身份证/地址等", "到期清理与可删除策略（可配置）", "提示层明确：不上传/不粘贴敏感信息"], {
-      x: 7.02,
-      y: 2.95,
-      w: 5.25,
-      h: 3.5,
-      fontSize: 15,
-      color: COLORS.ink,
-    });
+    addBullets(
+      slide,
+      [
+        "最小化存储：只保存必要字段与摘要",
+        "默认脱敏：手机号/身份证/地址等",
+        "到期清理与可删除策略（可配置）",
+        "提示层明确：不上传/不粘贴敏感信息",
+      ],
+      {
+        x: 7.02,
+        y: 2.95,
+        w: 5.25,
+        h: 3.5,
+        fontSize: 15,
+        color: COLORS.ink,
+      },
+    );
 
     addFooter(slide, { page: page++ });
   }
@@ -975,8 +1084,13 @@ function buildDeck() {
     addCard(slide, { x: 8.15, y: 2.1, w: 4.35, h: 4.65, title: "阶段性交付物", body: "" });
     addBullets(
       slide,
-      ["可演示的 MVP：登录 + 咨询 + 会话留痕", "关键场景 Demo：合同审查/劳动争议", "验收口径：指标 + 测试脚本 + 演示脚本", "答辩材料：结构化叙事 + 风险与对策"],
-      { x: 8.42, y: 2.95, w: 3.9, h: 3.6, fontSize: 15, color: COLORS.ink }
+      [
+        "可演示的 MVP：登录 + 咨询 + 会话留痕",
+        "关键场景 Demo：合同审查/劳动争议",
+        "验收口径：指标 + 测试脚本 + 演示脚本",
+        "答辩材料：结构化叙事 + 风险与对策",
+      ],
+      { x: 8.42, y: 2.95, w: 3.9, h: 3.6, fontSize: 15, color: COLORS.ink },
     );
 
     addFooter(slide, { page: page++ });
@@ -1033,4 +1147,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-

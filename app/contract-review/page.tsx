@@ -10,7 +10,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 function ContractReviewLayout() {
   const { state } = useContract();
 
-  if (!state.htmlContent && state.reviewStage === 'idle') {
+  if (!state.htmlContent && state.reviewStage === "idle") {
     return (
       <div className="h-screen flex flex-col bg-background">
         <Header />

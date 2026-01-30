@@ -4,10 +4,7 @@
  */
 
 const DEFAULT_API_TIMEOUT_MS = (() => {
-  const raw =
-    process.env.NEXT_PUBLIC_API_TIMEOUT_MS ??
-    process.env.API_TIMEOUT_MS ??
-    "15000";
+  const raw = process.env.NEXT_PUBLIC_API_TIMEOUT_MS ?? process.env.API_TIMEOUT_MS ?? "15000";
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 15000;
 })();
@@ -16,13 +13,13 @@ const DEFAULT_API_TIMEOUT_MS = (() => {
 // 如果设置了 NEXT_PUBLIC_API_URL，使用外部后端；否则使用 Next.js API Routes
 export function getApiBaseUrl(): string {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  return apiUrl || '';
+  return apiUrl || "";
 }
 
 // 构建完整的 API URL
 export function buildApiUrl(path: string): string {
   // 确保路径以 / 开头
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
   // In the browser, prefer same-origin requests so Next.js can proxy via rewrites.
   // This avoids CORS issues when the backend runs on a different origin (e.g. :8080).
@@ -37,7 +34,7 @@ export function buildApiUrl(path: string): string {
 export async function fetchWithTimeout(
   input: RequestInfo | URL,
   init: RequestInit | undefined,
-  timeoutMs: number = DEFAULT_API_TIMEOUT_MS
+  timeoutMs: number = DEFAULT_API_TIMEOUT_MS,
 ): Promise<Response> {
   const timeoutController = new AbortController();
   const timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
@@ -46,7 +43,7 @@ export async function fetchWithTimeout(
     init?.signal && typeof AbortSignal !== "undefined" && "any" in AbortSignal
       ? // @ts-expect-error AbortSignal.any is not in older TS lib defs
         AbortSignal.any([init.signal, timeoutController.signal])
-      : init?.signal ?? timeoutController.signal;
+      : (init?.signal ?? timeoutController.signal);
 
   try {
     return await fetch(input, { ...init, signal });
@@ -55,9 +52,7 @@ export async function fetchWithTimeout(
   }
 }
 
-export async function readResponseJsonSafe<T = unknown>(
-  response: Response
-): Promise<T | null> {
+export async function readResponseJsonSafe<T = unknown>(response: Response): Promise<T | null> {
   try {
     return (await response.json()) as T;
   } catch {
@@ -77,18 +72,19 @@ export function isNetworkOrTimeoutError(error: unknown): boolean {
 }
 
 // 通用的 fetch 包装函数
-export async function apiFetch<T = unknown>(
-  path: string,
-  options?: RequestInit
-): Promise<T> {
+export async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promise<T> {
   const url = buildApiUrl(path);
-  const response = await fetchWithTimeout(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
+  const response = await fetchWithTimeout(
+    url,
+    {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
     },
-  }, DEFAULT_API_TIMEOUT_MS);
+    DEFAULT_API_TIMEOUT_MS,
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -102,7 +98,7 @@ export async function apiFetch<T = unknown>(
 export async function apiAuthFetch<T = unknown>(
   path: string,
   token: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<T> {
   return apiFetch<T>(path, {
     ...options,
@@ -119,6 +115,6 @@ export function isUsingExternalBackend(): boolean {
 }
 
 // 获取后端类型描述
-export function getBackendType(): 'java' | 'nextjs' {
-  return isUsingExternalBackend() ? 'java' : 'nextjs';
+export function getBackendType(): "java" | "nextjs" {
+  return isUsingExternalBackend() ? "java" : "nextjs";
 }

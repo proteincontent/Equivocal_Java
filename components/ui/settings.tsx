@@ -27,16 +27,11 @@ export function Settings() {
       </div>
 
       <div className="space-y-2.5">
-        <Label htmlFor="bot-id" className="text-sm font-medium">机器人 ID</Label>
-        <Input
-          id="bot-id"
-          value={botId}
-          disabled
-          className="font-mono bg-muted"
-        />
-        <p className="text-xs text-muted-foreground/80">
-          使用内置 Coze 机器人 ID
-        </p>
+        <Label htmlFor="bot-id" className="text-sm font-medium">
+          机器人 ID
+        </Label>
+        <Input id="bot-id" value={botId} disabled className="font-mono bg-muted" />
+        <p className="text-xs text-muted-foreground/80">使用内置 Coze 机器人 ID</p>
       </div>
 
       <div className="flex flex-col gap-3 pt-4 border-t border-border/40">
