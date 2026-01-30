@@ -45,7 +45,9 @@ export function EditRoleDialog({
 
   const normalizedCurrentRole = useMemo(() => {
     if (!user) return 1;
-    const roleNum = Number.isFinite(user.role) ? user.role : Number.parseInt(String(user.role ?? "1"), 10);
+    const roleNum = Number.isFinite(user.role)
+      ? user.role
+      : Number.parseInt(String(user.role ?? "1"), 10);
     return roleNum >= 10 ? 10 : 1;
   }, [user]);
 
@@ -81,17 +83,17 @@ export function EditRoleDialog({
       // 更新角色（如果改变了）
       if (roleChanged) {
         const response = await fetch(buildApiUrl(`/api/admin/users/${user.id}`), {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ role: newRole }),
         });
 
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.error || '更新角色失败');
+          throw new Error(data.error || "更新角色失败");
         }
         roleUpdated = true;
       }
@@ -99,17 +101,17 @@ export function EditRoleDialog({
       // 重置密码（如果提供了新密码）
       if (passwordChanged) {
         const response = await fetch(buildApiUrl(`/api/admin/users/${user.id}`), {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ newPassword: trimmedPassword }),
         });
 
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.error || '重置密码失败');
+          throw new Error(data.error || "重置密码失败");
         }
         passwordUpdated = true;
       }
@@ -135,10 +137,10 @@ export function EditRoleDialog({
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      console.error('更新用户信息失败:', error);
+      console.error("更新用户信息失败:", error);
       toast({
         title: "错误",
-        description: error instanceof Error ? error.message : '更新失败',
+        description: error instanceof Error ? error.message : "更新失败",
         variant: "destructive",
       });
     } finally {
@@ -153,9 +155,7 @@ export function EditRoleDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>编辑用户信息</DialogTitle>
-          <DialogDescription>
-            修改用户 {user.email} 的权限和密码
-          </DialogDescription>
+          <DialogDescription>修改用户 {user.email} 的权限和密码</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
@@ -197,18 +197,12 @@ export function EditRoleDialog({
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              如需重置密码，请输入新密码
-            </p>
+            <p className="text-xs text-muted-foreground">如需重置密码，请输入新密码</p>
           </div>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             取消
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>

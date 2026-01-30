@@ -80,12 +80,12 @@ pnpm build  # Next.js 生产构建
 
 ## 配置项参考
 
-| 变量 | 说明 | 默认值 |
-| --- | --- | --- |
-| `LLM_MODEL` | 大语言模型名称 | `glm-4` |
-| `LLM_API_KEY` | 大语言模型 API 密钥 | _必须配置_ |
-| `EMBEDDING_MODEL` | Embedding 模型名称 | `embedding-2` |
-| `EMBEDDING_API_KEY` | Embedding API 密钥 | _必须配置_ |
+| 变量                 | 说明                        | 默认值                 |
+| -------------------- | --------------------------- | ---------------------- |
+| `LLM_MODEL`          | 大语言模型名称              | `glm-4`                |
+| `LLM_API_KEY`        | 大语言模型 API 密钥         | _必须配置_             |
+| `EMBEDDING_MODEL`    | Embedding 模型名称          | `embedding-2`          |
+| `EMBEDDING_API_KEY`  | Embedding API 密钥          | _必须配置_             |
 | `CF_VECTORIZE_INDEX` | Cloudflare Vectorize 索引名 | `legal-knowledge-base` |
 
 ## 项目结构
@@ -119,4 +119,3 @@ lib/                 # 工具函数
 ## 许可证
 
 [MIT](./LICENSE)
-

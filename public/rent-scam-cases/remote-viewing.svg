@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="210" y1="110" x2="460" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34D399"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Phone -->
+  <rect x="224" y="86" width="192" height="264" rx="28" stroke="url(#accent)" stroke-width="8"/>
+  <rect x="252" y="120" width="136" height="184" rx="16" stroke="#22D3EE" stroke-opacity="0.7" stroke-width="6"/>
+  <circle cx="320" cy="322" r="8" fill="#34D399"/>
+
+  <!-- House in screen -->
+  <path d="M278 210L320 176L362 210V254C362 260 357 265 351 265H289C283 265 278 260 278 254V210Z" stroke="#34D399" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M306 265V232C306 228 309 225 313 225H327C331 225 334 228 334 232V265" stroke="#34D399" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- "Signal" / waves -->
+  <path d="M442 136C468 154 484 184 484 218" stroke="#22D3EE" stroke-width="8" stroke-linecap="round" stroke-opacity="0.9"/>
+  <path d="M468 116C504 148 526 188 526 238" stroke="#22D3EE" stroke-width="8" stroke-linecap="round" stroke-opacity="0.6"/>
+</svg>

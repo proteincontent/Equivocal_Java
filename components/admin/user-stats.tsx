@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Shield, User, Activity } from "lucide-react";
+import { Users, Shield, User } from "lucide-react";
 import { motion, useSpring, useTransform } from "framer-motion";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 
@@ -41,14 +41,16 @@ function StatCard({ title, icon: Icon, value, description, delay = 0 }: any) {
           <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
             <Icon className="h-32 w-32 rotate-12" />
           </div>
-          
+
           <div className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-            <h3 className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors tracking-wide uppercase">{title}</h3>
+            <h3 className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors tracking-wide uppercase">
+              {title}
+            </h3>
             <div className="p-2 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300 shadow-[0_0_15px_rgba(var(--primary),0.3)]">
               <Icon className="h-4 w-4" />
             </div>
           </div>
-          
+
           <div className="relative z-10 mt-4">
             <div className="text-4xl font-bold tracking-tight font-mono tabular-nums">
               <Counter value={value} />
@@ -71,32 +73,32 @@ export function UserStats({ token }: UserStatsProps) {
 
   useEffect(() => {
     fetchStats();
-  }, [token]);
+  }, [fetchStats]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/stats', {
+      const response = await fetch("/api/admin/stats", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error('获取统计信息失败');
+        throw new Error("获取统计信息失败");
       }
 
       const data = await response.json();
       setStats(data);
     } catch (err) {
-      console.error('获取统计信息失败:', err);
-      setError(err instanceof Error ? err.message : '获取统计信息失败');
+      console.error("获取统计信息失败:", err);
+      setError(err instanceof Error ? err.message : "获取统计信息失败");
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   if (loading) {
     return (
@@ -119,7 +121,7 @@ export function UserStats({ token }: UserStatsProps) {
     return (
       <Card className="border-destructive/50 bg-destructive/10 backdrop-blur-md">
         <CardContent className="pt-6">
-          <p className="text-destructive text-sm">{error || '无法加载统计信息'}</p>
+          <p className="text-destructive text-sm">{error || "无法加载统计信息"}</p>
         </CardContent>
       </Card>
     );

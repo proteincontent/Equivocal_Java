@@ -45,6 +45,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 **错误**: `400 - Request contains an invalid argument`
 
 **可能原因**:
+
 - System Prompt 过长
 - 对某些关键词敏感（内容审查）
 - 请求参数格式问题
@@ -76,6 +77,7 @@ use_tools = False  # 强制禁用工具
 ```
 
 **启动时警告**:
+
 ```
 WARNING: Tools are currently DISABLED due to LLM API incompatibility
   The system will run in chat-only mode without tool calling capabilities
@@ -88,15 +90,16 @@ WARNING: Tools are currently DISABLED due to LLM API incompatibility
 
 使用真正兼容 OpenAI 的 API 提供商：
 
-| 提供商 | 兼容性 | 价格 | 备注 |
-|--------|--------|------|------|
-| OpenAI 官方 | ✅ 完美 | 较高 | 原生支持所有特性 |
-| Azure OpenAI | ✅ 完美 | 中等 | 企业级，稳定 |
-| 智谱 AI (GLM-4) | ✅ 良好 | 低 | 支持 Function Calling |
-| 通义千问 | ✅ 良好 | 低 | 支持工具调用 |
-| DeepSeek | ✅ 良好 | 极低 | 性价比高 |
+| 提供商          | 兼容性  | 价格 | 备注                  |
+| --------------- | ------- | ---- | --------------------- |
+| OpenAI 官方     | ✅ 完美 | 较高 | 原生支持所有特性      |
+| Azure OpenAI    | ✅ 完美 | 中等 | 企业级，稳定          |
+| 智谱 AI (GLM-4) | ✅ 良好 | 低   | 支持 Function Calling |
+| 通义千问        | ✅ 良好 | 低   | 支持工具调用          |
+| DeepSeek        | ✅ 良好 | 极低 | 性价比高              |
 
 **修改步骤**:
+
 ```bash
 # 编辑 ai-agent/.env
 LLM_API_BASE=https://api.openai.com/v1  # 或其他兼容API
@@ -139,6 +142,7 @@ Action Input: {"query": "民法典第一条"}
 - **工具调用 LLM**: 兼容的 API（用于需要工具的任务）
 
 **实现**:
+
 ```python
 def get_llm(use_tools: bool = False):
     if use_tools:
@@ -160,6 +164,7 @@ def get_llm(use_tools: bool = False):
 ## 测试日志
 
 ### 2025-12-25 20:26:23
+
 ```
 ✅ 请求: "你好"
 ✅ 结果: 200 OK
@@ -167,6 +172,7 @@ def get_llm(use_tools: bool = False):
 ```
 
 ### 2025-12-25 20:29:05
+
 ```
 ❌ 请求: "什么是民法典"
 ❌ 结果: 400 Bad Request
@@ -185,6 +191,7 @@ def get_llm(use_tools: bool = False):
 ## 技术支持
 
 如需启用完整功能，请提供以下信息：
+
 - [ ] 新的 LLM API 密钥
 - [ ] API 的 Base URL
 - [ ] 模型名称

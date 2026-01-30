@@ -252,7 +252,14 @@ function addPipeline(slide, { x, y, w, items } = {}) {
       line: { color: COLORS.line, width: 1 },
       radius: 0.18,
     });
-    slide.addShape("rect", { x: bx, y, w: 0.08, h: boxH, fill: { color: it.accent }, line: { color: it.accent } });
+    slide.addShape("rect", {
+      x: bx,
+      y,
+      w: 0.08,
+      h: boxH,
+      fill: { color: it.accent },
+      line: { color: it.accent },
+    });
     slide.addText(it.title, {
       x: bx + 0.22,
       y: y + 0.2,
@@ -302,7 +309,14 @@ function build() {
     addAurora(slide);
     addMeta(slide, { section: "COVER", page: 1 });
 
-    slide.addShape("rect", { x: 0, y: 0, w: 0.16, h: SLIDE_H, fill: { color: COLORS.blue }, line: { color: COLORS.blue } });
+    slide.addShape("rect", {
+      x: 0,
+      y: 0,
+      w: 0.16,
+      h: SLIDE_H,
+      fill: { color: COLORS.blue },
+      line: { color: COLORS.blue },
+    });
     addChip(slide, { x: 0.9, y: 0.55, text: "LIGHT_MODE // LAUNCH_STYLE", accent: COLORS.blue });
 
     slide.addText("EQUIVOCAL LEGAL", {
@@ -335,10 +349,22 @@ function build() {
       color: COLORS.muted,
     });
 
-    slide.addShape("line", { x: 0.9, y: 4.15, w: 4.0, h: 0, line: { color: COLORS.cyan, width: 4 } });
+    slide.addShape("line", {
+      x: 0.9,
+      y: 4.15,
+      w: 4.0,
+      h: 0,
+      line: { color: COLORS.cyan, width: 4 },
+    });
 
     slide.addText(
-      ["姓名：__________", "学号：__________", "学院/专业：__________", "指导教师：__________", "日期：____年__月__日"].join("\n"),
+      [
+        "姓名：__________",
+        "学号：__________",
+        "学院/专业：__________",
+        "指导教师：__________",
+        "日期：____年__月__日",
+      ].join("\n"),
       {
         x: 0.9,
         y: 4.55,
@@ -347,7 +373,7 @@ function build() {
         fontFace: FONTS.zh,
         fontSize: 14,
         color: COLORS.slate,
-      }
+      },
     );
 
     slide.addText("SYSTEM_STATUS: ONLINE  //  VERSION: v2.0  //  CN_REGION", {
@@ -372,7 +398,12 @@ function build() {
       subtitle: "开题阶段重点：把咨询链路工程化，让结果可追溯、可验收。",
       accent: COLORS.blue,
     });
-    addChip(slide, { x: SLIDE_W - 3.2, y: 1.62, text: "BRIGHT_PROJECTOR_READY", accent: COLORS.cyan });
+    addChip(slide, {
+      x: SLIDE_W - 3.2,
+      y: 1.62,
+      text: "BRIGHT_PROJECTOR_READY",
+      accent: COLORS.cyan,
+    });
 
     const y = 2.55;
     const w = (SLIDE_W - 0.9 * 2 - 0.5 * 2) / 3;
@@ -468,11 +499,21 @@ function build() {
     });
     addBullets(
       slide,
-      ["完成认证与权限边界（邮箱验证码 + JWT）", "实现咨询对话（流式输出）与会话管理", "输出风险提示/边界声明 + 审计日志落库"],
-      { x: 1.15, y: 3.2, w: 5.9, h: 2.1, fontSize: 15, color: COLORS.slate }
+      [
+        "完成认证与权限边界（邮箱验证码 + JWT）",
+        "实现咨询对话（流式输出）与会话管理",
+        "输出风险提示/边界声明 + 审计日志落库",
+      ],
+      { x: 1.15, y: 3.2, w: 5.9, h: 2.1, fontSize: 15, color: COLORS.slate },
     );
 
-    slide.addShape("line", { x: 1.15, y: 5.45, w: 5.8, h: 0, line: { color: COLORS.line, width: 1 } });
+    slide.addShape("line", {
+      x: 1.15,
+      y: 5.45,
+      w: 5.8,
+      h: 0,
+      line: { color: COLORS.line, width: 1 },
+    });
     slide.addText("非目标（明确不做）", {
       x: 1.15,
       y: 5.62,
@@ -502,16 +543,33 @@ function build() {
       bold: true,
       color: COLORS.ink,
     });
-    addBullets(slide, ["认证系统（邮箱验证码）", "会话系统（sessions/messages）", "咨询接口（/chat/stream）", "日志审计（traceId）", "基础管理（可选）"], {
-      x: 7.5,
-      y: 3.2,
-      w: 4.8,
-      h: 3.7,
-      fontSize: 15,
-      color: COLORS.slate,
-    });
+    addBullets(
+      slide,
+      [
+        "认证系统（邮箱验证码）",
+        "会话系统（sessions/messages）",
+        "咨询接口（/chat/stream）",
+        "日志审计（traceId）",
+        "基础管理（可选）",
+      ],
+      {
+        x: 7.5,
+        y: 3.2,
+        w: 4.8,
+        h: 3.7,
+        fontSize: 15,
+        color: COLORS.slate,
+      },
+    );
 
-    slide.addShape("rect", { x: 0.9, y: 2.55, w: 0.08, h: 4.65, fill: { color: COLORS.cyan }, line: { color: COLORS.cyan } });
+    slide.addShape("rect", {
+      x: 0.9,
+      y: 2.55,
+      w: 0.08,
+      h: 4.65,
+      fill: { color: COLORS.cyan },
+      line: { color: COLORS.cyan },
+    });
   }
 
   // Slide 4: Solution overview (one sentence + pipeline)
@@ -546,7 +604,11 @@ function build() {
       h: 2.65,
       accent: COLORS.blue,
       title: "发布会式口径（建议背诵）",
-      lines: ["我做的不是“聊天机器人”，而是一个“有边界、有日志、有验收口径”的咨询系统。", "所有输出绑定会话，附带 traceId，便于复盘与评估。", "AI 可切换/可降级：默认可用 → 不可用时返回可执行的替代方案。"],
+      lines: [
+        "我做的不是“聊天机器人”，而是一个“有边界、有日志、有验收口径”的咨询系统。",
+        "所有输出绑定会话，附带 traceId，便于复盘与评估。",
+        "AI 可切换/可降级：默认可用 → 不可用时返回可执行的替代方案。",
+      ],
     });
   }
 
@@ -587,9 +649,33 @@ function build() {
         line: { color: COLORS.line, width: 1 },
         radius: 0.18,
       });
-      slide.addShape("rect", { x, y, w: 0.08, h: boxH, fill: { color: b.accent }, line: { color: b.accent } });
-      slide.addText(b.label, { x: x + 0.22, y: y + 0.2, w: boxW - 0.35, h: 0.3, fontFace: FONTS.zh, fontSize: 15, bold: true, color: COLORS.ink });
-      slide.addText(b.sub, { x: x + 0.22, y: y + 0.58, w: boxW - 0.35, h: 0.35, fontFace: FONTS.zh, fontSize: 11, color: COLORS.muted });
+      slide.addShape("rect", {
+        x,
+        y,
+        w: 0.08,
+        h: boxH,
+        fill: { color: b.accent },
+        line: { color: b.accent },
+      });
+      slide.addText(b.label, {
+        x: x + 0.22,
+        y: y + 0.2,
+        w: boxW - 0.35,
+        h: 0.3,
+        fontFace: FONTS.zh,
+        fontSize: 15,
+        bold: true,
+        color: COLORS.ink,
+      });
+      slide.addText(b.sub, {
+        x: x + 0.22,
+        y: y + 0.58,
+        w: boxW - 0.35,
+        h: 0.35,
+        fontFace: FONTS.zh,
+        fontSize: 11,
+        color: COLORS.muted,
+      });
 
       if (i < layers.length - 1) {
         slide.addShape("rightArrow", {
@@ -610,7 +696,11 @@ function build() {
       h: 2.55,
       accent: COLORS.cyan,
       title: "关键工程点（评审最关心）",
-      lines: ["统一鉴权与权限边界：避免前端直接暴露模型密钥与业务逻辑。", "审计与追溯：所有请求/响应绑定 traceId，支持回放与验收。", "可切换/可降级：AI 不可用时走规则化 fallback（降低失败成本）。"],
+      lines: [
+        "统一鉴权与权限边界：避免前端直接暴露模型密钥与业务逻辑。",
+        "审计与追溯：所有请求/响应绑定 traceId，支持回放与验收。",
+        "可切换/可降级：AI 不可用时走规则化 fallback（降低失败成本）。",
+      ],
     });
   }
 
@@ -653,7 +743,14 @@ function build() {
       radius: 0.18,
       shadow: { color: "000000", opacity: 0.06, blur: 6, angle: 45, distance: 2 },
     });
-    slide.addShape("rect", { x: 7.25, y: 2.6, w: 0.08, h: 4.35, fill: { color: COLORS.purple }, line: { color: COLORS.purple } });
+    slide.addShape("rect", {
+      x: 7.25,
+      y: 2.6,
+      w: 0.08,
+      h: 4.35,
+      fill: { color: COLORS.purple },
+      line: { color: COLORS.purple },
+    });
     slide.addText("关键接口（示例）", {
       x: 7.47,
       y: 2.8,
@@ -767,15 +864,23 @@ function build() {
       bold: true,
       color: COLORS.ink,
     });
-    slide.addText(["traceRoot（会话级）", "traceId（消息级）", "provider/model（模型信息）", "latency/tokens（性能信息）"].join("  ·  "), {
-      x: x2 + 0.22,
-      y: y + cardH + 1.2,
-      w: cardW + 0.7 + cardW - 0.35,
-      h: 0.8,
-      fontFace: FONTS.zh,
-      fontSize: 13,
-      color: COLORS.slate,
-    });
+    slide.addText(
+      [
+        "traceRoot（会话级）",
+        "traceId（消息级）",
+        "provider/model（模型信息）",
+        "latency/tokens（性能信息）",
+      ].join("  ·  "),
+      {
+        x: x2 + 0.22,
+        y: y + cardH + 1.2,
+        w: cardW + 0.7 + cardW - 0.35,
+        h: 0.8,
+        fontFace: FONTS.zh,
+        fontSize: 13,
+        color: COLORS.slate,
+      },
+    );
   }
 
   // Slide 8: Key flow (main visual)
@@ -806,19 +911,50 @@ function build() {
     // Fallback path (dashed look via thin short lines)
     const fx = 1.1;
     const fy = 4.35;
-    slide.addShape("roundRect", { x: 0.9, y: 4.25, w: 12.55, h: 2.65, fill: { color: COLORS.card }, line: { color: COLORS.line }, radius: 0.18 });
-    slide.addShape("rect", { x: 0.9, y: 4.25, w: 0.08, h: 2.65, fill: { color: COLORS.red }, line: { color: COLORS.red } });
-    slide.addText("失败/降级策略（开题必须有）", { x: 1.12, y: 4.45, w: 12.2, h: 0.3, fontFace: FONTS.zh, fontSize: 15, bold: true, color: COLORS.ink });
-    slide.addText(["上游模型不可用 → 返回“可执行的替代步骤”（例如：需要补充哪些事实）", "输出不确定 → 强制提示边界 + 引导用户咨询专业律师", "全链路写入审计日志：请求参数摘要、模型信息、latency、traceId"].join("\n"), {
-      x: fx,
-      y: fy,
-      w: 12.2,
-      h: 2.2,
-      fontFace: FONTS.zh,
-      fontSize: 13,
-      color: COLORS.slate,
-      lineSpacingMultiple: 1.15,
+    slide.addShape("roundRect", {
+      x: 0.9,
+      y: 4.25,
+      w: 12.55,
+      h: 2.65,
+      fill: { color: COLORS.card },
+      line: { color: COLORS.line },
+      radius: 0.18,
     });
+    slide.addShape("rect", {
+      x: 0.9,
+      y: 4.25,
+      w: 0.08,
+      h: 2.65,
+      fill: { color: COLORS.red },
+      line: { color: COLORS.red },
+    });
+    slide.addText("失败/降级策略（开题必须有）", {
+      x: 1.12,
+      y: 4.45,
+      w: 12.2,
+      h: 0.3,
+      fontFace: FONTS.zh,
+      fontSize: 15,
+      bold: true,
+      color: COLORS.ink,
+    });
+    slide.addText(
+      [
+        "上游模型不可用 → 返回“可执行的替代步骤”（例如：需要补充哪些事实）",
+        "输出不确定 → 强制提示边界 + 引导用户咨询专业律师",
+        "全链路写入审计日志：请求参数摘要、模型信息、latency、traceId",
+      ].join("\n"),
+      {
+        x: fx,
+        y: fy,
+        w: 12.2,
+        h: 2.2,
+        fontFace: FONTS.zh,
+        fontSize: 13,
+        color: COLORS.slate,
+        lineSpacingMultiple: 1.15,
+      },
+    );
   }
 
   // Slide 9: Plan & metrics & risks (combined)
@@ -850,30 +986,83 @@ function build() {
     });
 
     // Metrics + risks (right)
-    slide.addShape("roundRect", { x: 8.25, y: 2.6, w: 4.18, h: 4.35, fill: { color: COLORS.card }, line: { color: COLORS.line }, radius: 0.18, shadow: { color: "000000", opacity: 0.06, blur: 6, angle: 45, distance: 2 } });
-    slide.addShape("rect", { x: 8.25, y: 2.6, w: 0.08, h: 4.35, fill: { color: COLORS.blue }, line: { color: COLORS.blue } });
-    slide.addText("验收指标", { x: 8.47, y: 2.8, w: 3.9, h: 0.3, fontFace: FONTS.zh, fontSize: 15, bold: true, color: COLORS.ink });
-    slide.addText(["可用性：> 99%", "首字延迟：< 2s（可调）", "审计覆盖：100% 关键链路", "追溯：traceId 可回放"].join("\n"), {
-      x: 8.55,
-      y: 3.2,
-      w: 3.8,
-      h: 1.25,
-      fontFace: FONTS.zh,
-      fontSize: 13,
-      color: COLORS.slate,
+    slide.addShape("roundRect", {
+      x: 8.25,
+      y: 2.6,
+      w: 4.18,
+      h: 4.35,
+      fill: { color: COLORS.card },
+      line: { color: COLORS.line },
+      radius: 0.18,
+      shadow: { color: "000000", opacity: 0.06, blur: 6, angle: 45, distance: 2 },
     });
+    slide.addShape("rect", {
+      x: 8.25,
+      y: 2.6,
+      w: 0.08,
+      h: 4.35,
+      fill: { color: COLORS.blue },
+      line: { color: COLORS.blue },
+    });
+    slide.addText("验收指标", {
+      x: 8.47,
+      y: 2.8,
+      w: 3.9,
+      h: 0.3,
+      fontFace: FONTS.zh,
+      fontSize: 15,
+      bold: true,
+      color: COLORS.ink,
+    });
+    slide.addText(
+      [
+        "可用性：> 99%",
+        "首字延迟：< 2s（可调）",
+        "审计覆盖：100% 关键链路",
+        "追溯：traceId 可回放",
+      ].join("\n"),
+      {
+        x: 8.55,
+        y: 3.2,
+        w: 3.8,
+        h: 1.25,
+        fontFace: FONTS.zh,
+        fontSize: 13,
+        color: COLORS.slate,
+      },
+    );
 
-    slide.addShape("line", { x: 8.45, y: 4.65, w: 3.85, h: 0, line: { color: COLORS.line, width: 1 } });
-    slide.addText("风险与对策", { x: 8.47, y: 4.82, w: 3.9, h: 0.3, fontFace: FONTS.zh, fontSize: 15, bold: true, color: COLORS.ink });
-    slide.addText(["幻觉：边界声明 +（可选）RAG 引用", "稳定：超时/重试/降级", "隐私：最小化存储 + 脱敏"].join("\n"), {
-      x: 8.55,
-      y: 5.2,
-      w: 3.8,
-      h: 1.6,
-      fontFace: FONTS.zh,
-      fontSize: 13,
-      color: COLORS.muted,
+    slide.addShape("line", {
+      x: 8.45,
+      y: 4.65,
+      w: 3.85,
+      h: 0,
+      line: { color: COLORS.line, width: 1 },
     });
+    slide.addText("风险与对策", {
+      x: 8.47,
+      y: 4.82,
+      w: 3.9,
+      h: 0.3,
+      fontFace: FONTS.zh,
+      fontSize: 15,
+      bold: true,
+      color: COLORS.ink,
+    });
+    slide.addText(
+      ["幻觉：边界声明 +（可选）RAG 引用", "稳定：超时/重试/降级", "隐私：最小化存储 + 脱敏"].join(
+        "\n",
+      ),
+      {
+        x: 8.55,
+        y: 5.2,
+        w: 3.8,
+        h: 1.6,
+        fontFace: FONTS.zh,
+        fontSize: 13,
+        color: COLORS.muted,
+      },
+    );
   }
 
   // Slide 10: Q&A (Light mode)
@@ -924,4 +1113,3 @@ build()
     console.error(err);
     process.exitCode = 1;
   });
-

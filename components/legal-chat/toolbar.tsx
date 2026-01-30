@@ -30,7 +30,7 @@ interface LegalChatToolbarProps {
 
 /**
  * 专业法律服务导航栏
- * 
+ *
  * 设计理念：
  * - 极简克制，不抢占内容注意力
  * - 精致的玻璃态效果
@@ -66,12 +66,12 @@ export function LegalChatToolbar({
     "hover:bg-secondary dark:hover:bg-white/10",
     "hover:border-border dark:hover:border-white/20",
     "hover:shadow-md",
-    "active:scale-[0.98]"
+    "active:scale-[0.98]",
   );
 
   const iconButtonClass = cn(buttonBaseClass, "w-10 h-10");
   const textButtonClass = cn(buttonBaseClass, "px-4 h-10");
-  
+
   return (
     <motion.header
       className="absolute inset-x-0 top-0 z-50 px-4 sm:px-6 py-4"
@@ -134,14 +134,14 @@ export function LegalChatToolbar({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* 用户头像/登录 */}
           {onLogin && onLogout && (
-            <UserAvatar 
-              user={user ?? null} 
-              onLogin={onLogin} 
+            <UserAvatar
+              user={user ?? null}
+              onLogin={onLogin}
               onLogout={onLogout}
               className="!rounded-xl !h-10"
             />
           )}
-          
+
           {/* 管理员入口 */}
           {mounted && isAdmin() && (
             <motion.button
@@ -158,13 +158,9 @@ export function LegalChatToolbar({
               <span className="hidden sm:inline text-sm font-medium">管理</span>
             </motion.button>
           )}
-          
+
           {/* 主题切换 */}
-          <Theme 
-            variant="button" 
-            size="sm"
-            className={iconButtonClass}
-          />
+          <Theme variant="button" size="sm" className={iconButtonClass} />
 
           {/* 设置按钮 - 仅在聊天界面显示 */}
           {mounted && selectedType && (
@@ -202,9 +198,7 @@ export function LegalChatToolbar({
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2563EB]/5 dark:bg-[#2563EB]/10 backdrop-blur-xl border border-[#2563EB]/20 dark:border-[#2563EB]/30 shadow-sm shadow-[#2563EB]/5">
             <div className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
-            <span className="text-xs font-semibold text-[#2563EB]">
-              {selectedType}
-            </span>
+            <span className="text-xs font-semibold text-[#2563EB]">{selectedType}</span>
           </div>
         </motion.div>
       )}

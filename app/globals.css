@@ -10,50 +10,50 @@
 
 :root {
   /* === 基础色板 (Neutral Palette) === */
-  --background: #FDFDFD; /* 接近纯白的纸张感 */
+  --background: #fdfdfd; /* 接近纯白的纸张感 */
   --foreground: #171717; /* 极深的灰，比纯黑更护眼 */
-  
-  --card: #FFFFFF;
+
+  --card: #ffffff;
   --card-foreground: #171717;
-  
-  --popover: #FFFFFF;
+
+  --popover: #ffffff;
   --popover-foreground: #171717;
-  
+
   --primary: #171717; /* 极简黑 */
-  --primary-foreground: #FFFFFF;
-  
-  --secondary: #F5F5F5; /* 极浅灰 */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f5f5f5; /* 极浅灰 */
   --secondary-foreground: #171717;
-  
-  --muted: #FAFAFA;
+
+  --muted: #fafafa;
   --muted-foreground: #737373; /* Neutral-500 */
-  
-  --accent: #F5F5F5;
+
+  --accent: #f5f5f5;
   --accent-foreground: #171717;
-  
+
   /* === 功能色 (Functional Colors) === */
   /* 只有在需要引起注意时才使用颜色 */
-  --destructive: #DC2626; /* Red-600 */
-  --destructive-foreground: #FFFFFF;
-  
-  --warning: #D97706; /* Amber-600 */
+  --destructive: #dc2626; /* Red-600 */
+  --destructive-foreground: #ffffff;
+
+  --warning: #d97706; /* Amber-600 */
   --success: #059669; /* Emerald-600 */
-  
-  --border: #E5E5E5; /* Neutral-200 */
-  --input: #E5E5E5;
+
+  --border: #e5e5e5; /* Neutral-200 */
+  --input: #e5e5e5;
   --ring: #171717;
-  
+
   /* === 圆角系统 === */
   --radius: 0.375rem; /* 6px，更紧凑 */
-  
+
   /* === 侧边栏 === */
-  --sidebar: #FAFAFA;
+  --sidebar: #fafafa;
   --sidebar-foreground: #171717;
   --sidebar-primary: #171717;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5F5F5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f5;
   --sidebar-accent-foreground: #171717;
-  --sidebar-border: #E5E5E5;
+  --sidebar-border: #e5e5e5;
   --sidebar-ring: #171717;
 
   /* 全局缩放因子 */
@@ -61,36 +61,36 @@
 }
 
 .dark {
-  --background: #0A0A0A;
-  --foreground: #EDEDED;
+  --background: #0a0a0a;
+  --foreground: #ededed;
   --card: #121212;
-  --card-foreground: #EDEDED;
+  --card-foreground: #ededed;
   --popover: #121212;
-  --popover-foreground: #EDEDED;
-  --primary: #EDEDED;
-  --primary-foreground: #0A0A0A;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
   --secondary: #262626;
-  --secondary-foreground: #EDEDED;
+  --secondary-foreground: #ededed;
   --muted: #171717;
-  --muted-foreground: #A3A3A3;
+  --muted-foreground: #a3a3a3;
   --accent: #262626;
-  --accent-foreground: #EDEDED;
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-  --warning: #F59E0B;
-  --success: #10B981;
+  --accent-foreground: #ededed;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --warning: #f59e0b;
+  --success: #10b981;
   --border: #262626;
   --input: #262626;
-  --ring: #EDEDED;
-  
+  --ring: #ededed;
+
   --sidebar: #121212;
-  --sidebar-foreground: #EDEDED;
-  --sidebar-primary: #EDEDED;
-  --sidebar-primary-foreground: #0A0A0A;
+  --sidebar-foreground: #ededed;
+  --sidebar-primary: #ededed;
+  --sidebar-primary-foreground: #0a0a0a;
   --sidebar-accent: #262626;
-  --sidebar-accent-foreground: #EDEDED;
+  --sidebar-accent-foreground: #ededed;
   --sidebar-border: #262626;
-  --sidebar-ring: #EDEDED;
+  --sidebar-ring: #ededed;
 }
 
 @theme inline {
@@ -134,7 +134,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
+
   /* 注册品牌色到 Tailwind 主题 */
   --color-brand-navy: var(--brand-navy);
   --color-brand-navy-light: var(--brand-navy-light);
@@ -167,8 +167,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* === 精致滚动条 === */
@@ -271,7 +275,8 @@
 }
 
 /* 列表缩进优化 */
-.contract-doc ul, .contract-doc ol {
+.contract-doc ul,
+.contract-doc ol {
   padding-left: 2em;
   margin-bottom: 16px;
 }
@@ -284,14 +289,15 @@
   font-size: 14px;
 }
 
-.contract-doc th, .contract-doc td {
-  border: 1px solid #E5E5E5;
+.contract-doc th,
+.contract-doc td {
+  border: 1px solid #e5e5e5;
   padding: 8px 12px;
   text-align: left;
 }
 
 .contract-doc th {
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   font-weight: 600;
 }
 
@@ -371,7 +377,9 @@
 .risk-highlight-active {
   position: relative;
   z-index: 10;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 0 6px currentColor; /* 双层光环效果 */
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 0 6px currentColor; /* 双层光环效果 */
 }
 
 .risk-highlight-active.risk-high {

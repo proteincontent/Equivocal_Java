@@ -85,6 +85,7 @@ cp .env.example .env
 #### 方法二：直接设置环境变量
 
 **Windows (CMD):**
+
 ```cmd
 set SPRING_DATASOURCE_URL=jdbc:mysql://your-host:4000/your-database
 set SPRING_DATASOURCE_USERNAME=your-username
@@ -96,6 +97,7 @@ set COZE_BOT_ID=your-bot-id
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 $env:SPRING_DATASOURCE_URL="jdbc:mysql://your-host:4000/your-database"
 $env:SPRING_DATASOURCE_USERNAME="your-username"
@@ -107,6 +109,7 @@ $env:COZE_BOT_ID="your-bot-id"
 ```
 
 **Linux/Mac:**
+
 ```bash
 export SPRING_DATASOURCE_URL=jdbc:mysql://your-host:4000/your-database
 export SPRING_DATASOURCE_USERNAME=your-username
@@ -119,22 +122,22 @@ export COZE_BOT_ID=your-bot-id
 
 #### 环境变量列表
 
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `SERVER_PORT` | 服务端口 | `8080` |
-| `SPRING_DATASOURCE_URL` | 数据库 JDBC URL | `jdbc:mysql://localhost:3306/equivocal` |
-| `SPRING_DATASOURCE_USERNAME` | 数据库用户名 | `root` |
-| `SPRING_DATASOURCE_PASSWORD` | 数据库密码 | *(空)* |
-| `JWT_SECRET` | JWT 签名密钥（至少 256 位） | *(需要设置)* |
-| `JWT_EXPIRATION` | JWT 过期时间（毫秒） | `86400000` (24小时) |
-| `RESEND_API_KEY` | Resend 邮件服务 API 密钥 | *(需要设置)* |
-| `RESEND_FROM_EMAIL` | 发件人邮箱 | `noreply@example.com` |
-| `COZE_API_URL` | Coze API 地址 | `https://api.coze.com` |
-| `COZE_API_KEY` | Coze API 密钥 | *(需要设置)* |
-| `COZE_TITLE_TOKEN` | Coze Title Token | *(可选)* |
-| `COZE_BOT_ID` | Coze Bot ID | *(需要设置)* |
-| `COZE_PROJECT_ID` | Coze Project ID | *(可选)* |
-| `APP_CORS_ALLOWED_ORIGINS` | 允许的 CORS 来源 | `http://localhost:3000,...` |
+| 变量名                       | 说明                        | 默认值                                  |
+| ---------------------------- | --------------------------- | --------------------------------------- |
+| `SERVER_PORT`                | 服务端口                    | `8080`                                  |
+| `SPRING_DATASOURCE_URL`      | 数据库 JDBC URL             | `jdbc:mysql://localhost:3306/equivocal` |
+| `SPRING_DATASOURCE_USERNAME` | 数据库用户名                | `root`                                  |
+| `SPRING_DATASOURCE_PASSWORD` | 数据库密码                  | _(空)_                                  |
+| `JWT_SECRET`                 | JWT 签名密钥（至少 256 位） | _(需要设置)_                            |
+| `JWT_EXPIRATION`             | JWT 过期时间（毫秒）        | `86400000` (24小时)                     |
+| `RESEND_API_KEY`             | Resend 邮件服务 API 密钥    | _(需要设置)_                            |
+| `RESEND_FROM_EMAIL`          | 发件人邮箱                  | `noreply@example.com`                   |
+| `COZE_API_URL`               | Coze API 地址               | `https://api.coze.com`                  |
+| `COZE_API_KEY`               | Coze API 密钥               | _(需要设置)_                            |
+| `COZE_TITLE_TOKEN`           | Coze Title Token            | _(可选)_                                |
+| `COZE_BOT_ID`                | Coze Bot ID                 | _(需要设置)_                            |
+| `COZE_PROJECT_ID`            | Coze Project ID             | _(可选)_                                |
+| `APP_CORS_ALLOWED_ORIGINS`   | 允许的 CORS 来源            | `http://localhost:3000,...`             |
 
 ### 启动
 
@@ -194,6 +197,7 @@ pnpm dev
 ## 密码兼容性
 
 后端支持从旧版简单哈希密码自动迁移到 BCrypt：
+
 - 登录时检测旧版密码格式
 - 验证成功后自动升级为 BCrypt 格式
 - 新用户直接使用 BCrypt

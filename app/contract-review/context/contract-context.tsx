@@ -38,7 +38,10 @@ type Action =
   | { type: "SET_FILTER"; payload: RiskFilter }
   | { type: "SET_ERROR"; payload: string }
   | { type: "UPDATE_HTML"; payload: string } // 仅更新显示HTML
-  | { type: "ACCEPT_FIX"; payload: { riskId: string; newText: string; newHtml: string; newBaseHtml: string } }
+  | {
+      type: "ACCEPT_FIX";
+      payload: { riskId: string; newText: string; newHtml: string; newBaseHtml: string };
+    }
   | { type: "UNDO" };
 
 // --- Initial State ---
@@ -61,29 +64,29 @@ function contractReducer(state: ContractState, action: Action): ContractState {
   switch (action.type) {
     case "RESET":
       return { ...initialState };
-      
+
     case "SET_STAGE":
       return { ...state, reviewStage: action.payload };
-      
+
     case "SET_FILE_NAME":
       return { ...state, fileName: action.payload };
-      
+
     case "SET_CONTENT":
       return {
         ...state,
         htmlContent: action.payload.html,
         baseHtmlContent: action.payload.baseHtml,
       };
-      
+
     case "SET_RISKS":
       return { ...state, risks: action.payload };
-      
+
     case "SET_ACTIVE_RISK":
       return { ...state, activeRiskId: action.payload };
-      
+
     case "SET_FILTER":
       return { ...state, riskFilter: action.payload };
-      
+
     case "SET_ERROR":
       return { ...state, errorMessage: action.payload, reviewStage: "error" };
 
@@ -93,7 +96,7 @@ function contractReducer(state: ContractState, action: Action): ContractState {
     case "ACCEPT_FIX": {
       const { riskId, newText, newHtml, newBaseHtml } = action.payload;
       const risk = state.risks.find((r) => r.id === riskId);
-      
+
       if (!risk) return state;
 
       const newUndoStack = [
@@ -121,7 +124,7 @@ function contractReducer(state: ContractState, action: Action): ContractState {
     case "UNDO": {
       if (state.undoStack.length === 0) return state;
       const lastState = state.undoStack[state.undoStack.length - 1];
-      
+
       return {
         ...state,
         htmlContent: lastState.htmlContent,
@@ -182,7 +185,7 @@ export function ContractProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_ERROR", payload: error });
   }, []);
 
-  const acceptFix = useCallback((riskId: string, newText: string) => {
+  const acceptFix = useCallback((_riskId: string, _newText: string) => {
     // 这里的逻辑需要访问 DOM，或者在组件层处理 DOM 操作后调用 dispatch
     // 为了保持 Context 纯净，我们假设组件层已经生成了新的 HTML
     // 但为了方便，我们在这里模拟一下或者要求组件传入新 HTML
@@ -198,9 +201,10 @@ export function ContractProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Computed
-  const visibleRisks = state.riskFilter === "all" 
-    ? state.risks 
-    : state.risks.filter((r) => r.level === state.riskFilter);
+  const visibleRisks =
+    state.riskFilter === "all"
+      ? state.risks
+      : state.risks.filter((r) => r.level === state.riskFilter);
 
   const stats = {
     high: state.risks.filter((r) => r.level === "high").length,

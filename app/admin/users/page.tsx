@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState({ total: 0, admins: 0, users: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
-  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
   const [uiScale, setUiScale] = useState(1.1);
 
   useEffect(() => {
@@ -60,11 +60,11 @@ export default function AdminUsersPage() {
   // 使用 useCallback 优化 fetchStats，避免不必要的重新创建
   const fetchStats = useCallback(async () => {
     if (!token) return;
-    
+
     try {
-      const response = await fetch(buildApiUrl('/api/admin/stats'), {
+      const response = await fetch(buildApiUrl("/api/admin/stats"), {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (response.ok) {
@@ -76,7 +76,7 @@ export default function AdminUsersPage() {
         });
       }
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      console.error("Failed to fetch stats:", err);
     } finally {
       setStatsLoading(false);
     }
@@ -90,7 +90,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (mounted && !isAdmin()) {
-      router.push('/');
+      router.push("/");
     }
   }, [mounted, isAdmin, router]);
 
@@ -118,7 +118,7 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">权限不足</h1>
           <p className="text-gray-500 mb-6">这里是管理员的私密花园</p>
           <Button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="rounded-full bg-gray-900 text-white hover:bg-gray-800 px-8 py-6"
           >
             返回首页
@@ -136,7 +136,7 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">未登录</h1>
           <p className="text-gray-500 mb-6">请先验证身份</p>
           <Button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="rounded-full bg-gray-900 text-white hover:bg-gray-800 px-8 py-6"
           >
             去登录
@@ -157,7 +157,7 @@ export default function AdminUsersPage() {
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <BackgroundOrganism />
-      
+
       <motion.div
         key="main-content"
         initial={{ opacity: 0 }}
@@ -179,7 +179,7 @@ export default function AdminUsersPage() {
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">返回首页</span>
           </Link>
-          
+
           <div className="flex items-center gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -188,7 +188,9 @@ export default function AdminUsersPage() {
                   className="h-10 rounded-full bg-white/40 backdrop-blur-md px-4 border border-white/50 hover:bg-white/60 hover:text-gray-900 text-gray-600"
                 >
                   <SlidersHorizontal className="w-4 h-4 mr-2" />
-                  <span className="text-sm font-medium tabular-nums">{Math.round(uiScale * 100)}%</span>
+                  <span className="text-sm font-medium tabular-nums">
+                    {Math.round(uiScale * 100)}%
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent

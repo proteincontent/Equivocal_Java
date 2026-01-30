@@ -1,20 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, 
-  Shield, 
-  ShieldAlert, 
-  User as UserIcon, 
-  MessageSquare, 
-  Edit, 
-  Trash2, 
+import {
+  Search,
+  ShieldAlert,
+  User as UserIcon,
+  MessageSquare,
+  Edit,
+  Trash2,
   Calendar,
   Activity,
   ChevronLeft,
   ChevronRight,
-  Terminal
+  Terminal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditRoleDialog } from "./edit-role-dialog";
@@ -34,15 +33,15 @@ interface CrewRosterProps {
   currentUserId: string;
 }
 
-function CrewCard({ 
-  user, 
-  index, 
-  onViewHistory, 
-  onEdit, 
+function CrewCard({
+  user,
+  index,
+  onViewHistory,
+  onEdit,
   onDelete,
-  isCurrentUser
-}: { 
-  user: User; 
+  isCurrentUser,
+}: {
+  user: User;
   index: number;
   onViewHistory: () => void;
   onEdit: () => void;
@@ -51,19 +50,19 @@ function CrewCard({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const isAdmin = user.role >= 10;
-  
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+    return date.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
   // 生成用户头像颜色
   const getAvatarGradient = (email: string) => {
-    const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const hash = email.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const hue = hash % 360;
     return `linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${(hue + 60) % 360}, 70%, 40%))`;
   };
@@ -82,41 +81,42 @@ function CrewCard({
       <motion.div
         className={`absolute -inset-1 rounded-2xl blur-xl transition-opacity duration-500 ${
           isAdmin
-            ? 'bg-gradient-to-r from-[#2563EB]/30 to-cyan-500/30'
-            : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20'
+            ? "bg-gradient-to-r from-[#2563EB]/30 to-cyan-500/30"
+            : "bg-gradient-to-r from-cyan-500/20 to-blue-500/20"
         }`}
         animate={{ opacity: isHovered ? 0.8 : 0.3 }}
       />
-      
+
       {/* 卡片主体 */}
-      <div className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
-        isHovered 
-          ? 'border-cyan-500/50 bg-black/60' 
-          : 'border-white/10 bg-black/40'
-      } backdrop-blur-xl`}>
-        
+      <div
+        className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
+          isHovered ? "border-cyan-500/50 bg-black/60" : "border-white/10 bg-black/40"
+        } backdrop-blur-xl`}
+      >
         {/* 扫描线效果 */}
-        <motion.div 
+        <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{
             background: `linear-gradient(to bottom, transparent 0%, rgba(0,255,255,0.03) 50%, transparent 100%)`,
-            backgroundSize: '100% 200%'
+            backgroundSize: "100% 200%",
           }}
           animate={{
-            backgroundPosition: isHovered ? ['0% 0%', '0% 100%'] : '0% 0%'
+            backgroundPosition: isHovered ? ["0% 0%", "0% 100%"] : "0% 0%",
           }}
           transition={{ duration: 2, repeat: isHovered ? Infinity : 0 }}
         />
 
         {/* 顶部状态栏 */}
-        <div className={`h-1 w-full ${isAdmin ? 'bg-gradient-to-r from-[#2563EB] to-cyan-500' : 'bg-gradient-to-r from-cyan-500 to-[#2563EB]'}`} />
+        <div
+          className={`h-1 w-full ${isAdmin ? "bg-gradient-to-r from-[#2563EB] to-cyan-500" : "bg-gradient-to-r from-cyan-500 to-[#2563EB]"}`}
+        />
 
         <div className="p-4">
           {/* 头部：头像 + 身份 */}
           <div className="flex items-start gap-4">
             {/* 头像 */}
             <div className="relative">
-              <div 
+              <div
                 className="w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold text-white shadow-lg"
                 style={{ background: getAvatarGradient(user.email) }}
               >
@@ -136,18 +136,18 @@ function CrewCard({
                 ) : (
                   <UserIcon className="w-4 h-4 text-cyan-400" />
                 )}
-                <span className={`text-xs font-mono uppercase tracking-wider ${
-                  isAdmin ? 'text-blue-400' : 'text-cyan-400'
-                }`}>
-                  {isAdmin ? '管理员' : '舰员'}
+                <span
+                  className={`text-xs font-mono uppercase tracking-wider ${
+                    isAdmin ? "text-blue-400" : "text-cyan-400"
+                  }`}
+                >
+                  {isAdmin ? "管理员" : "舰员"}
                 </span>
                 {isCurrentUser && (
                   <span className="text-xs font-mono text-cyan-400 ml-auto">你</span>
                 )}
               </div>
-              <p className="text-sm font-medium text-foreground truncate">
-                {user.email}
-              </p>
+              <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ function CrewCard({
           </div>
 
           {/* 操作按钮 */}
-          <motion.div 
+          <motion.div
             className="mt-4 flex gap-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
@@ -236,33 +236,29 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [viewHistoryUser, setViewHistoryUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [page, search, token]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: '12', // 网格布局，每页12个
+        limit: "12", // 网格布局，每页12个
       });
 
       if (search) {
-        params.append('search', search);
+        params.append("search", search);
       }
 
       const response = await fetch(`/api/admin/users?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error('认证失败，请重新登录');
+          throw new Error("认证失败，请重新登录");
         }
         throw new Error(`获取用户列表失败 (${response.status})`);
       }
@@ -272,13 +268,17 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
       setTotal(data.total || 0);
       setTotalPages(data.totalPages || 1);
     } catch (err) {
-      console.error('[CrewRoster] 获取用户列表失败:', err);
-      setError(err instanceof Error ? err.message : '获取用户列表失败');
+      console.error("[CrewRoster] 获取用户列表失败:", err);
+      setError(err instanceof Error ? err.message : "获取用户列表失败");
       setUsers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, token]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleSearch = () => {
     setSearch(searchInput);
@@ -286,7 +286,7 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -318,18 +318,19 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
   return (
     <div className="space-y-8">
       {/* 命令行搜索 */}
-      <motion.div 
+      <motion.div
         className="relative"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
-          commandFocused 
-            ? 'border-cyan-500/50 shadow-[0_0_30px_rgba(34,211,238,0.2)]' 
-            : 'border-white/10'
-        } bg-black/40 backdrop-blur-xl`}>
-          
+        <div
+          className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
+            commandFocused
+              ? "border-cyan-500/50 shadow-[0_0_30px_rgba(34,211,238,0.2)]"
+              : "border-white/10"
+          } bg-black/40 backdrop-blur-xl`}
+        >
           {/* 顶部状态栏 */}
           <div className="flex items-center gap-2 px-4 py-2 border-b border-white/5 bg-white/5">
             <div className="flex gap-1.5">
@@ -341,7 +342,7 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
               用户搜索脚本 — 终端 — 80×24
             </span>
           </div>
-          
+
           {/* 命令输入区 */}
           <div className="flex items-center gap-3 px-4 py-3">
             <Terminal className="w-4 h-4 text-cyan-400" />
@@ -377,18 +378,15 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
           </span>
           <span className="text-muted-foreground/30">|</span>
           <span className="text-muted-foreground/60">
-            页：<span className="text-cyan-400">{page}</span>/<span className="text-muted-foreground/80">{totalPages}</span>
+            页：<span className="text-cyan-400">{page}</span>/
+            <span className="text-muted-foreground/80">{totalPages}</span>
           </span>
         </div>
       </div>
 
       {/* 用户卡片网格 */}
-      {(!users || users.length === 0) ? (
-        <motion.div 
-          className="text-center py-16"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+      {!users || users.length === 0 ? (
+        <motion.div className="text-center py-16" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-4">
             <Search className="w-8 h-8 text-muted-foreground/30" />
           </div>
@@ -419,14 +417,14 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1 || loading}
             className="bg-white/5 hover:bg-white/10 border border-white/10 font-mono"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             上一页
           </Button>
-          
+
           <div className="flex items-center gap-2">
             {[...Array(Math.min(5, totalPages))].map((_, i) => {
               const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
@@ -438,9 +436,9 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
                   size="sm"
                   onClick={() => setPage(pageNum)}
                   className={`w-8 h-8 p-0 font-mono ${
-                    page === pageNum 
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
-                      : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                    page === pageNum
+                      ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                      : "bg-white/5 hover:bg-white/10 border border-white/10"
                   }`}
                 >
                   {pageNum}
@@ -448,11 +446,11 @@ export function CrewRoster({ token, currentUserId }: CrewRosterProps) {
               );
             })}
           </div>
-          
+
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages || loading}
             className="bg-white/5 hover:bg-white/10 border border-white/10 font-mono"
           >

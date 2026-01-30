@@ -41,6 +41,7 @@ wrangler r2 bucket list
 ```
 
 **或使用 Dashboard**:
+
 1. 访问 [R2 Overview](https://dash.cloudflare.com/?to=/:account/r2)
 2. Create bucket → 名称: `legal-agent-files` → Create
 
@@ -141,13 +142,16 @@ cd backend && ./start.cmd                    # 启动后端
 ## 故障排查
 
 ### Vectorize 连接失败
+
 - 确认 `CF_API_TOKEN` 有正确的权限
 - 确认 `CF_ACCOUNT_ID` 正确
 
 ### R2 上传失败
+
 - 确认 R2 凭证正确
 - 确认 Bucket 名称匹配
 
 ### Embedding 生成失败
+
 - 确认智谱 AI `EMBEDDING_API_KEY` 有效
 - 检查网络连接

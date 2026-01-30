@@ -2,22 +2,22 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import {
-  LEGAL_CATEGORY_LABELS,
-  LEGAL_SERVICE_SUMMARIES,
-} from "@/data/legal-services";
+import { LEGAL_CATEGORY_LABELS, LEGAL_SERVICE_SUMMARIES } from "@/data/legal-services";
 import type { LegalServiceType } from "@/data/legal-services";
 
 const categoryCardClasses: Record<string, string> = {
-  "文书生成": "bg-[#2563EB]/5 text-[#2563EB] border-[#2563EB]/20 hover:bg-[#2563EB]/10 dark:bg-[#2563EB]/10 dark:text-[#3B82F6] dark:border-[#2563EB]/30 dark:hover:bg-[#2563EB]/20",
-  "合同审查": "bg-cyan-500/5 text-cyan-600 border-cyan-500/20 hover:bg-cyan-500/10 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/30 dark:hover:bg-cyan-500/20",
-  "法律咨询": "bg-indigo-500/5 text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/10 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 dark:hover:bg-indigo-500/20",
+  文书生成:
+    "bg-[#2563EB]/5 text-[#2563EB] border-[#2563EB]/20 hover:bg-[#2563EB]/10 dark:bg-[#2563EB]/10 dark:text-[#3B82F6] dark:border-[#2563EB]/30 dark:hover:bg-[#2563EB]/20",
+  合同审查:
+    "bg-cyan-500/5 text-cyan-600 border-cyan-500/20 hover:bg-cyan-500/10 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/30 dark:hover:bg-cyan-500/20",
+  法律咨询:
+    "bg-indigo-500/5 text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/10 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 dark:hover:bg-indigo-500/20",
 };
 
 const categoryBadgeClasses: Record<string, string> = {
-  "文书生成": "bg-[#2563EB]/10 text-[#2563EB] dark:bg-[#2563EB]/20 dark:text-[#3B82F6]",
-  "合同审查": "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400",
-  "法律咨询": "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400",
+  文书生成: "bg-[#2563EB]/10 text-[#2563EB] dark:bg-[#2563EB]/20 dark:text-[#3B82F6]",
+  合同审查: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400",
+  法律咨询: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400",
 };
 
 interface LegalServiceSelectorProps {
@@ -68,7 +68,7 @@ export function LegalServiceSelector({ onSelect, className }: LegalServiceSelect
                 <span
                   className={cn(
                     "inline-block px-2 py-1 rounded text-xs",
-                    categoryBadgeClasses[service.category]
+                    categoryBadgeClasses[service.category],
                   )}
                 >
                   {service.category}

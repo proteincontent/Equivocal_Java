@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="240" y1="92" x2="412" y2="260" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="160" y1="120" x2="520" y2="252" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+  </defs>
+
+  <!-- House -->
+  <path
+    d="M260 196L320 146L380 196V264C380 274 372 282 362 282H278C268 282 260 274 260 264V196Z"
+    stroke="url(#accent)"
+    stroke-width="8"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M298 282V226C298 220 303 215 309 215H331C337 215 342 220 342 226V282"
+    stroke="url(#accent)"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+
+  <!-- Price tag -->
+  <path
+    d="M176 122H252C260 122 266 128 266 136V184L230 220H176C168 220 162 214 162 206V136C162 128 168 122 176 122Z"
+    stroke="url(#accent2)"
+    stroke-width="8"
+    stroke-linejoin="round"
+  />
+  <circle cx="188" cy="144" r="8" fill="#38BDF8"/>
+
+  <!-- Down arrow -->
+  <path d="M452 130V202" stroke="#34D399" stroke-width="10" stroke-linecap="round"/>
+  <path d="M430 184L452 206L474 184" stroke="#34D399" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

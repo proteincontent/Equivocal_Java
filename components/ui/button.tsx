@@ -68,7 +68,7 @@ function Button({
 
     const newRipple = { x, y, size, key: Date.now() };
     setRipples((prev) => [...prev, newRipple]);
-    
+
     onClick?.(e);
   };
 
@@ -80,9 +80,7 @@ function Button({
       {...props}
     >
       {/* 按钮内容 */}
-      <span className="relative z-10 flex items-center gap-2">
-        {props.children}
-      </span>
+      <span className="relative z-10 flex items-center gap-2">{props.children}</span>
 
       {/* 液态涟漪 */}
       {!asChild && (
@@ -91,20 +89,20 @@ function Button({
             {ripples.map((ripple) => (
               <motion.span
                 key={ripple.key}
-                initial={{ 
-                  scale: 0, 
+                initial={{
+                  scale: 0,
                   opacity: 0.35,
                   x: ripple.x,
                   y: ripple.y,
                 }}
-                animate={{ 
-                  scale: 2.5, 
+                animate={{
+                  scale: 2.5,
                   opacity: 0,
                 }}
                 exit={{ opacity: 0 }}
-                transition={{ 
-                  duration: 0.8, 
-                  ease: "easeOut" 
+                transition={{
+                  duration: 0.8,
+                  ease: "easeOut",
                 }}
                 onAnimationComplete={() => {
                   setRipples((prev) => prev.filter((r) => r.key !== ripple.key));

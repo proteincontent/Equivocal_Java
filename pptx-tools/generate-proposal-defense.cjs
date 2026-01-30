@@ -312,9 +312,13 @@ function build() {
     });
 
     slide.addText(
-      ["姓名：__________", "学号：__________", "学院/专业：__________", "指导教师：__________", "日期：____年__月__日"].join(
-        "\n"
-      ),
+      [
+        "姓名：__________",
+        "学号：__________",
+        "学院/专业：__________",
+        "指导教师：__________",
+        "日期：____年__月__日",
+      ].join("\n"),
       {
         x: 0.9,
         y: 3.6,
@@ -323,7 +327,7 @@ function build() {
         fontFace: FONTS.zh,
         fontSize: 14,
         color: "CBD5E1",
-      }
+      },
     );
 
     slide.addText("定位：咨询对话 + 合同审查 + 会话追溯（可扩展 RAG/OCR/文书生成）", {
@@ -436,14 +440,24 @@ function build() {
       color: COLORS.ink,
     });
 
-    addBullets(slide, ["邮箱验证码注册/登录", "JWT 鉴权与权限控制", "咨询对话（支持流式）", "会话列表/消息落库/删除", "基础管理统计（可选）"], {
-      x: 1.15,
-      y: 3.05,
-      w: 5.75,
-      h: 3.8,
-      fontSize: 15,
-      color: COLORS.slate,
-    });
+    addBullets(
+      slide,
+      [
+        "邮箱验证码注册/登录",
+        "JWT 鉴权与权限控制",
+        "咨询对话（支持流式）",
+        "会话列表/消息落库/删除",
+        "基础管理统计（可选）",
+      ],
+      {
+        x: 1.15,
+        y: 3.05,
+        w: 5.75,
+        h: 3.8,
+        fontSize: 15,
+        color: COLORS.slate,
+      },
+    );
 
     slide.addText("增强项（可选）", {
       x: 7.5,
@@ -456,14 +470,24 @@ function build() {
       color: COLORS.ink,
     });
 
-    addBullets(slide, ["合同文件上传/解析（OCR）", "RAG：引用法律知识库", "文书生成（Word/PDF）", "对象存储与向量库接入", "更丰富的沉浸式动效"], {
-      x: 7.5,
-      y: 3.05,
-      w: 4.8,
-      h: 3.8,
-      fontSize: 15,
-      color: COLORS.slate,
-    });
+    addBullets(
+      slide,
+      [
+        "合同文件上传/解析（OCR）",
+        "RAG：引用法律知识库",
+        "文书生成（Word/PDF）",
+        "对象存储与向量库接入",
+        "更丰富的沉浸式动效",
+      ],
+      {
+        x: 7.5,
+        y: 3.05,
+        w: 4.8,
+        h: 3.8,
+        fontSize: 15,
+        color: COLORS.slate,
+      },
+    );
 
     slide.addShape("rect", {
       x: 0.9,
@@ -517,7 +541,11 @@ function build() {
       h: 2.65,
       accent: COLORS.ink,
       title: "我们的底线：不做“万能回答”，只输出“可执行的下一步”",
-      lines: ["对 AI 输出加“风险提示模板”与“边界声明”", "需要更高可信度时：使用 RAG 引用来源（可选）", "所有结果绑定会话，便于复盘与验收"],
+      lines: [
+        "对 AI 输出加“风险提示模板”与“边界声明”",
+        "需要更高可信度时：使用 RAG 引用来源（可选）",
+        "所有结果绑定会话，便于复盘与验收",
+      ],
       titleColor: COLORS.ink,
     });
 
@@ -689,7 +717,11 @@ function build() {
       h: 1.75,
       accent: COLORS.green,
       title: "verification_codes",
-      lines: ["email, code, type(register/login)", "expires_at, used, attempts", "作用：降低垃圾注册，提高账号安全性"],
+      lines: [
+        "email, code, type(register/login)",
+        "expires_at, used, attempts",
+        "作用：降低垃圾注册，提高账号安全性",
+      ],
     });
 
     addCard(slide, {
@@ -699,7 +731,11 @@ function build() {
       h: 1.75,
       accent: COLORS.red,
       title: "验收点（开题阶段就能说清楚）",
-      lines: ["每条 AI 回复都能定位到 session + message", "可按用户拉取历史会话", "删除会话后数据一致性正确"],
+      lines: [
+        "每条 AI 回复都能定位到 session + message",
+        "可按用户拉取历史会话",
+        "删除会话后数据一致性正确",
+      ],
     });
 
     addSlideNumber(slide, slideNo++);
@@ -721,19 +757,31 @@ function build() {
       {
         problem: "AI 输出不确定性",
         pColor: COLORS.red,
-        solution: ["输出边界声明 + 风险提示模板", "需要可信度：RAG 引用来源（可选）", "会话落库，便于追责与复盘"],
+        solution: [
+          "输出边界声明 + 风险提示模板",
+          "需要可信度：RAG 引用来源（可选）",
+          "会话落库，便于追责与复盘",
+        ],
         sColor: COLORS.green,
       },
       {
         problem: "LLM API 兼容性/稳定性",
         pColor: COLORS.orange,
-        solution: ["超时/重试/降级：工具不可用时回退纯对话", "支持 Coze ↔ 自建 Agent 两条路线", "接口层做适配，避免 UI 绑死供应商"],
+        solution: [
+          "超时/重试/降级：工具不可用时回退纯对话",
+          "支持 Coze ↔ 自建 Agent 两条路线",
+          "接口层做适配，避免 UI 绑死供应商",
+        ],
         sColor: COLORS.green,
       },
       {
         problem: "隐私与安全（法律场景更敏感）",
         pColor: COLORS.purple,
-        solution: ["JWT 鉴权 + 权限控制 + CORS 策略", "敏感信息最小化存储/脱敏", "文件上传权限控制（可选接 R2）"],
+        solution: [
+          "JWT 鉴权 + 权限控制 + CORS 策略",
+          "敏感信息最小化存储/脱敏",
+          "文件上传权限控制（可选接 R2）",
+        ],
         sColor: COLORS.green,
       },
     ];
@@ -833,7 +881,7 @@ function build() {
         "RAG（可选）：命中率/相关性采用抽样人工评估",
         "安全：未登录不可访问会话与上传接口",
       ],
-      { x: 1.15, y: 3.05, w: 5.75, h: 3.85, fontSize: 14 }
+      { x: 1.15, y: 3.05, w: 5.75, h: 3.85, fontSize: 14 },
     );
 
     slide.addText("测试分层（从连通到端到端）", {

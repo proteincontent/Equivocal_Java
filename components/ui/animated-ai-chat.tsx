@@ -30,6 +30,7 @@ import { useConfig } from "@/hooks/use-config";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthModal } from "@/components/ui/auth-modal";
 import { buildApiUrl, fetchWithTimeout } from "@/lib/api";
+import { ChatRentScamGallery } from "@/components/rent-scam-cases/chat-rent-scam-gallery";
 
 interface UseAutoResizeTextareaProps {
   minHeight: number;
@@ -123,13 +124,13 @@ interface AnimatedAIChatProps {
 
 // 文件附件类型
 interface FileAttachment {
-  id: string;           // Coze 文件 ID
-  fileName: string;     // 文件名
-  fileSize: number;     // 文件大小
-  fileType: string;     // 文件类型
+  id: string; // Coze 文件 ID
+  fileName: string; // 文件名
+  fileSize: number; // 文件大小
+  fileType: string; // 文件类型
   isUploading: boolean; // 是否正在上传
-  error?: string;       // 上传错误信息
-  localFile?: File;     // 本地文件对象（上传前）
+  error?: string; // 上传错误信息
+  localFile?: File; // 本地文件对象（上传前）
 }
 
 export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: AnimatedAIChatProps) {
@@ -139,6 +140,10 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   const [value, setValue] = useState("");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const isTypingRef = useRef(isTyping);
+  useEffect(() => {
+    isTypingRef.current = isTyping;
+  }, [isTyping]);
   const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [_recentCommand, setRecentCommand] = useState<string | null>(null);
@@ -155,6 +160,10 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesLengthRef = useRef(messages.length);
+  useEffect(() => {
+    messagesLengthRef.current = messages.length;
+  }, [messages.length]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -181,8 +190,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     if (!container) return;
 
     const thresholdPx = 80;
-    const distanceToBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
+    const distanceToBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
     const atBottom = distanceToBottom <= thresholdPx;
 
     setIsAtBottom(atBottom);
@@ -192,12 +200,15 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   }, []);
 
   const handleCopy = useCallback((text: string, index: number) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 2000);
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+      });
   }, []);
 
   const handleStopGenerating = useCallback(() => {
@@ -252,17 +263,17 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       // 🚨 关键修复：防止发送消息时的闪烁
       // 如果正在输入(流式传输中)，或者是刚刚发送了消息导致 sessionId 变化
       // 我们都不应该重新拉取历史，因为当前内存中的 messages 才是最新的
-      if (isTyping) {
+      if (isTypingRef.current) {
         // 如果 sessionId 变了，更新 ref 以便下次正确判断，但不拉取数据
         if (sessionId) {
-            fetchHistorySessionIdRef.current = sessionId;
+          fetchHistorySessionIdRef.current = sessionId;
         }
         return;
       }
 
       // 如果是从无 SessionId 变为有 SessionId (通常是第一条消息发送后)
       // 且当前已经有消息在展示了，说明是本地状态更新，不需要拉取历史
-      if (!prevSessionId && sessionId && messages.length > 0) {
+      if (!prevSessionId && sessionId && messagesLengthRef.current > 0) {
         return;
       }
 
@@ -270,18 +281,20 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
         // 使用新的 API 端点获取指定会话的消息
         const response = await fetch(buildApiUrl(`/api/chat/sessions/${sessionId}`), {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (response.ok) {
           const data = await response.json();
           if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
-            setMessages(data.messages.map((msg: any) => ({
-              role: msg.role,
-              content: msg.content
-            })));
-            
+            setMessages(
+              data.messages.map((msg: any) => ({
+                role: msg.role,
+                content: msg.content,
+              })),
+            );
+
             // 滚动到底部
             setUnreadCount(0);
             setIsAtBottom(true);
@@ -301,7 +314,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           prevMessageCountRef.current = 0;
         }
       } catch (error) {
-        console.error('Failed to fetch chat history:', error);
+        console.error("Failed to fetch chat history:", error);
         setMessages([]);
         setUnreadCount(0);
         setIsAtBottom(true);
@@ -339,15 +352,8 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
         prefix: "/cases",
       },
     ],
-    []
+    [],
   );
-
-  const featureSuggestions = [
-    { icon: <FileText className="w-5 h-5 text-[#2563EB]" />, label: "起草合同" },
-    { icon: <Scale className="w-5 h-5 text-[#2563EB]" />, label: "法律咨询" },
-    { icon: <Shield className="w-5 h-5 text-[#2563EB]" />, label: "合规审查" },
-    { icon: <Search className="w-5 h-5 text-[#2563EB]" />, label: "案例检索" },
-  ];
 
   useEffect(() => {
     if (value.startsWith("/") && !value.includes(" ")) {
@@ -451,74 +457,77 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   /**
    * 上传单个文件到 Coze
    */
-  const uploadFile = useCallback(async (file: File): Promise<FileAttachment> => {
-    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    
-    // 创建临时附件对象
-    const tempAttachment: FileAttachment = {
-      id: tempId,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      isUploading: true,
-      localFile: file,
-    };
+  const uploadFile = useCallback(
+    async (file: File): Promise<FileAttachment> => {
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      console.log('[AnimatedAIChat] Starting file upload:', file.name);
-      const response = await fetch(buildApiUrl('/api/upload'), {
-        method: 'POST',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-        body: formData,
-      });
-
-      console.log('[AnimatedAIChat] Upload response status:', response.status);
-      if (response.status === 401) {
-        setErrorMessage('登录已过期，请重新登录');
-        setShowAuthModal(true);
-        throw new Error('未登录或登录已过期');
-      }
-      const responseText = await response.text();
-      console.log('[AnimatedAIChat] Upload response text:', responseText);
-
-      let result;
-      try {
-        result = responseText ? JSON.parse(responseText) : {};
-      } catch (e) {
-        console.error('[AnimatedAIChat] Failed to parse response as JSON:', e);
-        throw new Error(`服务器响应格式错误: ${response.status}`);
-      }
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || '文件上传失败');
-      }
-
-      const responseData = result?.data ?? {};
-      const uploadedId = responseData.id || responseData.file_id;
-      if (!uploadedId) {
-        throw new Error('上传成功但未返回文件ID');
-      }
-
-      // 返回成功的附件对象
-      return {
-        id: uploadedId,
-        fileName: responseData.file_name || result.filename || file.name,
-        fileSize: responseData.bytes || result.size || file.size,
+      // 创建临时附件对象
+      const tempAttachment: FileAttachment = {
+        id: tempId,
+        fileName: file.name,
+        fileSize: file.size,
         fileType: file.type,
-        isUploading: false,
+        isUploading: true,
+        localFile: file,
       };
-    } catch (error) {
-      console.error('[AnimatedAIChat] File upload error:', error);
-      return {
-        ...tempAttachment,
-        isUploading: false,
-        error: error instanceof Error ? error.message : '上传失败',
-      };
-    }
-  }, [token]);
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        console.log("[AnimatedAIChat] Starting file upload:", file.name);
+        const response = await fetch(buildApiUrl("/api/upload"), {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+        });
+
+        console.log("[AnimatedAIChat] Upload response status:", response.status);
+        if (response.status === 401) {
+          setErrorMessage("登录已过期，请重新登录");
+          setShowAuthModal(true);
+          throw new Error("未登录或登录已过期");
+        }
+        const responseText = await response.text();
+        console.log("[AnimatedAIChat] Upload response text:", responseText);
+
+        let result;
+        try {
+          result = responseText ? JSON.parse(responseText) : {};
+        } catch (e) {
+          console.error("[AnimatedAIChat] Failed to parse response as JSON:", e);
+          throw new Error(`服务器响应格式错误: ${response.status}`);
+        }
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || "文件上传失败");
+        }
+
+        const responseData = result?.data ?? {};
+        const uploadedId = responseData.id || responseData.file_id;
+        if (!uploadedId) {
+          throw new Error("上传成功但未返回文件ID");
+        }
+
+        // 返回成功的附件对象
+        return {
+          id: uploadedId,
+          fileName: responseData.file_name || result.filename || file.name,
+          fileSize: responseData.bytes || result.size || file.size,
+          fileType: file.type,
+          isUploading: false,
+        };
+      } catch (error) {
+        console.error("[AnimatedAIChat] File upload error:", error);
+        return {
+          ...tempAttachment,
+          isUploading: false,
+          error: error instanceof Error ? error.message : "上传失败",
+        };
+      }
+    },
+    [token],
+  );
 
   /**
    * 处理拖拽进入
@@ -526,9 +535,9 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // 检查是否有文件
-    if (e.dataTransfer.types.includes('Files')) {
+    if (e.dataTransfer.types.includes("Files")) {
       setIsDragging(true);
     }
   }, []);
@@ -539,7 +548,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // 只有当离开整个拖放区域时才取消高亮
     const rect = dropZoneRef.current?.getBoundingClientRect();
     if (rect) {
@@ -566,52 +575,53 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
   /**
    * 处理文件放置
    */
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
 
-    const files = e.dataTransfer.files;
-    if (!files || files.length === 0) return;
+      const files = e.dataTransfer.files;
+      if (!files || files.length === 0) return;
 
-    // 限制最多上传 5 个文件
-    const maxFiles = 5;
-    const currentCount = attachments.length;
-    const availableSlots = maxFiles - currentCount;
+      // 限制最多上传 5 个文件
+      const maxFiles = 5;
+      const currentCount = attachments.length;
+      const availableSlots = maxFiles - currentCount;
 
-    if (availableSlots <= 0) {
-      setErrorMessage('最多只能上传 5 个文件');
-      return;
-    }
+      if (availableSlots <= 0) {
+        setErrorMessage("最多只能上传 5 个文件");
+        return;
+      }
 
-    const filesToUpload = Array.from(files).slice(0, availableSlots);
+      const filesToUpload = Array.from(files).slice(0, availableSlots);
 
-    // 为每个文件创建临时附件并开始上传
-    for (const file of filesToUpload) {
-      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      
-      // 添加临时附件（显示上传中状态）
-      const tempAttachment: FileAttachment = {
-        id: tempId,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        isUploading: true,
-        localFile: file,
-      };
-      
-      setAttachments(prev => [...prev, tempAttachment]);
+      // 为每个文件创建临时附件并开始上传
+      for (const file of filesToUpload) {
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-      // 异步上传文件
-      uploadFile(file).then(uploadedAttachment => {
-        setAttachments(prev => 
-          prev.map(att => 
-            att.id === tempId ? uploadedAttachment : att
-          )
-        );
-      });
-    }
-  }, [attachments.length, uploadFile]);
+        // 添加临时附件（显示上传中状态）
+        const tempAttachment: FileAttachment = {
+          id: tempId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          isUploading: true,
+          localFile: file,
+        };
+
+        setAttachments((prev) => [...prev, tempAttachment]);
+
+        // 异步上传文件
+        uploadFile(file).then((uploadedAttachment) => {
+          setAttachments((prev) =>
+            prev.map((att) => (att.id === tempId ? uploadedAttachment : att)),
+          );
+        });
+      }
+    },
+    [attachments.length, uploadFile],
+  );
 
   /**
    * 处理文件选择
@@ -626,7 +636,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     const availableSlots = maxFiles - currentCount;
 
     if (availableSlots <= 0) {
-      setErrorMessage('最多只能上传 5 个文件');
+      setErrorMessage("最多只能上传 5 个文件");
       return;
     }
 
@@ -635,7 +645,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     // 为每个文件创建临时附件并开始上传
     for (const file of filesToUpload) {
       const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      
+
       // 添加临时附件（显示上传中状态）
       const tempAttachment: FileAttachment = {
         id: tempId,
@@ -645,22 +655,18 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
         isUploading: true,
         localFile: file,
       };
-      
-      setAttachments(prev => [...prev, tempAttachment]);
+
+      setAttachments((prev) => [...prev, tempAttachment]);
 
       // 异步上传文件
-      uploadFile(file).then(uploadedAttachment => {
-        setAttachments(prev => 
-          prev.map(att => 
-            att.id === tempId ? uploadedAttachment : att
-          )
-        );
+      uploadFile(file).then((uploadedAttachment) => {
+        setAttachments((prev) => prev.map((att) => (att.id === tempId ? uploadedAttachment : att)));
       });
     }
 
     // 清空文件输入
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -696,25 +702,25 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
 
     // 🚨 发送前检查登录状态
     if (!user || !token) {
-      setErrorMessage('请先登录后再使用聊天功能');
+      setErrorMessage("请先登录后再使用聊天功能");
       setShowAuthModal(true);
       return;
     }
 
     const trimmed = value.trim();
     lastSubmittedTextRef.current = trimmed;
-    
+
     // 检查是否有正在上传的文件
-    const uploadingFiles = attachments.filter(att => att.isUploading);
+    const uploadingFiles = attachments.filter((att) => att.isUploading);
     if (uploadingFiles.length > 0) {
-      setErrorMessage('请等待文件上传完成');
+      setErrorMessage("请等待文件上传完成");
       return;
     }
 
     // 检查是否有上传失败的文件
-    const failedFiles = attachments.filter(att => att.error);
+    const failedFiles = attachments.filter((att) => att.error);
     if (failedFiles.length > 0) {
-      setErrorMessage('部分文件上传失败，请移除后重试');
+      setErrorMessage("部分文件上传失败，请移除后重试");
       return;
     }
 
@@ -728,31 +734,31 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     let contentType: "text" | "object_string" = "text";
 
     // 如果有附件，构建 object_string 格式的内容
-    const uploadedFileIds = attachments.map(att => att.id);
+    const uploadedFileIds = attachments.map((att) => att.id);
     if (attachments.length > 0) {
       const contentParts: any[] = [];
-      
+
       // 添加文件
       for (const att of attachments) {
-        const isImage = att.fileType.startsWith('image/');
+        const isImage = att.fileType.startsWith("image/");
         contentParts.push({
-          type: isImage ? 'image' : 'file',
+          type: isImage ? "image" : "file",
           file_id: att.id,
         });
       }
-      
+
       // 添加文本：如果用户没输入内容，也要给一个默认指令，避免“只上传文件”时模型不知道要做什么
       const promptText =
         trimmed ||
-        (attachments.some(att => att.fileType.startsWith("image/"))
+        (attachments.some((att) => att.fileType.startsWith("image/"))
           ? "请识别并分析我上传的图片内容，并给出要点总结。"
           : "请阅读并分析我上传的文件（如合同/材料），提取关键信息，指出风险点，并给出修改或应对建议。");
 
       contentParts.push({
-        type: 'text',
+        type: "text",
         text: promptText,
       });
-      
+
       messageContent = JSON.stringify(contentParts);
       contentType = "object_string";
     }
@@ -787,7 +793,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     // 构建发送给后端的消息
     const apiMessages = nextMessages.map((msg, index) => {
       // 只有最后一条用户消息需要包含文件
-      if (index === nextMessages.length - 1 && msg.role === 'user' && uploadedFileIds.length > 0) {
+      if (index === nextMessages.length - 1 && msg.role === "user" && uploadedFileIds.length > 0) {
         return {
           role: msg.role,
           content: messageContent,
@@ -813,17 +819,17 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     try {
       // 使用流式端点
       const apiEndpoint = buildApiUrl("/api/chat");
-      
+
       // 🔑 添加 Authorization 头
       const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        'Accept': 'text/event-stream',
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
       };
-      
+
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
-      
+
       const chatTimeoutMs = Number.parseInt(
         process.env.NEXT_PUBLIC_CHAT_TIMEOUT_MS ?? "600000",
         10,
@@ -842,14 +848,14 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       // 🚫 处理错误响应
       if (!response.ok) {
         if (response.status === 401) {
-          setErrorMessage('登录已过期，请重新登录');
+          setErrorMessage("登录已过期，请重新登录");
           setShowAuthModal(true);
           setIsTyping(false);
           return;
         }
 
         let friendlyMessage = "请求失败，请稍后重试";
-        
+
         if (response.status === 403) {
           friendlyMessage = "抱歉，您没有权限执行此操作";
         } else if (response.status === 404) {
@@ -907,16 +913,16 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
       }
 
       // 检查是否是 SSE 流式响应
-      const contentType = response.headers.get('content-type');
-      if (contentType?.includes('text/event-stream')) {
+      const contentType = response.headers.get("content-type");
+      if (contentType?.includes("text/event-stream")) {
         // 处理 SSE 流式响应
         await handleStreamResponse(response);
       } else {
         // 处理普通 JSON 响应（兼容旧版）
         const data = await response.json();
-        
+
         let assistantContent = "";
-        
+
         if (data?.choices && Array.isArray(data.choices) && data.choices.length > 0) {
           assistantContent = extractMessageContent(data.choices[0].message);
         } else {
@@ -931,8 +937,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
             ...current,
             {
               role: "assistant",
-              content:
-                "抱歉，我没有生成有效回复。可以换一种说法再试试。",
+              content: "抱歉，我没有生成有效回复。可以换一种说法再试试。",
             },
           ]);
           return;
@@ -958,7 +963,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
         return;
       }
       console.warn("[AnimatedAIChat] Failed to send message", error);
-      
+
       const errorMsg = error instanceof Error ? error.message : "未知错误";
       const isNetworkError = errorMsg.includes("Failed to fetch") || errorMsg.includes("Network");
 
@@ -971,7 +976,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
             : `请求出错：${errorMsg}`,
         },
       ]);
-      
+
       setErrorMessage(errorMsg);
       return;
     } finally {
@@ -990,12 +995,12 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     }
 
     const decoder = new TextDecoder();
-    
+
     // 渲染状态
     let displayedContent = ""; // 屏幕上实际显示的内容
-    let bufferContent = "";    // 待显示的缓冲内容（蓄水池）
+    let bufferContent = ""; // 待显示的缓冲内容（蓄水池）
     let hasAddedAssistantMessage = false;
-    
+
     // 流状态
     let isStreamEnded = false;
     let newSessionId: string | null = null;
@@ -1005,22 +1010,22 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
     const pumpNetworkStream = async () => {
       let networkBuffer = ""; // SSE 数据包解析缓冲
       let shouldStop = false;
-      
+
       try {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
           networkBuffer += decoder.decode(value, { stream: true });
-          
-          const events = networkBuffer.split('\n\n');
+
+          const events = networkBuffer.split("\n\n");
           networkBuffer = events.pop() || "";
 
           for (const eventBlock of events) {
-            const lines = eventBlock.split('\n');
+            const lines = eventBlock.split("\n");
             for (const line of lines) {
-              if (!line.startsWith('data:')) continue;
-              
+              if (!line.startsWith("data:")) continue;
+
               const dataStr = line.substring(5).trim();
               if (!dataStr) continue;
 
@@ -1032,24 +1037,24 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
 
               try {
                 const event = JSON.parse(dataStr);
-                
-                if (event.type === 'session') {
+
+                if (event.type === "session") {
                   newSessionId = event.sessionId;
                   if (newSessionId && newSessionId !== sessionId) {
                     onSessionChange?.(newSessionId);
                   }
-                } else if (event.type === 'content' || event.type === 'answer') {
+                } else if (event.type === "content" || event.type === "answer") {
                   // 关键点：只写入缓冲池，不直接更新 UI
                   bufferContent += event.content;
                 } else if (event.type === "done") {
                   shouldStop = true;
                   break;
-                } else if (event.type === 'error') {
+                } else if (event.type === "error") {
                   streamError = event.message || "Unknown error from stream";
                   shouldStop = true;
                   break;
                 }
-              } catch (e) {
+              } catch {
                 // ignore parse error
               }
             }
@@ -1066,10 +1071,10 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
             break;
           }
         }
-        
+
         // 处理剩余 buffer
         if (networkBuffer.trim()) {
-           // 简单处理剩余数据，通常不重要
+          // 简单处理剩余数据，通常不重要
         }
       } catch (err) {
         console.warn("Stream reading error:", err);
@@ -1092,10 +1097,13 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           const backlog = bufferContent.length;
           let chunkSize = 1;
 
-          if (backlog > 200) chunkSize = 20;      // 极速追赶
-          else if (backlog > 100) chunkSize = 10; // 快速追赶
-          else if (backlog > 50) chunkSize = 5;   // 中速
-          else if (backlog > 20) chunkSize = 2;   // 稍快
+          if (backlog > 200)
+            chunkSize = 20; // 极速追赶
+          else if (backlog > 100)
+            chunkSize = 10; // 快速追赶
+          else if (backlog > 50)
+            chunkSize = 5; // 中速
+          else if (backlog > 20) chunkSize = 2; // 稍快
           // 默认 chunkSize = 1，提供最细腻的打字感
 
           const chunk = bufferContent.slice(0, chunkSize);
@@ -1115,7 +1123,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           } else {
             setMessages((current) => {
               const updated = [...current];
-              if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+              if (updated.length > 0 && updated[updated.length - 1].role === "assistant") {
                 updated[updated.length - 1] = {
                   ...updated[updated.length - 1],
                   content: displayedContent,
@@ -1163,23 +1171,27 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
    * 获取文件图标
    */
   const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) {
+    if (fileType.startsWith("image/")) {
       return <ImageFileIcon className="w-3 h-3" />;
     }
     return <FileIcon className="w-3 h-3" />;
   };
 
   const renderInputArea = (centered = false) => (
-    <div className={cn(
-      "relative group flex flex-col transition-all duration-500",
-      centered ? "w-full max-w-3xl mx-auto" : "w-full"
-    )}>
-      <div className={cn(
-        "relative rounded-2xl border transition-all duration-300 overflow-hidden backdrop-blur-xl",
-        inputFocused
-          ? "bg-background/95 border-[#2563EB] shadow-[0_0_50px_-12px_rgba(37,99,235,0.2)] ring-1 ring-[#2563EB]/30"
-          : "bg-background/60 border-border/50 hover:border-[#2563EB]/40 hover:bg-background/80"
-      )}>
+    <div
+      className={cn(
+        "relative group flex flex-col transition-all duration-500",
+        centered ? "w-full max-w-3xl mx-auto" : "w-full",
+      )}
+    >
+      <div
+        className={cn(
+          "relative rounded-2xl border transition-all duration-300 overflow-hidden backdrop-blur-xl",
+          inputFocused
+            ? "bg-background/95 border-[#2563EB] shadow-[0_0_50px_-12px_rgba(37,99,235,0.2)] ring-1 ring-[#2563EB]/30"
+            : "bg-background/60 border-border/50 hover:border-[#2563EB]/40 hover:bg-background/80",
+        )}
+      >
         <Textarea
           ref={textareaRef}
           value={value}
@@ -1197,7 +1209,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           }
           className={cn(
             "text-foreground placeholder:text-muted-foreground/60 px-6 font-sans text-[16px] leading-relaxed resize-none bg-transparent",
-            centered ? "min-h-[80px] py-6" : "min-h-[52px] py-4"
+            centered ? "min-h-[80px] py-6" : "min-h-[52px] py-4",
           )}
         />
 
@@ -1217,7 +1229,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                     "flex items-center gap-2 text-xs py-1.5 px-3 rounded-md border",
                     attachment.error
                       ? "bg-red-500/10 border-red-500/20 text-red-400"
-                      : "bg-[#2563EB]/5 border-[#2563EB]/10 text-[#2563EB]/80"
+                      : "bg-[#2563EB]/5 border-[#2563EB]/10 text-[#2563EB]/80",
                   )}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1229,9 +1241,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                     getFileIcon(attachment.fileType)
                   )}
                   <span className="max-w-[120px] truncate font-mono">{attachment.fileName}</span>
-                  {attachment.error && (
-                    <span className="text-red-400 text-[10px]">失败</span>
-                  )}
+                  {attachment.error && <span className="text-red-400 text-[10px]">失败</span>}
                   <button
                     onClick={() => removeAttachment(attachment.id)}
                     className="text-white/40 hover:text-white transition-colors"
@@ -1243,95 +1253,100 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 pb-3">
-           <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleAttachFile}
+              className="p-2 text-muted-foreground/40 hover:text-[#2563EB] hover:bg-[#2563EB]/10 rounded-lg transition-all"
+              title="上传文件"
+              aria-label="上传文件"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <div className="h-4 w-px bg-border/40 mx-2" />
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={handleAttachFile}
-                className="p-2 text-muted-foreground/40 hover:text-[#2563EB] hover:bg-[#2563EB]/10 rounded-lg transition-all"
-                title="上传文件"
-                aria-label="上传文件"
+                disabled
+                aria-disabled="true"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs text-muted-foreground/40 opacity-60 cursor-not-allowed"
+                title="即将上线"
               >
-                <Paperclip className="w-4 h-4" />
+                <Globe className="w-3.5 h-3.5" />
+                <span>联网</span>
               </button>
-              <div className="h-4 w-px bg-border/40 mx-2" />
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs text-muted-foreground/40 opacity-60 cursor-not-allowed"
-                  title="即将上线"
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>联网</span>
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs text-muted-foreground/40 opacity-60 cursor-not-allowed"
-                  title="即将上线"
-                >
-                  <BrainCircuit className="w-3.5 h-3.5" />
-                  <span>深度</span>
-                </button>
-              </div>
-           </div>
-           
-            {isTyping ? (
               <button
                 type="button"
-                onClick={handleStopGenerating}
-                aria-label="停止生成"
-                title="停止生成（Esc）"
-                className={cn(
-                  "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
-                  "bg-muted text-muted-foreground hover:bg-muted/80"
-                )}
+                disabled
+                aria-disabled="true"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-transparent border border-transparent text-xs text-muted-foreground/40 opacity-60 cursor-not-allowed"
+                title="即将上线"
               >
-                <Square className="w-4 h-4" />
+                <BrainCircuit className="w-3.5 h-3.5" />
+                <span>深度</span>
               </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSendMessage}
-                disabled={(!value.trim() && attachments.length === 0) || attachments.some(att => att.isUploading)}
-                aria-label="发送"
-                title="发送（Enter）"
-                className={cn(
-                  "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
-                  (value.trim() || attachments.length > 0) && !attachments.some(att => att.isUploading)
-                    ? "bg-[#2563EB] text-white hover:bg-[#3B82F6] shadow-lg hover:shadow-[#2563EB]/20"
-                    : "bg-muted text-muted-foreground/40 cursor-not-allowed"
-                )}
-              >
-                <SendIcon className="w-4 h-4" />
-              </button>
-            )}
+            </div>
+          </div>
+
+          {isTyping ? (
+            <button
+              type="button"
+              onClick={handleStopGenerating}
+              aria-label="停止生成"
+              title="停止生成（Esc）"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
+                "bg-muted text-muted-foreground hover:bg-muted/80",
+              )}
+            >
+              <Square className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSendMessage}
+              disabled={
+                (!value.trim() && attachments.length === 0) ||
+                attachments.some((att) => att.isUploading)
+              }
+              aria-label="发送"
+              title="发送（Enter）"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-300 flex items-center justify-center",
+                (value.trim() || attachments.length > 0) &&
+                  !attachments.some((att) => att.isUploading)
+                  ? "bg-[#2563EB] text-white hover:bg-[#3B82F6] shadow-lg hover:shadow-[#2563EB]/20"
+                  : "bg-muted text-muted-foreground/40 cursor-not-allowed",
+              )}
+            >
+              <SendIcon className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
-      
+
       {/* Decorative Focus Glow */}
-      <div className={cn(
-        "absolute -inset-[1px] -z-10 rounded-[17px] bg-gradient-to-r from-[#2563EB]/0 via-[#2563EB]/30 to-[#2563EB]/0 opacity-0 transition-opacity duration-500 blur-sm",
-        inputFocused && "opacity-100"
-      )} />
+      <div
+        className={cn(
+          "absolute -inset-[1px] -z-10 rounded-[17px] bg-gradient-to-r from-[#2563EB]/0 via-[#2563EB]/30 to-[#2563EB]/0 opacity-0 transition-opacity duration-500 blur-sm",
+          inputFocused && "opacity-100",
+        )}
+      />
     </div>
   );
 
   return (
     <div className="h-full flex flex-col w-full relative overflow-hidden">
-      
       {/* 🔐 认证模态框 */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={(authUser) => {
           // 🔑 更新全局认证状态
-          const savedToken = localStorage.getItem('auth_token');
+          const savedToken = localStorage.getItem("auth_token");
           if (savedToken) {
             login(authUser, savedToken);
           }
@@ -1359,25 +1374,25 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           {/* Header - Only show in chat mode */}
-      {isChatStarted && (
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#2563EB]/5 border border-[#2563EB]/10">
-            <div className="relative">
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#2563EB] animate-ping opacity-50" />
-              <div className="relative w-2 h-2 rounded-full bg-[#2563EB] shadow-[0_0_10px_rgba(37,99,235,0.6)]" />
+          {isChatStarted && (
+            <div className="flex items-center justify-between px-6 py-4">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#2563EB]/5 border border-[#2563EB]/10">
+                <div className="relative">
+                  <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#2563EB] animate-ping opacity-50" />
+                  <div className="relative w-2 h-2 rounded-full bg-[#2563EB] shadow-[0_0_10px_rgba(37,99,235,0.6)]" />
+                </div>
+                <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">
+                  系统在线
+                </span>
+              </div>
             </div>
-            <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">
-              系统在线
-            </span>
-          </div>
-        </div>
-      )}
+          )}
 
           <motion.div
             ref={dropZoneRef}
             className={cn(
               "relative flex-1 flex flex-col min-h-0",
-              isDragging && "ring-2 ring-[#2563EB]/50 inset-0 z-50 bg-black/50"
+              isDragging && "ring-2 ring-[#2563EB]/50 inset-0 z-50 bg-black/50",
             )}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
@@ -1396,7 +1411,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                 >
                   <div className="flex flex-col items-center gap-4 text-white">
                     <div className="p-4 rounded-full bg-white/10 border border-white/20">
-                       <Paperclip className="w-8 h-8" />
+                      <Paperclip className="w-8 h-8" />
                     </div>
                     <span className="text-lg font-medium">松开即可上传文件</span>
                   </div>
@@ -1421,28 +1436,37 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
-                        className={cn("flex w-full mb-8 flex-col group", isUser ? "items-end" : "items-start")}
+                        className={cn(
+                          "flex w-full mb-8 flex-col group",
+                          isUser ? "items-end" : "items-start",
+                        )}
                       >
                         <div
                           className={cn(
                             "relative transition-all duration-500",
                             isUser
                               ? "max-w-[85%] px-5 py-3.5 bg-[#2563EB]/[0.08] dark:bg-[#2563EB]/[0.12] text-foreground rounded-2xl rounded-tr-md border border-[#2563EB]/15 dark:border-[#2563EB]/20"
-                              : "w-full px-0 py-4 text-foreground"
+                              : "w-full px-0 py-4 text-foreground",
                           )}
                         >
                           {!isUser && (
-                             <div className="flex items-center gap-3 mb-4 border-b border-[#2563EB]/20 pb-3">
-                                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#2563EB] to-[#3B82F6] shadow-md shadow-[#2563EB]/20">
-                                    <Scale className="w-4 h-4 text-white" />
-                                 </div>
-                                 <span className="text-xs font-bold text-[#2563EB] tracking-widest uppercase">法律顾问</span>
+                            <div className="flex items-center gap-3 mb-4 border-b border-[#2563EB]/20 pb-3">
+                              <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#2563EB] to-[#3B82F6] shadow-md shadow-[#2563EB]/20">
+                                <Scale className="w-4 h-4 text-white" />
                               </div>
-                           )}
-                          <div className={cn(
-                            "prose max-w-none prose-p:leading-7 prose-li:marker:text-[#2563EB]/50",
-                            !isUser ? "font-sans text-[15px] text-foreground/90 leading-relaxed" : "text-foreground font-sans text-sm"
-                          )}>
+                              <span className="text-xs font-bold text-[#2563EB] tracking-widest uppercase">
+                                法律顾问
+                              </span>
+                            </div>
+                          )}
+                          <div
+                            className={cn(
+                              "prose max-w-none prose-p:leading-7 prose-li:marker:text-[#2563EB]/50",
+                              !isUser
+                                ? "font-sans text-[15px] text-foreground/90 leading-relaxed"
+                                : "text-foreground font-sans text-sm",
+                            )}
+                          >
                             {isUser ? message.content : renderMessageContent(message.content)}
                           </div>
                         </div>
@@ -1464,7 +1488,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                       </motion.div>
                     );
                   })}
-                  
+
                   {isTyping && messages[messages.length - 1]?.role !== "assistant" && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
@@ -1474,13 +1498,13 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                       <ContractGenerationLoader />
                     </motion.div>
                   )}
-                  
+
                   {isTyping && messages[messages.length - 1]?.role === "assistant" && (
-                     <div className="flex justify-start w-full relative pl-0 mb-2">
-                         <div className="flex items-center gap-2 text-[#2563EB]/60">
-                            <span className="text-xs font-mono animate-pulse">正在输入...</span>
-                         </div>
-                     </div>
+                    <div className="flex justify-start w-full relative pl-0 mb-2">
+                      <div className="flex items-center gap-2 text-[#2563EB]/60">
+                        <span className="text-xs font-mono animate-pulse">正在输入...</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -1510,18 +1534,20 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                 <div className="p-4 md:p-6 bg-gradient-to-t from-background via-background/95 to-transparent">
                   {renderInputArea(false)}
                   <div className="text-center mt-3">
-                     <span className="text-[10px] text-muted-foreground/40 font-mono tracking-widest">对话内容仅用于咨询，请勿上传敏感隐私</span>
+                    <span className="text-[10px] text-muted-foreground/40 font-mono tracking-widest">
+                      对话内容仅用于咨询，请勿上传敏感隐私
+                    </span>
                   </div>
                 </div>
               </>
             ) : (
               // Initial/Empty State (Legal Console Style)
-              <div className="flex-1 flex flex-col items-center justify-center p-8 max-w-3xl mx-auto w-full relative">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-start overflow-y-auto p-6 sm:p-8 pt-10 md:pt-14 pb-10 max-w-3xl mx-auto w-full relative">
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="mb-16 text-center space-y-6"
+                  className="mb-10 md:mb-14 text-center space-y-6"
                 >
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2563EB]/10 border border-[#2563EB]/20 mb-4">
                     <Scale className="w-8 h-8 text-[#2563EB]" />
@@ -1536,34 +1562,19 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  className="w-full mb-12"
+                  className="w-full mb-8 md:mb-10"
                 >
                   {renderInputArea(true)}
                 </motion.div>
 
-                {/* Feature Suggestions - Minimalist */}
+                {/* Rent Scam Cases (Doubao-style cards) */}
                 <motion.div
-                  className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full"
+                  className="w-full"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  {featureSuggestions.map((feature, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setValue(`帮我${feature.label}...`);
-                        textareaRef.current?.focus();
-                        setTimeout(() => adjustHeight(), 0);
-                      }}
-                      className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-background/60 backdrop-blur-md border border-border/80 hover:border-[#2563EB]/50 hover:bg-background/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.15)] transition-all duration-300"
-                    >
-                      <div className="p-2.5 rounded-lg bg-muted/50 group-hover:bg-[#2563EB]/10 transition-colors">
-                        {feature.icon}
-                      </div>
-                      <span className="text-sm text-foreground group-hover:text-[#2563EB] font-medium transition-colors">{feature.label}</span>
-                    </button>
-                  ))}
+                  <ChatRentScamGallery />
                 </motion.div>
               </div>
             )}
@@ -1597,7 +1608,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
               </div>
             )}
           </motion.div>
-          
+
           {/* Command Palette */}
           <AnimatePresence>
             {showCommandPalette && (
@@ -1625,8 +1636,10 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
                         {suggestion.icon}
                       </div>
                       <div className="flex flex-col">
-                         <span className="font-medium">{suggestion.label}</span>
-                         <span className="text-xs text-muted-foreground/50 font-mono">{suggestion.prefix}</span>
+                        <span className="font-medium">{suggestion.label}</span>
+                        <span className="text-xs text-muted-foreground/50 font-mono">
+                          {suggestion.prefix}
+                        </span>
                       </div>
                     </motion.div>
                   ))}
@@ -1634,7 +1647,6 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
               </motion.div>
             )}
           </AnimatePresence>
-
         </motion.div>
       </div>
 
@@ -1661,9 +1673,22 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
  * 判断 URL 是否是文件链接
  */
 const isFileUrl = (url: string): boolean => {
-  const fileExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z', '.txt', '.csv'];
+  const fileExtensions = [
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".zip",
+    ".rar",
+    ".7z",
+    ".txt",
+    ".csv",
+  ];
   const lowerUrl = url.toLowerCase();
-  return fileExtensions.some(ext => lowerUrl.includes(ext));
+  return fileExtensions.some((ext) => lowerUrl.includes(ext));
 };
 
 /**
@@ -1674,18 +1699,18 @@ const extractFileName = (url: string): string => {
     // 尝试从 URL 路径中提取文件名
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
-    const segments = pathname.split('/');
+    const segments = pathname.split("/");
     const lastSegment = segments[segments.length - 1];
-    
-    if (lastSegment && lastSegment.includes('.')) {
+
+    if (lastSegment && lastSegment.includes(".")) {
       // 解码 URL 编码的文件名
       return decodeURIComponent(lastSegment);
     }
-    
+
     // 如果无法提取，返回通用名称
-    return '下载文件';
+    return "下载文件";
   } catch {
-    return '下载文件';
+    return "下载文件";
   }
 };
 
@@ -1705,9 +1730,9 @@ const renderMessageContent = (content: string): React.ReactNode => {
           const fileName = extractFileName(url);
 
           if (isFile) {
-            const isWord = fileName.endsWith('.doc') || fileName.endsWith('.docx');
-            const isPdf = fileName.endsWith('.pdf');
-            
+            const isWord = fileName.endsWith(".doc") || fileName.endsWith(".docx");
+            const isPdf = fileName.endsWith(".pdf");
+
             return (
               <a
                 href={url}
@@ -1716,14 +1741,23 @@ const renderMessageContent = (content: string): React.ReactNode => {
                 download={fileName}
                 className="group flex items-center gap-3 p-3 my-2 rounded-xl bg-card border border-border hover:border-[#2563EB]/50 hover:shadow-md transition-all duration-300 no-underline max-w-sm"
               >
-                <span className={cn(
-                  "p-2.5 rounded-lg flex-shrink-0 transition-colors",
-                  isWord ? "bg-blue-50 text-blue-600" :
-                  isPdf ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600"
-                )}>
-                  {isWord ? <FileText className="w-5 h-5" /> :
-                   isPdf ? <FileIcon className="w-5 h-5" /> :
-                   <Download className="w-5 h-5" />}
+                <span
+                  className={cn(
+                    "p-2.5 rounded-lg flex-shrink-0 transition-colors",
+                    isWord
+                      ? "bg-blue-50 text-blue-600"
+                      : isPdf
+                        ? "bg-red-50 text-red-600"
+                        : "bg-gray-100 text-gray-600",
+                  )}
+                >
+                  {isWord ? (
+                    <FileText className="w-5 h-5" />
+                  ) : isPdf ? (
+                    <FileIcon className="w-5 h-5" />
+                  ) : (
+                    <Download className="w-5 h-5" />
+                  )}
                 </span>
                 <span className="flex flex-col min-w-0 overflow-hidden">
                   <span className="text-sm font-medium text-foreground truncate pr-2 group-hover:text-[#2563EB] transition-colors">
@@ -1750,7 +1784,9 @@ const renderMessageContent = (content: string): React.ReactNode => {
           );
         },
         // 确保 <u> 标签正常显示
-        u: ({ children }) => <u className="decoration-[#2563EB]/40 underline-offset-4">{children}</u>,
+        u: ({ children }) => (
+          <u className="decoration-[#2563EB]/40 underline-offset-4">{children}</u>
+        ),
       }}
     >
       {content}
@@ -1793,111 +1829,98 @@ function extractMessageContent(message: unknown): string {
   return "";
 }
 
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1 h-4">
-      {[1, 2, 3, 4].map((i) => (
-        <motion.div
-          key={i}
-          className="w-0.5 bg-[#2563EB]/60 rounded-full"
-          initial={{ height: 4, opacity: 0.5 }}
-          animate={{
-            height: [4, 12, 4],
-            opacity: [0.5, 1, 0.5],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Number.POSITIVE_INFINITY,
-            delay: i * 0.1,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+const CONTRACT_GENERATION_STEPS = [
+  "解析合同需求与关键要素...",
+  "检索《民法典》相关法律法规...",
+  "构建标准合同框架...",
+  "拟定核心条款与补充协议...",
+  "进行合规性与风险审查...",
+  "正在生成最终文档...",
+] as const;
+
+const CONTRACT_GENERATION_TIMES_MS = [2000, 2500, 2000, 3000, 2500, 10000] as const;
 
 function ContractGenerationLoader() {
   const [step, setStep] = useState(0);
-  const steps = [
-    "解析合同需求与关键要素...",
-    "检索《民法典》相关法律法规...",
-    "构建标准合同框架...",
-    "拟定核心条款与补充协议...",
-    "进行合规性与风险审查...",
-    "正在生成最终文档..."
-  ];
+  const steps = CONTRACT_GENERATION_STEPS;
 
   useEffect(() => {
-    const times = [2000, 2500, 2000, 3000, 2500, 10000];
     let currentStep = 0;
     let timer: NodeJS.Timeout;
-    
+
     const next = () => {
-      if (currentStep >= steps.length - 1) return;
+      if (currentStep >= CONTRACT_GENERATION_STEPS.length - 1) return;
       timer = setTimeout(() => {
         currentStep++;
         setStep(currentStep);
         next();
-      }, times[currentStep]);
+      }, CONTRACT_GENERATION_TIMES_MS[currentStep]);
     };
-    
+
     next();
-    
+
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="flex flex-col gap-4 py-2 max-w-md w-full">
-       <div className="flex items-center gap-3 text-[#2563EB]">
-          <div className="p-1.5 rounded-lg bg-[#2563EB]/10 border border-[#2563EB]/20">
-            <Scale className="w-4 h-4 animate-pulse" />
-          </div>
-          <span className="text-sm font-bold tracking-widest uppercase">AI 法律助理工作流</span>
-       </div>
-       
-       <div className="pl-11 space-y-3 w-full">
-          <div className="space-y-2">
-             {steps.map((s, i) => {
-                if (i > step) return null;
-                
-                const isCurrent = i === step;
-                
-                return (
-                   <motion.div
-                     key={i}
-                     initial={{ opacity: 0, x: -10 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     className="flex items-center gap-3"
-                   >
-                      <div className={cn(
-                        "w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-500",
-                        isCurrent ? "bg-[#2563EB] shadow-[0_0_8px_rgba(37,99,235,0.6)] scale-110" : "bg-[#2563EB]/30"
-                      )} />
-                      <span className={cn(
-                        "text-sm transition-colors duration-500",
-                        isCurrent ? "text-foreground font-medium" : "text-muted-foreground/60"
-                      )}>
-                        {s}
-                      </span>
-                      {isCurrent && (
-                        <span className="text-xs text-[#2563EB] font-mono animate-pulse ml-auto">处理中</span>
-                      )}
-                   </motion.div>
-                )
-             })}
-          </div>
-          
-          {/* 进度条 */}
-          <div className="h-1 w-full bg-muted/50 rounded-full overflow-hidden mt-4">
-             <motion.div
-               className="h-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6]"
-               initial={{ width: "0%" }}
-               animate={{ width: `${Math.min(((step + 1) / steps.length) * 100, 95)}%` }}
-               transition={{ duration: 0.5 }}
-             />
-          </div>
-       </div>
+      <div className="flex items-center gap-3 text-[#2563EB]">
+        <div className="p-1.5 rounded-lg bg-[#2563EB]/10 border border-[#2563EB]/20">
+          <Scale className="w-4 h-4 animate-pulse" />
+        </div>
+        <span className="text-sm font-bold tracking-widest uppercase">AI 法律助理工作流</span>
+      </div>
+
+      <div className="pl-11 space-y-3 w-full">
+        <div className="space-y-2">
+          {steps.map((s, i) => {
+            if (i > step) return null;
+
+            const isCurrent = i === step;
+
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-3"
+              >
+                <div
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-500",
+                    isCurrent
+                      ? "bg-[#2563EB] shadow-[0_0_8px_rgba(37,99,235,0.6)] scale-110"
+                      : "bg-[#2563EB]/30",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm transition-colors duration-500",
+                    isCurrent ? "text-foreground font-medium" : "text-muted-foreground/60",
+                  )}
+                >
+                  {s}
+                </span>
+                {isCurrent && (
+                  <span className="text-xs text-[#2563EB] font-mono animate-pulse ml-auto">
+                    处理中
+                  </span>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* 进度条 */}
+        <div className="h-1 w-full bg-muted/50 rounded-full overflow-hidden mt-4">
+          <motion.div
+            className="h-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6]"
+            initial={{ width: "0%" }}
+            animate={{ width: `${Math.min(((step + 1) / steps.length) * 100, 95)}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

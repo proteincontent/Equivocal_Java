@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useContract } from "../context/contract-context";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Wand2, Copy, CheckCircle2, AlertTriangle, AlertCircle, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -34,28 +33,43 @@ export function RiskPanel() {
             共 {state.risks.length} 处
           </span>
         </div>
-        
+
         <div className="grid grid-cols-3 gap-2">
           <StatBadge
             count={computed.stats.high}
             label="高风险"
             type="high"
-            active={state.riskFilter === 'high'}
-            onClick={() => dispatch({ type: 'SET_FILTER', payload: state.riskFilter === 'high' ? 'all' : 'high' })}
+            active={state.riskFilter === "high"}
+            onClick={() =>
+              dispatch({
+                type: "SET_FILTER",
+                payload: state.riskFilter === "high" ? "all" : "high",
+              })
+            }
           />
           <StatBadge
             count={computed.stats.medium}
             label="建议优化"
             type="medium"
-            active={state.riskFilter === 'medium'}
-            onClick={() => dispatch({ type: 'SET_FILTER', payload: state.riskFilter === 'medium' ? 'all' : 'medium' })}
+            active={state.riskFilter === "medium"}
+            onClick={() =>
+              dispatch({
+                type: "SET_FILTER",
+                payload: state.riskFilter === "medium" ? "all" : "medium",
+              })
+            }
           />
           <StatBadge
             count={computed.stats.safe}
             label="权益保障"
             type="safe"
-            active={state.riskFilter === 'safe'}
-            onClick={() => dispatch({ type: 'SET_FILTER', payload: state.riskFilter === 'safe' ? 'all' : 'safe' })}
+            active={state.riskFilter === "safe"}
+            onClick={() =>
+              dispatch({
+                type: "SET_FILTER",
+                payload: state.riskFilter === "safe" ? "all" : "safe",
+              })
+            }
           />
         </div>
       </div>
@@ -76,7 +90,7 @@ export function RiskPanel() {
                 key={risk.id}
                 risk={risk}
                 isActive={state.activeRiskId === risk.id}
-                onClick={() => dispatch({ type: 'SET_ACTIVE_RISK', payload: risk.id })}
+                onClick={() => dispatch({ type: "SET_ACTIVE_RISK", payload: risk.id })}
                 onAccept={(text) => actions.acceptFix(risk.id, text)}
               />
             ))
@@ -87,10 +101,16 @@ export function RiskPanel() {
   );
 }
 
-function StatBadge({ count, label, type, active, onClick }: { 
-  count: number; 
-  label: string; 
-  type: 'high' | 'medium' | 'safe'; 
+function StatBadge({
+  count,
+  label,
+  type,
+  active,
+  onClick,
+}: {
+  count: number;
+  label: string;
+  type: "high" | "medium" | "safe";
   active: boolean;
   onClick: () => void;
 }) {
@@ -106,7 +126,7 @@ function StatBadge({ count, label, type, active, onClick }: {
       className={cn(
         "flex flex-col items-center justify-center p-2 rounded-lg border transition-all",
         colors[type],
-        active ? "ring-2 ring-primary ring-offset-1" : "opacity-70 hover:opacity-100"
+        active ? "ring-2 ring-primary ring-offset-1" : "opacity-70 hover:opacity-100",
       )}
     >
       <span className="text-lg font-bold leading-none mb-1">{count}</span>
@@ -115,14 +135,22 @@ function StatBadge({ count, label, type, active, onClick }: {
   );
 }
 
-function RiskCard({ risk, isActive, onClick, onAccept }: { 
-  risk: ContractRisk; 
-  isActive: boolean; 
+function RiskCard({
+  risk,
+  isActive,
+  onClick,
+  onAccept,
+}: {
+  risk: ContractRisk;
+  isActive: boolean;
   onClick: () => void;
   onAccept: (text: string) => void;
 }) {
-  const suggestedText = risk.suggestion?.match(/建议修改为[："""](.*?)["""]|建议改为[："""](.*?)["""]/)?.[1] || risk.suggestion;
-  const showDiff = suggestedText && suggestedText.length < 500 && suggestedText !== risk.originalText;
+  const suggestedText =
+    risk.suggestion?.match(/建议修改为[："""](.*?)["""]|建议改为[："""](.*?)["""]/)?.[1] ||
+    risk.suggestion;
+  const showDiff =
+    suggestedText && suggestedText.length < 500 && suggestedText !== risk.originalText;
 
   return (
     <div
@@ -130,19 +158,24 @@ function RiskCard({ risk, isActive, onClick, onAccept }: {
       onClick={onClick}
       className={cn(
         "group relative p-4 rounded-xl border transition-all cursor-pointer hover:shadow-md",
-        isActive 
-          ? "bg-card border-primary ring-1 ring-primary shadow-lg scale-[1.02] z-10" 
-          : "bg-card border-border hover:border-primary/30"
+        isActive
+          ? "bg-card border-primary ring-1 ring-primary shadow-lg scale-[1.02] z-10"
+          : "bg-card border-border hover:border-primary/30",
       )}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
-          {risk.level === 'high' && <AlertCircle className="w-4 h-4 text-destructive shrink-0" />}
-          {risk.level === 'medium' && <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />}
-          {risk.level === 'safe' && <ShieldCheck className="w-4 h-4 text-green-500 shrink-0" />}
-          <h3 className={cn("font-medium text-sm leading-tight", 
-            risk.level === 'high' ? "text-destructive" : "text-foreground"
-          )}>
+          {risk.level === "high" && <AlertCircle className="w-4 h-4 text-destructive shrink-0" />}
+          {risk.level === "medium" && (
+            <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
+          )}
+          {risk.level === "safe" && <ShieldCheck className="w-4 h-4 text-green-500 shrink-0" />}
+          <h3
+            className={cn(
+              "font-medium text-sm leading-tight",
+              risk.level === "high" ? "text-destructive" : "text-foreground",
+            )}
+          >
             {risk.title}
           </h3>
         </div>
@@ -156,19 +189,23 @@ function RiskCard({ risk, isActive, onClick, onAccept }: {
         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
           {showDiff ? (
             <div className="space-y-2 mt-3 pt-3 border-t">
-              <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">修改建议</div>
+              <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                修改建议
+              </div>
               <div className="bg-muted/30 rounded p-2 text-xs space-y-2">
                 <div className="flex gap-2 opacity-60">
-                   <span className="text-destructive font-bold select-none">-</span>
-                   <span className="line-through decoration-destructive/50">{risk.originalText}</span>
+                  <span className="text-destructive font-bold select-none">-</span>
+                  <span className="line-through decoration-destructive/50">
+                    {risk.originalText}
+                  </span>
                 </div>
                 <div className="flex gap-2">
-                   <span className="text-green-600 font-bold select-none">+</span>
-                   <span className="text-green-700 bg-green-50 rounded px-1">{suggestedText}</span>
+                  <span className="text-green-600 font-bold select-none">+</span>
+                  <span className="text-green-700 bg-green-50 rounded px-1">{suggestedText}</span>
                 </div>
               </div>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="w-full h-8 mt-2 text-xs gap-2"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -180,28 +217,30 @@ function RiskCard({ risk, isActive, onClick, onAccept }: {
               </Button>
             </div>
           ) : (
-             <div className="mt-3 pt-3 border-t">
-                <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">建议</div>
-                <div className="text-xs bg-muted/30 p-2 rounded text-foreground/90 leading-relaxed">
-                   {risk.suggestion}
-                </div>
-             </div>
+            <div className="mt-3 pt-3 border-t">
+              <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                建议
+              </div>
+              <div className="text-xs bg-muted/30 p-2 rounded text-foreground/90 leading-relaxed">
+                {risk.suggestion}
+              </div>
+            </div>
           )}
-          
+
           <div className="flex justify-end mt-2">
-             <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-[10px] text-muted-foreground hover:text-foreground"
-                onClick={(e) => {
-                   e.stopPropagation();
-                   navigator.clipboard.writeText(risk.suggestion || "");
-                   toast.success("已复制");
-                }}
-             >
-                <Copy className="w-3 h-3 mr-1" />
-                复制
-             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-[10px] text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(risk.suggestion || "");
+                toast.success("已复制");
+              }}
+            >
+              <Copy className="w-3 h-3 mr-1" />
+              复制
+            </Button>
           </div>
         </div>
       )}

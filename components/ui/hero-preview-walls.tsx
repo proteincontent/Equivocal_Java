@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export type Card = {
   id: number;
@@ -117,12 +118,14 @@ export const CardSlide = ({
             </div>
 
             {/* Image Section */}
-            <div className="mt-2 relative overflow-hidden rounded-lg">
+            <div className="mt-2 relative h-20 sm:h-24 md:h-28 overflow-hidden rounded-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-[#2563EB]/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <img
+              <Image
                 src={card.image}
                 alt={card.name}
-                className="w-full h-20 sm:h-24 md:h-28 rounded-lg border border-neutral-200/50 dark:border-neutral-700/50 object-cover shadow-sm transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 640px) 90vw, 420px"
+                className="rounded-lg border border-neutral-200/50 dark:border-neutral-700/50 object-cover shadow-sm transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </div>
@@ -133,10 +136,13 @@ export const CardSlide = ({
             </p>
             <div className="w-1.5 h-1.5 rounded-full bg-[#2563EB] animate-pulse" />
           </div>
-          
+
           {/* Subtle noise texture overlay */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply dark:mix-blend-overlay"
-             style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply dark:mix-blend-overlay"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            }}
           />
         </motion.div>
       ))}
@@ -156,14 +162,11 @@ export function HeroPreviewWalls() {
       content: (
         <p>
           我们设计智能系统来优化工作流、降低管理成本，并帮助业务平滑扩展。我们的自动化模块可无缝集成于{" "}
-          <span className="font-semibold text-[#2563EB] dark:text-[#3B82F6]">
-            多平台与 API
-          </span>
+          <span className="font-semibold text-[#2563EB] dark:text-[#3B82F6]">多平台与 API</span>
           ，确保精度与可靠性。
         </p>
       ),
-      image:
-        "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/dashboard-gradient.png",
+      image: "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/dashboard-gradient.png",
     },
     {
       id: 1,
@@ -178,8 +181,7 @@ export function HeroPreviewWalls() {
           ，可在深色与浅色模式间动态适配。
         </p>
       ),
-      image:
-        "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/crm-featured.png",
+      image: "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/crm-featured.png",
     },
     {
       id: 2,
@@ -194,8 +196,7 @@ export function HeroPreviewWalls() {
           ，我们的流水线都能保障性能、监控与容错能力。
         </p>
       ),
-      image:
-        "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/featured-06.png",
+      image: "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/featured-06.png",
     },
   ];
 
@@ -226,11 +227,15 @@ export function HeroPreviewWalls() {
 
       {/* Background Image */}
       <div className="relative flex justify-center max-w-5xl mx-auto px-4 sm:px-6">
-        <img
-          src="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/abstract-glass-walls.jpg"
-          alt="背景"
-          className="rounded-2xl shadow-xl w-full object-cover border-8 border-neutral-200 dark:border-neutral-800"
-        />
+        <div className="relative w-full aspect-[16/9]">
+          <Image
+            src="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/abstract-glass-walls.jpg"
+            alt="背景"
+            fill
+            sizes="(max-width: 1024px) 100vw, 900px"
+            className="rounded-2xl shadow-xl object-cover border-8 border-neutral-200 dark:border-neutral-800"
+          />
+        </div>
 
         {/* Anchored Card Stack */}
         <div className="absolute -bottom-36 sm:-bottom-16 md:-bottom-9 flex justify-center w-full">
