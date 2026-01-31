@@ -8,27 +8,25 @@ import { cn } from "@/lib/utils";
 const riskConfig: Record<RentScamRiskLevel, { gradient: string; dot: string }> = {
   高: {
     gradient: "from-rose-500/22 via-fuchsia-500/10 to-transparent",
-    dot: "text-rose-200",
+    dot: "text-rose-600 dark:text-rose-300",
   },
   中: {
     gradient: "from-amber-500/22 via-orange-500/10 to-transparent",
-    dot: "text-amber-200",
+    dot: "text-amber-600 dark:text-amber-300",
   },
   低: {
     gradient: "from-emerald-500/22 via-sky-500/10 to-transparent",
-    dot: "text-emerald-200",
+    dot: "text-emerald-600 dark:text-emerald-300",
   },
 };
 
-const bentoLayout: string[] = [
-  "sm:col-span-2 lg:row-span-2",
-  "lg:row-span-2",
-  "",
-  "",
-  "sm:col-span-2",
-  "",
-  "",
-  "",
+const masonryAspects: string[] = [
+  "aspect-[16/10]",
+  "aspect-[4/3]",
+  "aspect-[3/4]",
+  "aspect-[9/16]",
+  "aspect-[5/4]",
+  "aspect-[1/1]",
 ];
 
 export function RentScamCasesGallery() {
@@ -46,19 +44,20 @@ export function RentScamCasesGallery() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 auto-rows-[12rem] sm:auto-rows-[13rem] lg:auto-rows-[14rem]">
+      <div className="columns-1 gap-3 sm:columns-2 sm:gap-4 lg:columns-3 2xl:columns-4">
         {rentScamCases.map((item, index) => (
           <Link
             key={item.slug}
             href={`/rent-scam-cases/${item.slug}`}
             className={cn(
-              "group relative h-full cursor-pointer overflow-hidden rounded-3xl border border-border/60 bg-background/40 backdrop-blur",
+              "group relative block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-3xl border border-border/60 bg-background/40 backdrop-blur",
+              "mb-3 sm:mb-4",
               "shadow-[0_14px_70px_-45px_rgba(2,6,23,0.18)]",
               "transition-[transform,border-color,box-shadow] duration-300 ease-out",
               "hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-[0_30px_90px_-55px_rgba(2,6,23,0.24)]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
               "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-              bentoLayout[index] ?? "",
+              masonryAspects[index % masonryAspects.length] ?? "",
             )}
             aria-label={`查看案例：${item.title}`}
           >
@@ -75,18 +74,14 @@ export function RentScamCasesGallery() {
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className={cn(
-                  "object-contain p-8",
+                  "object-contain p-5 sm:p-6",
                   "transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none",
                 )}
                 priority={index < 3}
               />
             </div>
 
-            <div className="absolute left-4 top-4 right-4 flex items-start justify-between gap-3">
-              <div className="inline-flex items-center rounded-full bg-background/75 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm ring-1 ring-foreground/10 backdrop-blur">
-                <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-                法律案例
-              </div>
+            <div className="absolute left-4 top-4 right-4 flex items-start justify-end gap-3">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-background/75 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm ring-1 ring-foreground/10 backdrop-blur">
                 <span
                   className={cn("h-1.5 w-1.5 rounded-full bg-current", riskConfig[item.risk].dot)}
@@ -104,7 +99,7 @@ export function RentScamCasesGallery() {
                   </h3>
                   <p className="mt-1 text-xs text-white/80 line-clamp-2">{item.subtitle}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {item.tags.slice(0, 3).map((t) => (
+                    {item.tags.slice(0, 2).map((t) => (
                       <span
                         key={t}
                         className="inline-flex items-center rounded-full bg-white/14 px-2 py-0.5 text-[10px] font-semibold text-white/90 ring-1 ring-white/20"
