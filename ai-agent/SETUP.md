@@ -96,6 +96,10 @@ python main.py
 
 服务默认将在 `http://localhost:8100` 启动（可通过 `AGENT_PORT`/`PORT` 覆盖）。
 
+> 备注：OCR（`easyocr` → `torch/torchvision`）在 Windows + Python 3.13 可能导入很慢或不兼容。
+> 当前已做“懒加载”：不影响服务启动；只有在调用 OCR 工具时才会导入依赖。
+> 如你暂时不需要 OCR，可在 `ai-agent/.env` 或命令行设置：`DISABLE_OCR=true`。
+
 ### 7. 启动 Java 后端
 
 ```bash
