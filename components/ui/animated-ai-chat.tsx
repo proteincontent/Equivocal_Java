@@ -864,6 +864,13 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
             return;
           }
           setErrorMessage("抱歉，当前账号无权限执行此操作");
+          setMessages((current) => [
+            ...current,
+            {
+              role: "assistant",
+              content: "请求失败（403）：抱歉，当前账号无权限执行此操作。请更换账号或联系管理员开通权限。",
+            },
+          ]);
           setIsTyping(false);
           return;
         }
