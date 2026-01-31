@@ -55,7 +55,6 @@ curl -X POST http://localhost:8100/v1/chat/completions \
 ### 🚫 **完全无法使用的功能**
 
 1. **工具调用** - 核心功能受损
-   - OCR 文本提取 (`extract_text_from_file`)
    - 文档生成 (`generate_legal_document`)
    - RAG 搜索 (`legal_rag_search`)
    - 知识库查询 (`legal_rag_info`)
@@ -81,7 +80,7 @@ use_tools = False  # 强制禁用工具
 ```
 WARNING: Tools are currently DISABLED due to LLM API incompatibility
   The system will run in chat-only mode without tool calling capabilities
-  Tools affected: OCR, Document Generation, RAG Search
+  Tools affected: Document Generation, RAG Search
 ```
 
 ## 解决方案
