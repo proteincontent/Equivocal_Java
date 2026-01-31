@@ -23,15 +23,13 @@ const riskConfig: Record<RentScamRiskLevel, { gradient: string; dot: string }> =
   },
 };
 
-const bentoLayout: string[] = [
-  "sm:col-span-2 lg:row-span-2",
-  "lg:row-span-2",
-  "",
-  "",
-  "sm:col-span-2",
-  "",
-  "",
-  "",
+const masonryAspects: string[] = [
+  "aspect-[16/10]",
+  "aspect-[4/3]",
+  "aspect-[3/4]",
+  "aspect-[9/16]",
+  "aspect-[5/4]",
+  "aspect-[1/1]",
 ];
 
 type Tag = string;
@@ -92,10 +90,15 @@ export function ChatRentScamGallery({ limit = 8 }: { limit?: number }) {
         ))}
       </div>
 
-      {/* 卡片（豆包风格：Bento Grid） */}
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 auto-rows-[12rem] sm:auto-rows-[13rem] lg:auto-rows-[14rem]">
+      {/* 卡片（素材墙：Masonry via CSS Columns） */}
+      <div className="mt-6 columns-1 gap-3 sm:columns-2 sm:gap-4 lg:columns-3 2xl:columns-4">
         {items.map((item, index) => (
-          <Card key={item.slug} item={item} index={index} className={bentoLayout[index] ?? ""} />
+          <Card
+            key={item.slug}
+            item={item}
+            index={index}
+            className={masonryAspects[index % masonryAspects.length] ?? ""}
+          />
         ))}
       </div>
     </section>
@@ -145,7 +148,8 @@ function Card({
     <Link
       href={`/rent-scam-cases/${item.slug}`}
       className={cn(
-        "group relative h-full overflow-hidden rounded-[28px] bg-white shadow-[0_10px_44px_-18px_rgba(2,6,23,0.18)] ring-1 ring-slate-200/60",
+        "group relative block w-full break-inside-avoid overflow-hidden rounded-[28px] bg-white shadow-[0_10px_44px_-18px_rgba(2,6,23,0.18)] ring-1 ring-slate-200/60",
+        "mb-3 sm:mb-4",
         "transition-[transform,box-shadow,filter] duration-300 ease-out",
         "hover:-translate-y-0.5 hover:shadow-[0_22px_70px_-30px_rgba(2,6,23,0.22)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
@@ -167,7 +171,7 @@ function Card({
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={cn(
-            "object-contain p-8",
+            "object-contain p-5 sm:p-6",
             "transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none",
           )}
           priority={index < 2}
@@ -175,20 +179,13 @@ function Card({
       </div>
 
       {/* 顶部信息 */}
-      <div className="absolute left-4 top-4 right-4 flex items-start justify-between gap-3">
-        <div className="inline-flex items-center rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-slate-950/60 dark:text-slate-100 dark:ring-white/10">
-          <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
-          法律案例
-        </div>
-        <div
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ring-1 ring-black/5 backdrop-blur",
-            "bg-white/80 text-slate-700 dark:bg-slate-950/60 dark:text-slate-100 dark:ring-white/10",
-          )}
-        >
-          <span className={cn("h-1.5 w-1.5 rounded-full bg-current", config.dot)} />
+      <div className="absolute left-4 top-4 right-4 flex items-start justify-end gap-3">
+        <span className="inline-flex items-center rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-slate-950/60 dark:text-slate-100 dark:ring-white/10">
+          <span
+            className={cn("mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current", config.dot)}
+          />
           风险{item.risk}
-        </div>
+        </span>
       </div>
 
       {/* 底部遮罩 + 文案 */}
