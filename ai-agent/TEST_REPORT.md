@@ -40,7 +40,7 @@
 | **知识库初始化**        | ✅ 通过 | 导入2个法律知识文档块     |
 | **LLM 基础调用**        | ✅ 通过 | 中文响应正常              |
 | **工具绑定（5个工具）** | ✅ 通过 | 无报错                    |
-| **API 服务启动**        | ✅ 通过 | FastAPI运行在8000端口     |
+| **API 服务启动**        | ✅ 通过 | FastAPI运行在8100端口     |
 | **聊天 API 测试**       | ✅ 通过 | 返回友好欢迎信息          |
 
 ### 📋 配置更新
@@ -121,7 +121,7 @@ content_clean = re.sub(r'[^\x00-\x7F\u4e00-\u9fff]+', '[emoji]', content)
 ### 聊天 API
 
 ```bash
-POST http://localhost:8000/v1/chat/completions
+POST http://localhost:8100/v1/chat/completions
 Content-Type: application/json
 
 {
@@ -177,7 +177,7 @@ Content-Type: application/json
 
 1. ⭐ **Java 后端集成**
    - 修改 `AgentService.java` 调用 Python API
-   - 将 Coze API 调用替换为 `http://localhost:8000/v1/chat/completions`
+   - 将 Coze API 调用替换为 `http://localhost:8100/v1/chat/completions`
    - 测试流式响应解析
 
 2. ⭐ **端到端测试**
@@ -216,7 +216,7 @@ Content-Type: application/json
 ### Python 环境
 
 - **Python 版本**: 3.13
-- **FastAPI**: 运行在 8000 端口
+- **FastAPI**: 运行在 8100 端口
 - **启动命令**: `python ai-agent/main.py`
 
 ### 主要依赖
@@ -257,7 +257,7 @@ cd ai-agent && python main.py
 ### 测试聊天
 
 ```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
+curl -X POST http://localhost:8100/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"你好"}],"stream":false}'
 ```
@@ -278,4 +278,4 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 - ✅ 无第三方平台依赖
 - ✅ 更灵活的对话管理
 
-**推荐下一步**: 修改 Java 后端的 `AgentService.java`，将请求转发到 `http://localhost:8000/v1/chat/completions`。
+**推荐下一步**: 修改 Java 后端的 `AgentService.java`，将请求转发到 `http://localhost:8100/v1/chat/completions`。

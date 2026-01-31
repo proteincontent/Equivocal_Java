@@ -22,7 +22,7 @@ public class AgentService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    @Value("${agent.api-url:http://localhost:8000/v1}")
+    @Value("${agent.api-url:http://localhost:8100/v1}")
     private String apiUrl;
 
     public AgentService(WebClient webClient, ObjectMapper objectMapper) {
