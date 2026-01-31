@@ -94,7 +94,7 @@ cd ai-agent
 python main.py
 ```
 
-服务将在 `http://localhost:8000` 启动。
+服务默认将在 `http://localhost:8100` 启动（可通过 `AGENT_PORT`/`PORT` 覆盖）。
 
 ### 7. 启动 Java 后端
 
@@ -118,8 +118,8 @@ cd backend
 
 访问以下 URL 确认服务正常：
 
-- Python Agent: http://localhost:8000/
-- Python API 文档: http://localhost:8000/docs
+- Python Agent: http://localhost:8100/
+- Python API 文档: http://localhost:8100/docs
 - Java Backend: http://localhost:8080/
 
 ## 命令速查

@@ -15,7 +15,7 @@
 ### ✅ 成功的请求
 
 ```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
+curl -X POST http://localhost:8100/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"你好"}],"stream":false}'
 ```
@@ -37,7 +37,7 @@ llm.bind_tools(tools)  # 失败
 #### 2. 特定内容的请求
 
 ```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
+curl -X POST http://localhost:8100/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"什么是民法典"}],"stream":false}'
 ```

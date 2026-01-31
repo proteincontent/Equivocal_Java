@@ -111,7 +111,7 @@
 目标：修复“合同审查”页面上传 `.docx` 后出现的 `AI 审查服务调用失败（HTTP 500）`，至少做到：
 
 - 前端不再只显示“HTTP 500”这种不可诊断信息，而能展示后端返回的具体 `detail`。
-- 调用路径不再硬编码 `http://localhost:8000/...`（避免生产环境/跨域问题），改为同源 `/api/...` 并由 Next.js 统一转发到 AI Agent 服务。
+- 调用路径不再硬编码 `http://localhost:8100/...`（避免生产环境/跨域问题），改为同源 `/api/...` 并由 Next.js 统一转发到 AI Agent 服务。
 - 尽量降低 AI Agent 端因模型输出不规范导致的 500（JSON 解析失败等）。
 
 非目标（本次不做）：
@@ -121,12 +121,12 @@
 
 关键观察（已定位）：
 
-- 前端 `app/contract-review/components/upload-zone.tsx` 当前直接从浏览器请求 `http://localhost:8000/v1/contract/review`。
+- 前端 `app/contract-review/components/upload-zone.tsx` 当前直接从浏览器请求 `http://localhost:8100/v1/contract/review`。
 - AI Agent（FastAPI）在 `ai-agent/app/api/contract.py` 里捕获所有异常并统一抛 `HTTP 500`，导致前端看不到真实错误原因。
 
 验收标准（成功判据）：
 
-- [ ] 上传 `.docx` 时，前端调用走 `/api/contract/review`（不再硬编码 `localhost:8000`）。
+- [ ] 上传 `.docx` 时，前端调用走 `/api/contract/review`（不再硬编码 `localhost:8100`）。
 - [ ] 若 AI Agent 出错，前端错误提示包含后端 `detail`（便于定位具体失败原因）。
 - [ ] 常见合同文本可正常返回 `risks`（至少 1 条），不再频繁 500（无法完全消除时需降级返回可用错误信息）。
 

@@ -68,7 +68,7 @@ coze:
 
 agent:
   # 自建 LangGraph Agent 服务配置
-  api-url: ${AGENT_API_URL:http://localhost:8000/v1}
+  api-url: ${AGENT_API_URL:http://localhost:8100/v1}
 
 app:
   cors:

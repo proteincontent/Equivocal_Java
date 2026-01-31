@@ -61,7 +61,7 @@ resend:
 
 # Python AI Agent 配置 (LangGraph)
 agent:
-  api-url: ${AGENT_API_URL:http://localhost:8000/v1}
+  api-url: ${AGENT_API_URL:http://localhost:8100/v1}
 
 app:
   cors:
