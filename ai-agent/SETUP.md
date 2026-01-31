@@ -89,6 +89,9 @@ python ai-agent/scripts/init_knowledge_base.py
 # 方式 1：使用启动脚本（Windows）
 ai-agent\start.bat
 
+# 方式 1.1：使用 PowerShell 启动脚本（推荐，Ctrl+C 停止更干净）
+powershell -ExecutionPolicy Bypass -File ai-agent\start.ps1
+
 # 方式 2：直接运行
 cd ai-agent
 python main.py
