@@ -5,7 +5,6 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from app.services.llm import get_llm
-from app.tools.ocr import extract_text_from_file
 from app.tools.doc_generator import generate_legal_document, list_supported_documents
 from app.tools.rag import legal_rag_search, legal_rag_info
 from app.core.config import get_settings
@@ -16,7 +15,6 @@ class AgentState(TypedDict):
 
 # Define tools list
 tools = [
-    extract_text_from_file,
     generate_legal_document,
     list_supported_documents,
     legal_rag_search,
@@ -76,7 +74,7 @@ def create_agent_graph():
     llm_with_tools = llm.bind_tools(tools)
     
     print(f"INFO: Tools are ENABLED with model: {settings.LLM_MODEL}")
-    print("  Available tools: OCR, Document Generation, RAG Search, Legal Info")
+    print("  Available tools: Document Generation, RAG Search, Legal Info")
 
     # Define the chatbot node
     def chatbot(state: AgentState):

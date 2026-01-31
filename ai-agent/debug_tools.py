@@ -6,13 +6,11 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from app.tools.rag import legal_rag_search, legal_rag_info
-from app.tools.ocr import extract_text_from_file
 from app.tools.doc_generator import generate_legal_document, list_supported_documents
 import json
 
 # Define tools list
 tools = [
-    extract_text_from_file,
     generate_legal_document,
     list_supported_documents,
     legal_rag_search,

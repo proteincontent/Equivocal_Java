@@ -14,7 +14,6 @@ from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 # Import actual tools
-from app.tools.ocr import extract_text_from_file
 from app.tools.doc_generator import generate_legal_document, list_supported_documents
 from app.tools.rag import legal_rag_search, legal_rag_info
 
@@ -37,7 +36,6 @@ llm = ChatOpenAI(
 
 # All tools
 all_tools = [
-    extract_text_from_file,
     generate_legal_document,
     list_supported_documents,
     legal_rag_search,
@@ -47,9 +45,8 @@ all_tools = [
 SYSTEM_PROMPT = """你是专业法律智能助手，提供合同分析、文书生成和法律咨询服务。
 
 核心能力：
-1. 合同分析：用 extract_text_from_file 提取文件内容并分析风险
-2. 文书生成：用 generate_legal_document 生成 Word 文档
-3. 法律咨询：用 legal_rag_search 查询法律条文
+1. 文书生成：用 generate_legal_document 生成 Word 文档
+2. 法律咨询：用 legal_rag_search 查询法律条文
 
 保持专业、客观、准确。使用中文交流。"""
 

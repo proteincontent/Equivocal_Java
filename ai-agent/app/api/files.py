@@ -1,14 +1,47 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from pypdf import PdfReader
 from app.services.storage import storage_service
 from app.services.vector_store import vector_store
-from app.tools.ocr import extract_text_from_file
 import shutil
 import os
 import tempfile
 
 router = APIRouter()
+
+def extract_text_from_file(file_path: str) -> str:
+    """
+    Extract text from a local file (PDF/text only).
+
+    Note: OCR is intentionally removed from this project.
+    """
+    if not os.path.exists(file_path):
+        return ""
+
+    ext = os.path.splitext(file_path)[1].lower()
+
+    if ext == ".pdf":
+        try:
+            reader = PdfReader(file_path)
+            texts: list[str] = []
+            for page in reader.pages:
+                page_text = page.extract_text() or ""
+                if page_text:
+                    texts.append(page_text)
+            return "\n".join(texts).strip()
+        except Exception:
+            return ""
+
+    if ext in {".txt", ".md"}:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return f.read().strip()
+        except Exception:
+            return ""
+
+    # Images and other formats are unsupported without OCR
+    return ""
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
