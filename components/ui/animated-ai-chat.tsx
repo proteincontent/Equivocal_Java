@@ -847,6 +847,7 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
 
       // 🚫 处理错误响应
       if (!response.ok) {
+        // 认证/授权失败：Spring Security 在未登录时可能返回 401 或 403（取决于配置）
         if (response.status === 401) {
           setErrorMessage("登录已过期，请重新登录");
           setShowAuthModal(true);
@@ -854,11 +855,22 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
           return;
         }
 
+        if (response.status === 403) {
+          // 没带 token 时，403 基本等价于“需要登录”
+          if (!token) {
+            setErrorMessage("需要登录后才能继续使用");
+            setShowAuthModal(true);
+            setIsTyping(false);
+            return;
+          }
+          setErrorMessage("抱歉，当前账号无权限执行此操作");
+          setIsTyping(false);
+          return;
+        }
+
         let friendlyMessage = "请求失败，请稍后重试";
 
-        if (response.status === 403) {
-          friendlyMessage = "抱歉，您没有权限执行此操作";
-        } else if (response.status === 404) {
+        if (response.status === 404) {
           friendlyMessage = "未找到相关资源或服务";
         } else if (response.status === 429) {
           friendlyMessage = "请求过于频繁，请喝杯茶稍后再试";
@@ -902,11 +914,13 @@ export function AnimatedAIChat({ sessionId, onSessionChange, onNewMessage }: Ani
         });
 
         setErrorMessage(finalMessage);
+
+        const infraHint = "你可以稍后重试，或检查后端(8080)与 AI Agent(8100)是否正常运行。";
         setMessages((current) => [
           ...current,
           {
             role: "assistant",
-            content: `请求失败（${response.status}）：${finalMessage}\n\n你可以稍后重试，或检查后端(8080)与 AI Agent(8000)是否正常运行。`,
+            content: `请求失败（${response.status}）：${finalMessage}\n\n${infraHint}`,
           },
         ]);
         return;
