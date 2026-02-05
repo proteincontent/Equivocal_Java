@@ -37,19 +37,25 @@ public class VerificationController {
         
         log.info("[VerificationController] Send code request: {}", email);
         
-        boolean sent = verificationService.sendVerificationCode(email.trim().toLowerCase());
+        VerificationService.SendCodeResult result =
+                verificationService.sendVerificationCode(email.trim().toLowerCase());
         
-        if (sent) {
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("success", true);
-            result.put("message", "Verification code sent");
-            return ResponseEntity.ok(result);
-        } else {
-            Map<String, Object> error = new HashMap<String, Object>();
-            error.put("success", false);
-            error.put("error", "Failed to send verification code");
-            return ResponseEntity.internalServerError().body(error);
+        if (result.isSuccess()) {
+            Map<String, Object> ok = new HashMap<String, Object>();
+            ok.put("success", true);
+            ok.put("message", "Verification code sent");
+            return ResponseEntity.ok(ok);
         }
+
+        Map<String, Object> error = new HashMap<String, Object>();
+        error.put("success", false);
+        error.put("error", result.getMessage());
+
+        if (result.getStatus() == VerificationService.SendCodeStatus.RATE_LIMITED) {
+            return ResponseEntity.status(429).body(error);
+        }
+
+        return ResponseEntity.internalServerError().body(error);
     }
     
     @PostMapping("/verify-code")
