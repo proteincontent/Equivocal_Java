@@ -47,11 +47,15 @@ public class ChatController {
         String sessionIdStr = request.getSessionId();
         ChatSession session;
         
-        if (sessionIdStr != null && !sessionIdStr.isEmpty()) {
-            session = chatSessionRepository.findById(sessionIdStr)
-                    .orElseGet(() -> createNewSession(user.getId()));
+        if (sessionIdStr != null && !sessionIdStr.trim().isEmpty()) {
+            Optional<ChatSession> existingSession = chatSessionRepository.findById(sessionIdStr.trim());
+            if (existingSession.isPresent() && userId.equals(existingSession.get().getUserId())) {
+                session = existingSession.get();
+            } else {
+                session = createNewSession(userId);
+            }
         } else {
-            session = createNewSession(user.getId());
+            session = createNewSession(userId);
         }
         
         final String finalSessionId = session.getId();
@@ -60,7 +64,6 @@ public class ChatController {
         List<Map<String, String>> messages = request.getMessages();
         if (messages != null && !messages.isEmpty()) {
             Map<String, String> lastMessage = messages.get(messages.size() - 1);
-            log.info("[Debug] Last message from frontend: {}", lastMessage);
             if ("user".equals(lastMessage.get("role"))) {
                 String contentType = lastMessage.getOrDefault("content_type", "text");
                 saveMessage(finalSessionId, "user", lastMessage.get("content"), contentType);
@@ -95,16 +98,16 @@ public class ChatController {
             sessionJson = "{\"type\":\"session\",\"sessionId\":\"" + finalSessionId + "\"}";
         }
         
-        log.info("[Debug] Session Event: {}", sessionJson);
+        log.debug("[ChatController] Session event prepared");
         // 在 TEXT_EVENT_STREAM 模式下，Flux<String> 的每一项会被自动包装成 data: <item>\n\n
         Flux<String> sessionEvent = Flux.just(sessionJson);
         
         // 调用 Agent 流式 API
-        log.info("[Debug] Calling agentService.streamChat with userId: {} and conversationId: {}", userId, finalSessionId);
+        log.debug("[ChatController] Calling agentService.streamChat: userId={}, sessionId={}", userId, finalSessionId);
         // AgentService signature: streamChat(String userId, List<Map<String, Object>> messages)
         Flux<String> chatStream = agentService.streamChat(userId, chatMessages)
                 .doOnSubscribe(s -> log.info("[ChatController] Stream subscribed for session: {}", finalSessionId))
-                .doOnNext(item -> log.info("[ChatController] Stream item received: {}", item))
+                .doOnNext(item -> log.debug("[ChatController] Stream item received ({} chars)", item != null ? item.length() : 0))
                 .doOnNext(item -> {
                     // 安全解析 JSON 收集内容用于后台保存
                     try {
@@ -113,7 +116,7 @@ public class ChatController {
                             fullResponse.append(node.path("content").asText());
                         }
                     } catch (Exception e) {
-                        log.debug("Skip non-content event for accumulation: {}", item);
+                        log.debug("Skip non-content event for accumulation");
                     }
                 })
                 .doOnComplete(() -> {
@@ -180,9 +183,13 @@ public class ChatController {
             String sessionIdStr = request.getSessionId();
             ChatSession session;
             
-            if (sessionIdStr != null && !sessionIdStr.isEmpty()) {
-                session = chatSessionRepository.findById(sessionIdStr)
-                        .orElseGet(() -> createNewSession(user.getId()));
+            if (sessionIdStr != null && !sessionIdStr.trim().isEmpty()) {
+                Optional<ChatSession> existingSession = chatSessionRepository.findById(sessionIdStr.trim());
+                if (existingSession.isPresent() && user.getId().equals(existingSession.get().getUserId())) {
+                    session = existingSession.get();
+                } else {
+                    session = createNewSession(user.getId());
+                }
             } else {
                 session = createNewSession(user.getId());
             }

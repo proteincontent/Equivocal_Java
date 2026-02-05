@@ -53,7 +53,7 @@ public class UploadController {
             log.info("Uploading file: {}, size: {} bytes", originalFilename, fileData.length);
 
             String agentRawResponse = agentService.uploadFile(fileData, originalFilename);
-            log.info("Agent upload response: {}", agentRawResponse);
+            log.debug("Agent upload response received ({} chars)", agentRawResponse != null ? agentRawResponse.length() : 0);
 
             if (agentRawResponse == null) {
                 throw new RuntimeException("Agent API returned null response");
@@ -85,7 +85,6 @@ public class UploadController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("File upload failed", e);
-            e.printStackTrace(); // 确保打印到控制台
             response.put("success", false);
             // 防止 NPE 导致 error 字段为 null
             response.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred during upload: " + e.getClass().getName());

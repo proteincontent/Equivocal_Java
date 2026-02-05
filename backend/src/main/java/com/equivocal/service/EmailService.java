@@ -28,16 +28,11 @@ public class EmailService {
     
     public boolean sendVerificationCode(String email, String code) {
         try {
-            // 【调试日志】检查配置是否正确加载
-            log.info("[EmailService] ===== 邮件发送调试信息 =====");
-            log.info("[EmailService] Resend API Key 是否配置: {}", (resendApiKey != null && !resendApiKey.isEmpty() && !resendApiKey.equals("${RESEND_API_KEY:}")));
-            log.info("[EmailService] Resend API Key 长度: {}", resendApiKey != null ? resendApiKey.length() : 0);
-            log.info("[EmailService] Resend API Key 前10字符: {}", resendApiKey != null && resendApiKey.length() > 10 ? resendApiKey.substring(0, 10) + "..." : resendApiKey);
-            log.info("[EmailService] 发件人邮箱: {}", fromEmail);
-            log.info("[EmailService] 收件人邮箱: {}", email);
+            boolean apiKeyConfigured = resendApiKey != null && !resendApiKey.trim().isEmpty();
+            log.info("[EmailService] Sending verification email: to={}, apiKeyConfigured={}", email, apiKeyConfigured);
             
             // 检查 API Key 是否为空
-            if (resendApiKey == null || resendApiKey.isEmpty()) {
+            if (!apiKeyConfigured) {
                 log.error("[EmailService] 错误: Resend API Key 未配置！请设置环境变量 RESEND_API_KEY");
                 return false;
             }
