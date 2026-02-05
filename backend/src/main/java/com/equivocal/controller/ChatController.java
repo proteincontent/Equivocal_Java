@@ -177,36 +177,14 @@ public class ChatController {
                 error.put("error", "Unauthorized");
                 return ResponseEntity.status(401).body(error);
             }
-            
-            String userId = user.getId();
-            
-            // Handle session
-            String sessionIdStr = request.getSessionId();
-            ChatSession session;
-            
-            if (sessionIdStr != null && !sessionIdStr.trim().isEmpty()) {
-                Optional<ChatSession> existingSession = chatSessionRepository.findById(sessionIdStr.trim());
-                if (existingSession.isPresent() && user.getId().equals(existingSession.get().getUserId())) {
-                    session = existingSession.get();
-                } else {
-                    session = createNewSession(user.getId());
-                }
-            } else {
-                session = createNewSession(user.getId());
-            }
 
-            // Save user message
-            List<Map<String, String>> messages = request.getMessages();
-            if (messages != null && !messages.isEmpty()) {
-                Map<String, String> lastMessage = messages.get(messages.size() - 1);
-                if ("user".equals(lastMessage.get("role"))) {
-                    String contentType = lastMessage.getOrDefault("content_type", "text");
-                    saveMessage(session.getId(), "user", lastMessage.get("content"), contentType);
-                }
-            }
-            
-            // Temporary: Return error to force stream usage if frontend supports it
-            throw new UnsupportedOperationException("Sync chat is deprecated. Please use stream.");
+            Map<String, Object> body = new HashMap<>();
+            Map<String, String> errorDetails = new HashMap<>();
+            errorDetails.put("message", "服务端内部错误");
+            errorDetails.put("type", "deprecated");
+            errorDetails.put("code", "sync_deprecated");
+            body.put("error", errorDetails);
+            return ResponseEntity.status(410).body(body);
             
         } catch (Exception e) {
             log.error("[ChatController] Sync chat failed: {}", e.getMessage(), e);
