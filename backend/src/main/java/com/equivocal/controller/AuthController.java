@@ -34,7 +34,7 @@ public class AuthController {
         } catch (Exception e) {
             log.error("[AuthController] 认证过程中发生异常", e);
             return ResponseEntity.internalServerError()
-                    .body(AuthResponse.error("服务端内部错误: " + e.getMessage()));
+                    .body(AuthResponse.error("服务端内部错误"));
         }
     }
 }

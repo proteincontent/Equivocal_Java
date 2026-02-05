@@ -2,6 +2,7 @@ package com.equivocal.service;
 
 import com.equivocal.entity.VerificationCode;
 import com.equivocal.repository.VerificationCodeRepository;
+import com.equivocal.security.InMemoryRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class VerificationService {
     
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
+    private final InMemoryRateLimiter rateLimiter;
     
     private static final int CODE_LENGTH = 6;
     private static final int EXPIRATION_MINUTES = 5;
@@ -27,13 +29,19 @@ public class VerificationService {
     @Transactional
     public boolean sendVerificationCode(String email) {
         try {
-            verificationCodeRepository.deleteByEmail(email);
+            String normalizedEmail = email != null ? email.trim().toLowerCase() : null;
+            if (!rateLimiter.allow("sendCode:" + normalizedEmail)) {
+                log.warn("[VerificationService] sendVerificationCode rate limited: {}", normalizedEmail);
+                return false;
+            }
+
+            verificationCodeRepository.deleteByEmail(normalizedEmail);
             
             String code = generateCode();
             LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
             
             VerificationCode verificationCode = VerificationCode.builder()
-                    .email(email)
+                    .email(normalizedEmail)
                     .code(code)
                     .expiresAt(expiresAt)
                     .attempts(0)
@@ -41,13 +49,13 @@ public class VerificationService {
             
             verificationCodeRepository.save(verificationCode);
             
-            boolean sent = emailService.sendVerificationCode(email, code);
+            boolean sent = emailService.sendVerificationCode(normalizedEmail, code);
             
             if (sent) {
-                log.info("[VerificationService] Verification code sent: {}", email);
+                log.info("[VerificationService] Verification code sent: {}", normalizedEmail);
                 return true;
             } else {
-                log.error("[VerificationService] Failed to send verification code: {}", email);
+                log.error("[VerificationService] Failed to send verification code: {}", normalizedEmail);
                 return false;
             }
         } catch (Exception e) {

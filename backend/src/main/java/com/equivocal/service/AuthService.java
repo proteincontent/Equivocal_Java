@@ -4,6 +4,7 @@ import com.equivocal.dto.AuthRequest;
 import com.equivocal.dto.AuthResponse;
 import com.equivocal.entity.User;
 import com.equivocal.repository.UserRepository;
+import com.equivocal.security.InMemoryRateLimiter;
 import com.equivocal.security.JwtService;
 import com.equivocal.security.PasswordService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class AuthService {
     private final PasswordService passwordService;
     private final JwtService jwtService;
     private final VerificationService verificationService;
+    private final InMemoryRateLimiter rateLimiter;
     
     /**
      * 登录或注册
@@ -35,15 +38,21 @@ public class AuthService {
         if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
             return AuthResponse.error("邮箱和密码不能为空");
         }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        if (!rateLimiter.allow("auth:" + normalizedEmail)) {
+            log.warn("[AuthService] Authentication rate limited: email={}", normalizedEmail);
+            return AuthResponse.error("请求过于频繁，请稍后再试");
+        }
         
-        Optional<User> existingUser = userRepository.findByEmail(email);
+        Optional<User> existingUser = userRepository.findByEmail(normalizedEmail);
         
         if (existingUser.isPresent()) {
             // 登录
             return login(existingUser.get(), password);
         } else {
             // 注册
-            return register(email, password, request.getCode());
+            return register(normalizedEmail, password, request.getCode());
         }
     }
     
@@ -110,9 +119,8 @@ public class AuthService {
         // 创建用户
         String hashedPassword = passwordService.hashPassword(password);
         
-        // 生成用户 ID（格式：user_时间戳_随机字符串）
-        String userId = "user_" + System.currentTimeMillis() + "_" +
-                        Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 7);
+        // 生成用户 ID
+        String userId = "user_" + UUID.randomUUID().toString().replace("-", "");
         
         // 默认注册为普通用户；管理员权限应通过受控流程授予
         Integer role = 1;

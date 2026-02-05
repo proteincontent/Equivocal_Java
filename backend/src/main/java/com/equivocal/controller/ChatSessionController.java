@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,7 +57,7 @@ public class ChatSessionController {
         } catch (Exception e) {
             log.error("[ChatSessionController] Failed to get sessions: {}", e.getMessage(), e);
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -103,7 +104,7 @@ public class ChatSessionController {
         } catch (Exception e) {
             log.error("[ChatSessionController] Failed to get session: {}", e.getMessage(), e);
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -149,7 +150,7 @@ public class ChatSessionController {
         } catch (Exception e) {
             log.error("[ChatSessionController] Failed to get messages: {}", e.getMessage(), e);
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -169,9 +170,8 @@ public class ChatSessionController {
             
             String title = request != null ? request.getOrDefault("title", "新对话") : "新对话";
             
-            // 生成会话 ID（格式：session_时间戳_随机字符串）
-            String sessionId = "session_" + System.currentTimeMillis() + "_" + 
-                              Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 7);
+            // 生成会话 ID
+            String sessionId = "session_" + UUID.randomUUID().toString().replace("-", "");
             
             ChatSession session = ChatSession.builder()
                     .id(sessionId)
@@ -189,7 +189,7 @@ public class ChatSessionController {
         } catch (Exception e) {
             log.error("[ChatSessionController] Failed to create session: {}", e.getMessage(), e);
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -235,7 +235,7 @@ public class ChatSessionController {
         } catch (Exception e) {
             log.error("[ChatSessionController] Failed to update session: {}", e.getMessage(), e);
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -291,7 +291,7 @@ public class ChatSessionController {
         } catch (Exception e) {
             log.error("[ChatSessionController] Failed to delete session: {}", e.getMessage(), e);
             Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
