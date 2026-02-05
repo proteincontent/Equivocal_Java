@@ -48,8 +48,14 @@ class NoSecretsInResourcesTest {
     private static String readClasspathResource(String path) throws Exception {
         try (InputStream is = NoSecretsInResourcesTest.class.getResourceAsStream(path)) {
             assertNotNull(is, "missing resource: " + path);
-            byte[] bytes = is.readAllBytes();
-            return new String(bytes, StandardCharsets.UTF_8);
+            // Java 8 compatible readAllBytes replacement.
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = is.read(buf)) >= 0) {
+                baos.write(buf, 0, n);
+            }
+            return new String(baos.toByteArray(), StandardCharsets.UTF_8);
         }
     }
 }

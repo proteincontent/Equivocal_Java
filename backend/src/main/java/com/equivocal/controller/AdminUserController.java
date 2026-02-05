@@ -257,13 +257,18 @@ public class AdminUserController {
             
             List<ChatSession> sessions = chatSessionRepository.findByUserIdOrderByUpdatedAtDesc(id);
             List<String> sessionIds = sessions.stream().map(ChatSession::getId).collect(Collectors.toList());
-            Map<String, Long> countsBySessionId = chatMessageRepository.countMessagesBySessionIds(sessionIds)
-                    .stream()
-                    .collect(Collectors.toMap(
-                            ChatMessageRepository.SessionMessageCount::getSessionId,
-                            ChatMessageRepository.SessionMessageCount::getCnt,
-                            (a, b) -> a
-                    ));
+            Map<String, Long> countsBySessionId;
+            if (sessionIds.isEmpty()) {
+                countsBySessionId = java.util.Collections.emptyMap();
+            } else {
+                countsBySessionId = chatMessageRepository.countMessagesBySessionIds(sessionIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                ChatMessageRepository.SessionMessageCount::getSessionId,
+                                ChatMessageRepository.SessionMessageCount::getCnt,
+                                (a, b) -> a
+                        ));
+            }
              
             List<Map<String, Object>> sessionList = sessions.stream()
                     .map(session -> {
