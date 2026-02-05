@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -51,9 +52,8 @@ public class AdminUserController {
                 return ResponseEntity.badRequest().body(error);
             }
 
-            // 生成用户 ID（格式：user_时间戳_随机字符串）
-            String userId = "user_" + System.currentTimeMillis() + "_" +
-                            Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 7);
+            // 生成用户 ID
+            String userId = "user_" + UUID.randomUUID().toString().replace("-", "");
             
             String hashedPassword = passwordService.hashPassword(request.getPassword());
             
@@ -78,7 +78,7 @@ public class AdminUserController {
         } catch (Exception e) {
             log.error("[AdminUserController] Failed to create user: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -149,7 +149,7 @@ public class AdminUserController {
         } catch (Exception e) {
             log.error("[AdminUserController] Failed to get users: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<String, String>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -168,7 +168,7 @@ public class AdminUserController {
         } catch (Exception e) {
             log.error("[AdminUserController] Failed to get user: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<String, String>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -206,7 +206,7 @@ public class AdminUserController {
         } catch (Exception e) {
             log.error("[AdminUserController] Failed to update user: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<String, String>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -219,8 +219,14 @@ public class AdminUserController {
             if (!userRepository.existsById(id)) {
                 return ResponseEntity.notFound().build();
             }
-            
-            // 先删除用户的所有会话（会级联删除消息）
+
+            List<ChatSession> sessions = chatSessionRepository.findByUserIdOrderByUpdatedAtDesc(id);
+            List<String> sessionIds = sessions.stream().map(ChatSession::getId).collect(Collectors.toList());
+            if (!sessionIds.isEmpty()) {
+                chatMessageRepository.deleteBySessionIdIn(sessionIds);
+            }
+
+            // 再删除用户的所有会话
             chatSessionRepository.deleteByUserId(id);
             
             userRepository.deleteById(id);
@@ -233,7 +239,7 @@ public class AdminUserController {
         } catch (Exception e) {
             log.error("[AdminUserController] Failed to delete user: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<String, String>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -273,7 +279,7 @@ public class AdminUserController {
         } catch (Exception e) {
             log.error("[AdminUserController] Failed to get user chat sessions: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<String, String>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }

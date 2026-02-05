@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -22,4 +23,11 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Modifying
     @Transactional
     void deleteBySessionId(String sessionId);
+
+    /**
+     * 批量删除多个会话的所有消息
+     */
+    @Modifying
+    @Transactional
+    void deleteBySessionIdIn(Collection<String> sessionIds);
 }

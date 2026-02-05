@@ -69,7 +69,7 @@ public class AdminChatController {
         } catch (Exception e) {
             log.error("[AdminChatController] Failed to get session messages: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -104,7 +104,7 @@ public class AdminChatController {
         } catch (Exception e) {
             log.error("[AdminChatController] Failed to get session: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
@@ -136,7 +136,7 @@ public class AdminChatController {
         } catch (Exception e) {
             log.error("[AdminChatController] Failed to delete session: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
