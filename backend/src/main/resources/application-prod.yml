@@ -1,0 +1,6 @@
+spring:
+  jpa:
+    hibernate:
+      # Production should not auto-mutate schema.
+      ddl-auto: validate
+

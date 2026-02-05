@@ -23,14 +23,12 @@ backend/
 │   │   ├── SecurityConfig.java      # Spring Security 配置
 │   │   ├── CorsConfig.java          # CORS 配置
 │   │   └── WebClientConfig.java     # WebClient 配置
-│   ├── controller/                   # REST 控制器
-│   │   ├── AuthController.java      # 认证 API
-│   │   ├── VerificationController.java # 验证码 API
-│   │   ├── CozeChatController.java  # Coze 聊天 API
-│   │   ├── CozeUploadController.java # Coze 文件上传
-│   │   ├── AdminUserController.java # 用户管理
-│   │   ├── AdminStatsController.java # 统计 API
-│   │   └── ConfigController.java    # 配置 API
+  │   ├── controller/                   # REST 控制器
+  │   │   ├── AuthController.java      # 认证 API
+  │   │   ├── VerificationController.java # 验证码 API
+  │   │   ├── AdminUserController.java # 用户管理
+  │   │   ├── AdminStatsController.java # 统计 API
+  │   │   └── ConfigController.java    # 配置 API
 │   ├── dto/                          # 数据传输对象
 │   │   ├── AuthRequest.java
 │   │   └── AuthResponse.java
@@ -48,11 +46,11 @@ backend/
 │   │   ├── PasswordService.java     # 密码加密
 │   │   ├── JwtService.java          # JWT 服务
 │   │   └── JwtAuthFilter.java       # JWT 过滤器
-│   └── service/                      # 业务服务
-│       ├── AuthService.java         # 认证服务
-│       ├── EmailService.java        # 邮件服务
-│       ├── VerificationService.java # 验证码服务
-│       └── CozeService.java         # Coze API 服务
+  │   └── service/                      # 业务服务
+  │       ├── AuthService.java         # 认证服务
+  │       ├── EmailService.java        # 邮件服务
+  │       ├── VerificationService.java # 验证码服务
+  │       └── AgentService.java        # AI Agent 客户端
 ├── src/main/resources/
 │   └── application.yml              # 应用配置
 ├── pom.xml                          # Maven 配置
@@ -87,38 +85,32 @@ cp .env.example .env
 **Windows (CMD):**
 
 ```cmd
-set SPRING_DATASOURCE_URL=jdbc:mysql://your-host:4000/your-database
-set SPRING_DATASOURCE_USERNAME=your-username
-set SPRING_DATASOURCE_PASSWORD=your-password
-set JWT_SECRET=your-jwt-secret-key
-set RESEND_API_KEY=your-resend-api-key
-set COZE_API_KEY=your-coze-api-key
-set COZE_BOT_ID=your-bot-id
-```
+ set SPRING_DATASOURCE_URL=jdbc:mysql://your-host:4000/your-database
+ set SPRING_DATASOURCE_USERNAME=your-username
+ set SPRING_DATASOURCE_PASSWORD=your-password
+ set JWT_SECRET=your-jwt-secret-key
+ set RESEND_API_KEY=your-resend-api-key
+ ```
 
 **Windows (PowerShell):**
 
 ```powershell
-$env:SPRING_DATASOURCE_URL="jdbc:mysql://your-host:4000/your-database"
-$env:SPRING_DATASOURCE_USERNAME="your-username"
-$env:SPRING_DATASOURCE_PASSWORD="your-password"
-$env:JWT_SECRET="your-jwt-secret-key"
-$env:RESEND_API_KEY="your-resend-api-key"
-$env:COZE_API_KEY="your-coze-api-key"
-$env:COZE_BOT_ID="your-bot-id"
-```
+ $env:SPRING_DATASOURCE_URL="jdbc:mysql://your-host:4000/your-database"
+ $env:SPRING_DATASOURCE_USERNAME="your-username"
+ $env:SPRING_DATASOURCE_PASSWORD="your-password"
+ $env:JWT_SECRET="your-jwt-secret-key"
+ $env:RESEND_API_KEY="your-resend-api-key"
+ ```
 
 **Linux/Mac:**
 
 ```bash
-export SPRING_DATASOURCE_URL=jdbc:mysql://your-host:4000/your-database
-export SPRING_DATASOURCE_USERNAME=your-username
-export SPRING_DATASOURCE_PASSWORD=your-password
-export JWT_SECRET=your-jwt-secret-key
-export RESEND_API_KEY=your-resend-api-key
-export COZE_API_KEY=your-coze-api-key
-export COZE_BOT_ID=your-bot-id
-```
+ export SPRING_DATASOURCE_URL=jdbc:mysql://your-host:4000/your-database
+ export SPRING_DATASOURCE_USERNAME=your-username
+ export SPRING_DATASOURCE_PASSWORD=your-password
+ export JWT_SECRET=your-jwt-secret-key
+ export RESEND_API_KEY=your-resend-api-key
+ ```
 
 #### 环境变量列表
 
@@ -128,16 +120,11 @@ export COZE_BOT_ID=your-bot-id
 | `SPRING_DATASOURCE_URL`      | 数据库 JDBC URL             | `jdbc:mysql://localhost:3306/equivocal` |
 | `SPRING_DATASOURCE_USERNAME` | 数据库用户名                | `root`                                  |
 | `SPRING_DATASOURCE_PASSWORD` | 数据库密码                  | _(空)_                                  |
-| `JWT_SECRET`                 | JWT 签名密钥（至少 256 位） | _(需要设置)_                            |
-| `JWT_EXPIRATION`             | JWT 过期时间（毫秒）        | `86400000` (24小时)                     |
-| `RESEND_API_KEY`             | Resend 邮件服务 API 密钥    | _(需要设置)_                            |
-| `RESEND_FROM_EMAIL`          | 发件人邮箱                  | `noreply@example.com`                   |
-| `COZE_API_URL`               | Coze API 地址               | `https://api.coze.com`                  |
-| `COZE_API_KEY`               | Coze API 密钥               | _(需要设置)_                            |
-| `COZE_TITLE_TOKEN`           | Coze Title Token            | _(可选)_                                |
-| `COZE_BOT_ID`                | Coze Bot ID                 | _(需要设置)_                            |
-| `COZE_PROJECT_ID`            | Coze Project ID             | _(可选)_                                |
-| `APP_CORS_ALLOWED_ORIGINS`   | 允许的 CORS 来源            | `http://localhost:3000,...`             |
+ | `JWT_SECRET`                 | JWT 签名密钥（至少 256 位） | _(需要设置)_                            |
+ | `JWT_EXPIRATION`             | JWT 过期时间（毫秒）        | `86400000` (24小时)                     |
+ | `RESEND_API_KEY`             | Resend 邮件服务 API 密钥    | _(需要设置)_                            |
+ | `RESEND_FROM_EMAIL`          | 发件人邮箱                  | `noreply@example.com`                   |
+ | `APP_CORS_ALLOWED_ORIGINS`   | 允许的 CORS 来源            | `http://localhost:3000,...`             |
 
 ### 启动
 
@@ -163,8 +150,10 @@ cd backend
 
 ### 聊天
 
-- `POST /api/coze-chat` - Coze 聊天
-- `POST /api/coze-upload` - Coze 文件上传
+- `POST /api/chat` - 流式聊天（SSE）
+- `GET /api/chat/sessions` - 当前用户会话列表
+- `GET /api/chat/sessions/{id}` - 获取会话详情（含消息）
+- `POST /api/upload` - 文件上传（交给 Agent 处理）
 
 ### 管理
 
@@ -212,7 +201,9 @@ pnpm dev
 
 ### 数据库迁移
 
-JPA 配置为 `ddl-auto: update`，会自动同步实体类到数据库表结构。
+本项目默认（本地开发）使用 `ddl-auto: update` 自动同步实体类到数据库表结构。
+
+生产环境建议使用 `prod` profile（`application-prod.yml`），将 `ddl-auto` 设为 `validate`，避免服务启动时自动修改表结构。
 
 ## 许可证
 

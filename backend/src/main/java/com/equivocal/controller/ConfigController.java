@@ -22,9 +22,6 @@ public class ConfigController {
     @Value("${openai.default-model:gpt-3.5-turbo}")
     private String defaultModel;
 
-    @Value("${coze.enabled:true}")
-    private boolean cozeEnabled;
-
     @Value("${email.verification.enabled:true}")
     private boolean emailVerificationEnabled;
 
@@ -34,12 +31,10 @@ public class ConfigController {
         config.put("appName", appName);
         config.put("appVersion", appVersion);
         config.put("defaultModel", defaultModel);
-        config.put("cozeEnabled", cozeEnabled);
         config.put("emailVerificationEnabled", emailVerificationEnabled);
 
         Map<String, Object> features = new HashMap<>();
         features.put("chat", true);
-        features.put("cozeChat", cozeEnabled);
         features.put("emailVerification", emailVerificationEnabled);
         features.put("admin", true);
         config.put("features", features);

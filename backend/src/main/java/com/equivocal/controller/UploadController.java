@@ -28,7 +28,9 @@ public class UploadController {
             "application/pdf",
             "text/plain",
             "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "image/png",
+            "image/jpeg"
     ));
 
     @PostMapping
@@ -68,6 +70,12 @@ public class UploadController {
             byte[] fileData = file.getBytes();
 
             log.info("Uploading file: {}, size: {} bytes", originalFilename, fileData.length);
+
+            if (!hasValidSignature(contentType, fileData)) {
+                response.put("success", false);
+                response.put("error", "文件内容与类型不匹配");
+                return ResponseEntity.badRequest().body(response);
+            }
 
             String agentRawResponse = agentService.uploadFile(fileData, originalFilename);
             log.debug("Agent upload response received ({} chars)", agentRawResponse != null ? agentRawResponse.length() : 0);
@@ -113,6 +121,59 @@ public class UploadController {
             return false;
         }
         String normalized = contentType.trim().toLowerCase();
-        return normalized.startsWith("image/") || ALLOWED_CONTENT_TYPES.contains(normalized);
+        return ALLOWED_CONTENT_TYPES.contains(normalized);
+    }
+
+    private static boolean hasValidSignature(String contentType, byte[] data) {
+        if (data == null) {
+            return false;
+        }
+        String normalized = contentType != null ? contentType.trim().toLowerCase() : "";
+
+        // text/plain can be any bytes (including empty already checked earlier).
+        if ("text/plain".equals(normalized)) {
+            return true;
+        }
+
+        if ("application/pdf".equals(normalized)) {
+            return startsWith(data, "%PDF-".getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+        }
+
+        if ("application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(normalized)) {
+            // docx is a ZIP (PK..).
+            return data.length >= 2 && (data[0] == 'P') && (data[1] == 'K');
+        }
+
+        if ("application/msword".equals(normalized)) {
+            // Legacy .doc (OLE2) magic: D0 CF 11 E0 A1 B1 1A E1
+            byte[] ole = new byte[]{
+                    (byte) 0xD0, (byte) 0xCF, 0x11, (byte) 0xE0, (byte) 0xA1, (byte) 0xB1, 0x1A, (byte) 0xE1
+            };
+            return startsWith(data, ole);
+        }
+
+        if ("image/png".equals(normalized)) {
+            byte[] png = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+            return startsWith(data, png);
+        }
+
+        if ("image/jpeg".equals(normalized)) {
+            // JPEG starts with FF D8 FF
+            return data.length >= 3 && (data[0] == (byte) 0xFF) && (data[1] == (byte) 0xD8) && (data[2] == (byte) 0xFF);
+        }
+
+        return false;
+    }
+
+    private static boolean startsWith(byte[] data, byte[] prefix) {
+        if (data.length < prefix.length) {
+            return false;
+        }
+        for (int i = 0; i < prefix.length; i++) {
+            if (data[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 }
