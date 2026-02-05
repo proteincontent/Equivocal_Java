@@ -19,7 +19,7 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         // 配置连接池 - 禁用连接复用以避免陈旧连接问题
-        ConnectionProvider connectionProvider = ConnectionProvider.builder("coze-pool")
+        ConnectionProvider connectionProvider = ConnectionProvider.builder("webclient-pool")
                 .maxConnections(50)
                 .maxIdleTime(Duration.ofSeconds(20))
                 .maxLifeTime(Duration.ofSeconds(60))

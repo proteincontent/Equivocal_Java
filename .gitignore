@@ -50,3 +50,7 @@ Thumbs.db
 # Kilo Code / Claude
 .claude/settings.local.json
 .kilocode/settings.local.json
+
+# Git worktrees (project-local)
+.worktrees/
+worktrees/

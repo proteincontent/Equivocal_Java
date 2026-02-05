@@ -4,9 +4,12 @@ import java.sql.SQLException;
 
 public class TestJdbcConnection {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/test?useSSL=true&requireSSL=true&verifyServerCertificate=false&allowPublicKeyRetrieval=true&connectTimeout=30000&socketTimeout=60000&autoReconnect=true&failOverReadOnly=false&maxReconnects=3&tcpKeepAlive=true";
-        String user = "gdjqzvhsjk1agjw.root";
-        String password = "0upXu0riDOLiJPCk";
+        String url = envOrDefault(
+                "SPRING_DATASOURCE_URL",
+                "jdbc:mysql://localhost:3306/equivocal?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+        );
+        String user = envOrDefault("SPRING_DATASOURCE_USERNAME", "root");
+        String password = envOrDefault("SPRING_DATASOURCE_PASSWORD", "");
 
         System.out.println("Connecting to database...");
         System.out.println("URL: " + url);
@@ -26,5 +29,10 @@ public class TestJdbcConnection {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String envOrDefault(String key, String defaultValue) {
+        String value = System.getenv(key);
+        return value != null ? value : defaultValue;
     }
 }

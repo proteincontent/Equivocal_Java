@@ -6,6 +6,9 @@ import com.equivocal.repository.ChatMessageRepository;
 import com.equivocal.repository.ChatSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,16 +31,22 @@ public class AdminChatController {
      * 获取会话的所有消息（管理员功能）
      */
     @GetMapping("/{id}/messages")
-    public ResponseEntity<?> getSessionMessages(@PathVariable String id) {
+    public ResponseEntity<?> getSessionMessages(@PathVariable String id,
+                                                @RequestParam(defaultValue = "1") int page,
+                                                @RequestParam(defaultValue = "200") int limit) {
         try {
             log.info("[AdminChatController] Getting messages for session: {}", id);
-            
+
             Optional<ChatSession> sessionOpt = chatSessionRepository.findById(id);
             if (!sessionOpt.isPresent()) {
                 return ResponseEntity.notFound().build();
             }
-            
-            List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(id);
+
+            int safePage = Math.max(1, page);
+            int safeLimit = Math.max(1, Math.min(500, limit));
+            PageRequest pageable = PageRequest.of(safePage - 1, safeLimit, Sort.by(Sort.Direction.ASC, "createdAt"));
+            Page<ChatMessage> messagePage = chatMessageRepository.findBySessionId(id, pageable);
+            List<ChatMessage> messages = messagePage.getContent();
             
             List<Map<String, Object>> messageList = messages.stream()
                     .map(message -> {
@@ -64,7 +73,11 @@ public class AdminChatController {
             
             result.put("session", sessionMap);
             result.put("messages", messageList);
-            
+            result.put("page", safePage);
+            result.put("limit", safeLimit);
+            result.put("total", messagePage.getTotalElements());
+            result.put("totalPages", messagePage.getTotalPages());
+             
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("[AdminChatController] Failed to get session messages: {}", e.getMessage(), e);
@@ -90,7 +103,7 @@ public class AdminChatController {
             ChatSession session = sessionOpt.get();
             
             // 获取消息数量
-            List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(id);
+            long messageCount = chatMessageRepository.countBySessionId(id);
             
             Map<String, Object> result = new HashMap<>();
             result.put("id", session.getId());
@@ -98,7 +111,7 @@ public class AdminChatController {
             result.put("title", session.getTitle());
             result.put("createdAt", session.getCreatedAt());
             result.put("updatedAt", session.getUpdatedAt());
-            result.put("messageCount", messages.size());
+            result.put("messageCount", messageCount);
             
             return ResponseEntity.ok(result);
         } catch (Exception e) {

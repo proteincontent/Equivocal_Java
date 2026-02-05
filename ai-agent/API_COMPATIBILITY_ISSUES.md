@@ -103,7 +103,7 @@ WARNING: Tools are currently DISABLED due to LLM API incompatibility
 # 编辑 ai-agent/.env
 LLM_API_BASE=https://api.openai.com/v1  # 或其他兼容API
 LLM_MODEL=gpt-4-turbo
-LLM_API_KEY=sk-xxxxx
+LLM_API_KEY=sk_xxxxx
 ```
 
 ### 方案 2: 实现 ReAct 模式（工作量大）
@@ -147,7 +147,7 @@ def get_llm(use_tools: bool = False):
     if use_tools:
         # 使用兼容的 API
         return ChatOpenAI(
-            api_key="sk-compat-api",
+            api_key="sk_compat_api",
             base_url="https://api.compatible.com/v1",
             model="gpt-4"
         )

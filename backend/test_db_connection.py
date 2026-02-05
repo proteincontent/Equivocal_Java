@@ -1,14 +1,17 @@
+import os
 import socket
 import ssl
 import mysql.connector
 from mysql.connector import Error
 import time
-
-HOST = 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com'
-PORT = 4000
-USER = 'gdjqzvhsjk1agjw.root'
-PASS = '0upXu0riDOLiJPCk'
-DB = 'test'
+ 
+# IMPORTANT: do not hardcode credentials/endpoints in repo.
+# Configure via env vars when you need to test a remote database.
+HOST = os.getenv("DB_HOST", "localhost")
+PORT = int(os.getenv("DB_PORT", "3306"))
+USER = os.getenv("DB_USER", "root")
+PASS = os.getenv("DB_PASS", "")
+DB = os.getenv("DB_NAME", "equivocal")
 
 def test_tcp():
     print(f"\n[1] Testing TCP Connection to {HOST}:{PORT}...")

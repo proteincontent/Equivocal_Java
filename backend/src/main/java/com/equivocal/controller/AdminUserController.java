@@ -1,6 +1,5 @@
 package com.equivocal.controller;
 
-import com.equivocal.entity.ChatMessage;
 import com.equivocal.entity.ChatSession;
 import com.equivocal.entity.User;
 import com.equivocal.repository.ChatMessageRepository;
@@ -257,7 +256,20 @@ public class AdminUserController {
             }
             
             List<ChatSession> sessions = chatSessionRepository.findByUserIdOrderByUpdatedAtDesc(id);
-            
+            List<String> sessionIds = sessions.stream().map(ChatSession::getId).collect(Collectors.toList());
+            Map<String, Long> countsBySessionId;
+            if (sessionIds.isEmpty()) {
+                countsBySessionId = java.util.Collections.emptyMap();
+            } else {
+                countsBySessionId = chatMessageRepository.countMessagesBySessionIds(sessionIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                ChatMessageRepository.SessionMessageCount::getSessionId,
+                                ChatMessageRepository.SessionMessageCount::getCnt,
+                                (a, b) -> a
+                        ));
+            }
+             
             List<Map<String, Object>> sessionList = sessions.stream()
                     .map(session -> {
                         Map<String, Object> map = new HashMap<>();
@@ -267,10 +279,8 @@ public class AdminUserController {
                         map.put("createdAt", session.getCreatedAt());
                         map.put("updatedAt", session.getUpdatedAt());
                         
-                        // 获取消息数量
-                        List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId());
-                        map.put("messageCount", messages.size());
-                        
+                        map.put("messageCount", countsBySessionId.getOrDefault(session.getId(), 0L));
+                         
                         return map;
                     })
                     .collect(Collectors.toList());
