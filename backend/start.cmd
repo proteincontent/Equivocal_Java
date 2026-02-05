@@ -29,7 +29,7 @@ if exist .env (
 echo.
 echo 验证关键配置...
 if defined RESEND_API_KEY (
-    echo   [OK] RESEND_API_KEY 已配置 (长度: %RESEND_API_KEY:~0,10%...)
+    echo   [OK] RESEND_API_KEY 已配置
 ) else (
     echo   [警告] RESEND_API_KEY 未配置!
 )
