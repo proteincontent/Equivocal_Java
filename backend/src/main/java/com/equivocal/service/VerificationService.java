@@ -27,12 +27,12 @@ public class VerificationService {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     
     @Transactional
-    public boolean sendVerificationCode(String email) {
+    public SendCodeResult sendVerificationCode(String email) {
         try {
             String normalizedEmail = email != null ? email.trim().toLowerCase() : null;
             if (!rateLimiter.allow("sendCode:" + normalizedEmail)) {
                 log.warn("[VerificationService] sendVerificationCode rate limited: {}", normalizedEmail);
-                return false;
+                return new SendCodeResult(false, SendCodeStatus.RATE_LIMITED, "请求过于频繁，请稍后再试");
             }
 
             verificationCodeRepository.deleteByEmail(normalizedEmail);
@@ -53,14 +53,14 @@ public class VerificationService {
             
             if (sent) {
                 log.info("[VerificationService] Verification code sent: {}", normalizedEmail);
-                return true;
+                return new SendCodeResult(true, SendCodeStatus.SENT, "Verification code sent");
             } else {
                 log.error("[VerificationService] Failed to send verification code: {}", normalizedEmail);
-                return false;
+                return new SendCodeResult(false, SendCodeStatus.SEND_FAILED, "Failed to send verification code");
             }
         } catch (Exception e) {
             log.error("[VerificationService] Exception: {}", e.getMessage(), e);
-            return false;
+            return new SendCodeResult(false, SendCodeStatus.ERROR, "服务端内部错误");
         }
     }
     
@@ -120,6 +120,37 @@ public class VerificationService {
             return success;
         }
         
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    public enum SendCodeStatus {
+        SENT,
+        RATE_LIMITED,
+        SEND_FAILED,
+        ERROR
+    }
+
+    public static class SendCodeResult {
+        private final boolean success;
+        private final SendCodeStatus status;
+        private final String message;
+
+        public SendCodeResult(boolean success, SendCodeStatus status, String message) {
+            this.success = success;
+            this.status = status;
+            this.message = message;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public SendCodeStatus getStatus() {
+            return status;
+        }
+
         public String getMessage() {
             return message;
         }
