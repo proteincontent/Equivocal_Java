@@ -4,6 +4,7 @@ import com.equivocal.repository.ChatMessageRepository;
 import com.equivocal.repository.ChatSessionRepository;
 import com.equivocal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/stats")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminStatsController {
 
     private final UserRepository userRepository;
@@ -66,7 +68,7 @@ public class AdminStatsController {
         }
 
         long endTime = System.currentTimeMillis();
-        System.out.println("[PERF] AdminStatsController.getStats(quick=" + quick + ") 耗时: " + (endTime - startTime) + "ms");
+        log.debug("[PERF] AdminStatsController.getStats(quick={}) 耗时: {}ms", quick, (endTime - startTime));
 
         return ResponseEntity.ok(stats);
     }
