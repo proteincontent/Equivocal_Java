@@ -103,8 +103,7 @@ public class UploadController {
         } catch (Exception e) {
             log.error("File upload failed", e);
             response.put("success", false);
-            // 防止 NPE 导致 error 字段为 null
-            response.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred during upload: " + e.getClass().getName());
+            response.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(response);
         }
     }
