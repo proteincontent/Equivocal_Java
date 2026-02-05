@@ -4,6 +4,7 @@ import com.equivocal.dto.AuthRequest;
 import com.equivocal.dto.AuthResponse;
 import com.equivocal.entity.User;
 import com.equivocal.repository.UserRepository;
+import com.equivocal.security.InMemoryRateLimiter;
 import com.equivocal.security.JwtService;
 import com.equivocal.security.PasswordService;
 import com.equivocal.service.AuthService;
@@ -39,6 +40,9 @@ class AuthServiceAdminBackdoorTest {
     @Mock
     private VerificationService verificationService;
 
+    @Mock
+    private InMemoryRateLimiter rateLimiter;
+
     @InjectMocks
     private AuthService authService;
 
@@ -47,6 +51,7 @@ class AuthServiceAdminBackdoorTest {
 
     @Test
     void register_adminEmail_doesNotGrantAdminRole() {
+        when(rateLimiter.allow("auth:admin@example.com")).thenReturn(true);
         when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.empty());
         when(verificationService.verifyCode("admin@example.com", "123456"))
                 .thenReturn(new VerificationService.VerificationResult(true, "ok"));
@@ -71,6 +76,7 @@ class AuthServiceAdminBackdoorTest {
                 .emailVerified(true)
                 .build();
 
+        when(rateLimiter.allow("auth:admin@example.com")).thenReturn(true);
         when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(existing));
         when(passwordService.verifyPassword("pass123", existing.getPassword())).thenReturn(true);
         when(passwordService.needsUpgrade(existing.getPassword())).thenReturn(false);
