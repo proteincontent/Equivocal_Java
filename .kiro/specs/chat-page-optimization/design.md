@@ -61,6 +61,7 @@ interface NavbarProps {
 ```
 
 **实现要点：**
+
 - 使用 `fixed top-0 left-0 right-0 z-50` 固定定位
 - 高度固定 64px (`h-16`)
 - 左侧显示品牌 Logo
@@ -80,6 +81,7 @@ interface SplineSceneWithLoaderProps {
 ```
 
 **实现要点：**
+
 - 使用 `useState` 跟踪加载状态
 - 骨架屏使用 `animate-pulse` 效果
 - 加载超时后显示静态 fallback
@@ -108,16 +110,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 // hooks/use-reduced-motion.ts
 export function useReducedMotion(): boolean {
   const [reducedMotion, setReducedMotion] = useState(false);
-  
+
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mediaQuery.matches);
-    
+
     const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
-  
+
   return reducedMotion;
 }
 ```
@@ -143,38 +145,42 @@ components/chat/
 
 本次优化主要涉及 UI 层面，不涉及数据模型变更。
 
-
-
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Fixed Navbar Positioning
-*For any* viewport scroll position, the Navbar element should always have `position: fixed` and `top: 0` computed styles, ensuring it remains at the top of the viewport.
+
+_For any_ viewport scroll position, the Navbar element should always have `position: fixed` and `top: 0` computed styles, ensuring it remains at the top of the viewport.
 **Validates: Requirements 1.1, 1.3**
 
 ### Property 2: Sidebar Tooltip Content Consistency
-*For any* chat session with a title, when the sidebar is collapsed and the user hovers over that session item, the tooltip should display the exact same title text as the session.
+
+_For any_ chat session with a title, when the sidebar is collapsed and the user hovers over that session item, the tooltip should display the exact same title text as the session.
 **Validates: Requirements 2.2**
 
 ### Property 3: Reduced Motion Animation Disabling
-*For any* animated component in the Chat Page, when the user's system has `prefers-reduced-motion: reduce` enabled, the component should either have no animation or use instant transitions (duration ≤ 50ms).
+
+_For any_ animated component in the Chat Page, when the user's system has `prefers-reduced-motion: reduce` enabled, the component should either have no animation or use instant transitions (duration ≤ 50ms).
 **Validates: Requirements 5.1, 5.2**
 
 ## Error Handling
 
 ### 3D Scene Loading Errors
+
 - **Timeout**: 10 秒超时后显示静态 fallback 图片
 - **Network Error**: 捕获加载错误，显示 fallback 并记录错误日志
 - **Graceful Degradation**: 即使 3D 场景加载失败，页面其他功能正常运行
 
 ### Component Rendering Errors
+
 - 使用 React Error Boundary 包裹关键组件
 - 错误时显示友好的错误提示，而非白屏
 
 ## Testing Strategy
 
 ### Unit Testing
+
 使用 Vitest + React Testing Library 进行单元测试：
 
 1. **Navbar 组件测试**
@@ -192,6 +198,7 @@ components/chat/
    - 验证媒体查询变化响应
 
 ### Property-Based Testing
+
 使用 **fast-check** 库进行属性测试：
 
 1. **Property 1 测试**: 生成随机滚动位置，验证 Navbar 始终固定
@@ -203,16 +210,19 @@ components/chat/
 测试文件命名格式：`*.property.test.ts`
 
 ### Visual Regression Testing
+
 - 使用 Playwright 截图对比，确保重构后视觉一致性
 
 ## Implementation Notes
 
 ### 性能考虑
+
 1. **Navbar**: 使用 `will-change: transform` 优化固定定位性能
 2. **Sidebar Tooltip**: 使用 Radix UI Tooltip，支持延迟显示避免闪烁
 3. **3D Scene**: 使用 `loading="lazy"` 延迟加载，减少首屏阻塞
 4. **动画**: 使用 CSS 变量控制动画时长，方便 reduced motion 切换
 
 ### 兼容性
+
 - 支持 Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 - 移动端支持 iOS 14+, Android 10+

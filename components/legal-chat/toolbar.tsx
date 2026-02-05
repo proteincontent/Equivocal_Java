@@ -30,7 +30,7 @@ interface LegalChatToolbarProps {
 
 /**
  * 专业法律服务导航栏
- * 
+ *
  * 设计理念：
  * - 极简克制，不抢占内容注意力
  * - 精致的玻璃态效果
@@ -66,12 +66,12 @@ export function LegalChatToolbar({
     "hover:bg-secondary dark:hover:bg-white/10",
     "hover:border-border dark:hover:border-white/20",
     "hover:shadow-md",
-    "active:scale-[0.98]"
+    "active:scale-[0.98]",
   );
 
   const iconButtonClass = cn(buttonBaseClass, "w-10 h-10");
   const textButtonClass = cn(buttonBaseClass, "px-4 h-10");
-  
+
   return (
     <motion.header
       className="absolute inset-x-0 top-0 z-50 px-4 sm:px-6 py-4"
@@ -119,12 +119,12 @@ export function LegalChatToolbar({
               transition={{ delay: 0.2 }}
             >
               {/* Logo */}
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-                <span className="text-primary-foreground font-bold text-sm">法</span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#3B82F6] flex items-center justify-center shadow-lg shadow-[#2563EB]/20">
+                <span className="text-white font-bold text-sm">法</span>
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-foreground">智法顾问</p>
-                <p className="text-xs text-muted-foreground">Legal AI Assistant</p>
+                <p className="text-xs text-muted-foreground">法律 AI 助手</p>
               </div>
             </motion.div>
           )}
@@ -134,14 +134,14 @@ export function LegalChatToolbar({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* 用户头像/登录 */}
           {onLogin && onLogout && (
-            <UserAvatar 
-              user={user ?? null} 
-              onLogin={onLogin} 
+            <UserAvatar
+              user={user ?? null}
+              onLogin={onLogin}
               onLogout={onLogout}
               className="!rounded-xl !h-10"
             />
           )}
-          
+
           {/* 管理员入口 */}
           {mounted && isAdmin() && (
             <motion.button
@@ -158,13 +158,9 @@ export function LegalChatToolbar({
               <span className="hidden sm:inline text-sm font-medium">管理</span>
             </motion.button>
           )}
-          
+
           {/* 主题切换 */}
-          <Theme 
-            variant="button" 
-            size="sm"
-            className={iconButtonClass}
-          />
+          <Theme variant="button" size="sm" className={iconButtonClass} />
 
           {/* 设置按钮 - 仅在聊天界面显示 */}
           {mounted && selectedType && (
@@ -200,11 +196,9 @@ export function LegalChatToolbar({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background/80 dark:bg-white/5 backdrop-blur-xl border border-border/50 dark:border-white/10 shadow-sm">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground">
-              {selectedType}
-            </span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2563EB]/5 dark:bg-[#2563EB]/10 backdrop-blur-xl border border-[#2563EB]/20 dark:border-[#2563EB]/30 shadow-sm shadow-[#2563EB]/5">
+            <div className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+            <span className="text-xs font-semibold text-[#2563EB]">{selectedType}</span>
           </div>
         </motion.div>
       )}

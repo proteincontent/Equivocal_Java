@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 interface ParallaxTiltProps {
@@ -57,7 +57,7 @@ export function ParallaxTilt({ children, className = "", intensity = 15 }: Paral
       <div className="relative w-full h-full" style={{ transform: "translateZ(20px)" }}>
         {children}
       </div>
-      
+
       {/* 光泽层 (Gloss) - 随倾斜角度移动 */}
       <motion.div
         className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-500 bg-gradient-to-br from-white/50 to-transparent rounded-[inherit] z-20"

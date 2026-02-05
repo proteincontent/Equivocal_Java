@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="210" y1="110" x2="454" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60A5FA"/>
+      <stop offset="1" stop-color="#A78BFA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- House -->
+  <path
+    d="M246 198L320 140L394 198V266C394 277 385 286 374 286H266C255 286 246 277 246 266V198Z"
+    stroke="url(#accent)"
+    stroke-width="8"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M292 286V232C292 226 297 221 303 221H337C343 221 348 226 348 232V286"
+    stroke="url(#accent)"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+
+  <!-- ID Card -->
+  <rect x="420" y="118" width="150" height="110" rx="18" stroke="#60A5FA" stroke-width="8"/>
+  <circle cx="462" cy="168" r="20" stroke="#60A5FA" stroke-width="8"/>
+  <path d="M440 206C448 190 476 190 484 206" stroke="#60A5FA" stroke-width="8" stroke-linecap="round"/>
+  <path d="M510 150H552" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+  <path d="M510 176H548" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+  <path d="M510 202H540" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+</svg>

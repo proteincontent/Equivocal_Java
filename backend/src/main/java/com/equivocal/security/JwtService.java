@@ -28,12 +28,13 @@ public class JwtService {
     @PostConstruct
     public void init() {
         // 确保密钥足够长（至少 256 位 = 32 字节）
+        if (jwtSecret == null || jwtSecret.trim().isEmpty()) {
+            throw new IllegalStateException("jwt.secret 未配置（至少 32 字节）");
+        }
+
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
-            // 填充密钥到 32 字节
-            byte[] paddedKey = new byte[32];
-            System.arraycopy(keyBytes, 0, paddedKey, 0, keyBytes.length);
-            keyBytes = paddedKey;
+            throw new IllegalStateException("jwt.secret 长度不足（至少 32 字节）");
         }
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }

@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +21,8 @@ public class VerificationService {
     private static final int CODE_LENGTH = 6;
     private static final int EXPIRATION_MINUTES = 5;
     private static final int MAX_ATTEMPTS = 5;
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     
     @Transactional
     public boolean sendVerificationCode(String email) {
@@ -85,10 +87,9 @@ public class VerificationService {
     }
     
     private String generateCode() {
-        Random random = new Random();
         StringBuilder code = new StringBuilder();
         for (int i = 0; i < CODE_LENGTH; i++) {
-            code.append(random.nextInt(10));
+            code.append(SECURE_RANDOM.nextInt(10));
         }
         return code.toString();
     }

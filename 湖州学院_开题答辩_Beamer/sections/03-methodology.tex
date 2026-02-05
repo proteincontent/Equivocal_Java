@@ -1,0 +1,70 @@
+% sections/03-methodology.tex
+% 研究方法
+
+\section{系统方案}
+
+\begin{frame}[t]{系统方案：LangGraph + RAG 的工程化落地}
+    \framepills{\pillaccent{Architecture}\hspace{0.15cm}\pill{Next.js}\hspace{0.15cm}\pill{Java Gateway}\hspace{0.15cm}\pill{LangGraph}\hspace{0.15cm}\pill{RAG}}
+    \vspace{-0.30cm}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.54\textwidth}
+            \begin{aicard}[Components]
+                \begin{itemize}\setlength{\itemsep}{0.16cm}
+                    \item \textbf{前端（Next.js）}：对话 UI、服务类型入口、SSE 流式渲染
+                    \item \textbf{后端（Java）}：JWT 鉴权、会话管理、审计留痕、限流/风控
+                    \item \textbf{智能体（FastAPI + LangGraph）}：多步推理 + 工具调用，必要时检索引用\cite{langgraph2024}
+                    \item \textbf{数据层}：向量检索（Cloudflare Vectorize）+ 文件存储（R2）+ 结构化日志（DB）
+                \end{itemize}
+                {\footnotesize\color{muted}目标：把“咨询”变成可追溯的工程流程。}
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.46\textwidth}
+            \begin{aicard}[Flow]
+                \centering
+                \begin{tikzpicture}[node distance=0.58cm, every node/.style={font=\fontsize{8.2}{10.2}\selectfont, align=center}]
+                    \node[rounded corners=3.2mm, draw=line, fill=bg, line width=0.55pt, minimum width=5.05cm, minimum height=0.80cm] (fe) {\textbf{Frontend}\\ Next.js / Chat UI};
+                    \node[rounded corners=3.2mm, draw=line, fill=bg, line width=0.55pt, minimum width=5.05cm, minimum height=0.80cm, below=0.28cm of fe] (be) {\textbf{Backend}\\ Auth / Session / Audit};
+                    \node[rounded corners=3.2mm, draw=line, fill=bg, line width=0.55pt, minimum width=5.05cm, minimum height=0.80cm, below=0.28cm of be] (ai) {\textbf{Agent}\\ LangGraph + Tools};
+                    \node[rounded corners=3.2mm, draw=line, fill=bg, line width=0.55pt, minimum width=5.05cm, minimum height=0.80cm, below=0.28cm of ai] (data) {\textbf{Data}\\ Vectorize / R2 / DB};
+
+                    \draw[->, line width=0.85pt, color=accent] (fe) -- (be);
+                    \draw[->, line width=0.85pt, color=accent] (be) -- (ai);
+                    \draw[->, line width=0.85pt, color=accent] (ai) -- (data);
+                \end{tikzpicture}
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[t, fragile]{关键流程：工具调用 + 引用 + 追溯（traceId）}
+    \framepills{\pillaccent{Trace}\hspace{0.15cm}\pill{Tools}\hspace{0.15cm}\pill{Citations}\hspace{0.15cm}\pill{Replayable}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.54\textwidth}
+            \begin{aicard}[Request pipeline]
+                \begin{itemize}\setlength{\itemsep}{0.24cm}
+                    \item \textbf{Input}：问题/合同片段（可选脱敏）+ 用户身份
+                    \item \textbf{Guard}：鉴权、限流、风险提示模板
+                    \item \textbf{Agent}：决策（检索/生成/追问）
+                    \item \textbf{Tools}：RAG / OCR / 文书生成
+                    \item \textbf{Output}：建议 + 免责声明 +（可选）引用 + traceId
+                \end{itemize}
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.46\textwidth}
+            \begin{aicard}[LangGraph (pseudo)]
+                \lstset{language=Python, basicstyle=\ttfamily\scriptsize, numbers=none, frame=none, backgroundcolor=\color{bg}, linewidth=\linewidth, xleftmargin=0pt, xrightmargin=0pt}
+                \begin{lstlisting}
+graph = StateGraph(State)
+graph.add_node("decide", decide)
+graph.add_node("rag", legal_rag_search)
+graph.add_edge("decide", "rag")
+graph.add_edge("rag", "decide")
+graph.compile()
+                \end{lstlisting}
+                {\footnotesize\color{muted}要点：把多步推理固定为图结构，便于测试与回放。}
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}

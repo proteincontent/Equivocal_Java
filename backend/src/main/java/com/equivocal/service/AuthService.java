@@ -76,14 +76,6 @@ public class AuthService {
             log.info("[AuthService] 密码哈希已升级: userId={}", user.getId());
         }
         
-        // 检查是否需要升级管理员权限（针对 admin@example.com 账号）
-        if ("admin@example.com".equalsIgnoreCase(user.getEmail()) && !user.isAdmin()) {
-            user.setRole(10);
-            user.setUpdatedAt(LocalDateTime.now());
-            userRepository.save(user);
-            log.info("[AuthService] 管理员权限已自动修复: userId={}, email={}, newRole=10", user.getId(), user.getEmail());
-        }
-        
         // 生成 Token（使用最新的 role 值）
         String token = jwtService.generateToken(user.getId(), user.getEmail(), user.getRole());
         
@@ -122,15 +114,15 @@ public class AuthService {
         String userId = "user_" + System.currentTimeMillis() + "_" +
                         Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 7);
         
-        // 如果是 admin@example.com，则设置为管理员
-        Integer role = "admin@example.com".equals(email) ? 10 : 1;
+        // 默认注册为普通用户；管理员权限应通过受控流程授予
+        Integer role = 1;
 
         User user = User.builder()
                 .id(userId)
                 .email(email)
                 .password(hashedPassword)
                 .role(role)
-                .emailVerified(false)
+                .emailVerified(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

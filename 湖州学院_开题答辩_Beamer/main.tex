@@ -1,0 +1,267 @@
+% main.tex
+% 湖州学院开题答辩 Beamer 模板
+% 基于 metropolis 主题的现代极简设计
+
+\documentclass[aspectratio=169, 10pt]{beamer}
+
+% Engine guard (Overleaf should use LuaLaTeX)
+\RequirePackage{iftex}
+\ifLuaTeX\else\ifXeTeX\else
+  \PackageError{Beamer}{This project requires LuaLaTeX (or XeLaTeX)}{In Overleaf: Menu -> Settings -> Compiler -> LuaLaTeX.}
+  \endinput
+\fi\fi
+
+\usepackage[UTF8,fontset=fandol]{ctex}
+
+% Tabular extensions (must be loaded before colortbl)
+\usepackage{array}
+
+% Compatibility shim: newer `array` uses \insert@column for p/m/b columns,
+% while `colortbl` may still refer to \insert@pcolumn.
+\makeatletter
+\providecommand\insert@pcolumn{\insert@column}
+\makeatother
+
+% Table row colors (\rowcolor) support
+\usepackage{colortbl}
+
+%% ============ 颜色定义 ============
+% AI‑Native Minimal (Neutral base + single accent color)
+% 别用 #FFFFFF，太死板。用 #FBFBFD，这是 Apple 官网的背景白。
+\definecolor{bg}{HTML}{FBFBFD}
+% 卡片背景不要太灰，要极其微妙，像纸张微微隆起。
+\definecolor{bgsoft}{HTML}{F5F5F7}
+% 别用纯黑。用 #1D1D1F，这是 Apple 的标准字色，深邃但不死黑。
+\definecolor{ink}{HTML}{1D1D1F}
+% 次要文字用冷灰，增加科技感。
+\definecolor{slate}{HTML}{424245}
+% 辅助文字（页脚/引用）用中性灰。
+\definecolor{muted}{HTML}{86868B}
+% 线条要几乎看不见，但又确实存在。
+\definecolor{line}{HTML}{D2D2D7}
+% Single accent: AI Indigo (Tailwind indigo-500-ish). Keep everything else neutral.
+\definecolor{accent}{HTML}{6366F1}
+\colorlet{accentSoft}{accent!10}
+\colorlet{accentLine}{accent!35}
+
+%% ============ 主题与配置 ============
+\usetheme{metropolis}
+% Remove section title pages and progress bar; keep fraction numbering.
+\metroset{progressbar=none, numbering=fraction, sectionpage=none}
+
+% Core palette
+\setbeamercolor{normal text}{fg=ink, bg=bg}
+\setbeamercolor{alerted text}{fg=accent}
+\setbeamercolor{title}{fg=ink}
+\setbeamercolor{subtitle}{fg=slate}
+\setbeamercolor{author}{fg=ink}
+\setbeamercolor{institute}{fg=muted}
+\setbeamercolor{date}{fg=muted}
+
+% Metropolis internals
+\setbeamercolor{progress bar}{fg=accent, bg=line}
+\setbeamercolor{title separator}{fg=accent}
+\setbeamercolor{frametitle}{fg=ink, bg=bg}
+\setbeamercolor{palette primary}{fg=ink, bg=bg}
+\setbeamercolor{palette secondary}{fg=ink, bg=bg}
+\setbeamercolor{palette tertiary}{fg=ink, bg=bg}
+\setbeamercolor{palette quaternary}{fg=ink, bg=bg}
+\setbeamercolor{structure}{fg=accent}
+
+% Typography scale (Apple-like: big titles + whitespace)
+\setbeamerfont{title}{size=\Huge, series=\bfseries}
+% 别用 \mdseries，副标题也要有分量，但用颜色区分。
+\setbeamerfont{subtitle}{size=\Large, series=\bfseries}
+\setbeamerfont{frametitle}{size=\LARGE, series=\bfseries}
+
+%% ============ 字体配置（LuaLaTeX / XeLaTeX） ============
+\usepackage{fontspec}
+
+% 英文无衬线字体（带 fallback）
+\IfFontExistsTF{TeX Gyre Heros}{
+  \setsansfont{TeX Gyre Heros}
+  \setmainfont{TeX Gyre Heros}
+}{
+  \setsansfont{Latin Modern Sans}
+  \setmainfont{Latin Modern Sans}
+}
+
+% CJK fonts are handled by `ctex` (fontset=fandol) for maximum portability.
+% Set a CJK monofont to avoid warnings when using \ttfamily.
+\ifdefined\setCJKmainfont
+  % Prefer a clean CJK sans look when available (portable within Fandol set).
+  \IfFontExistsTF{FandolHei}{
+    \setCJKmainfont{FandolHei}
+    \setCJKsansfont{FandolHei}
+  }{}
+\fi
+\ifdefined\setCJKmonofont
+  \IfFontExistsTF{FandolFang}{
+    \setCJKmonofont{FandolFang}
+  }{}
+\fi
+
+% 字体大小设置
+\usepackage{setspace}
+% 1.15 太挤了，这是对观众视力的侮辱。改成 1.3，让文字呼吸。
+\setstretch{1.22}
+
+%% ============ 页面设置 ============
+% 去掉 navigation symbols
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+
+% Minimal Apple-like footer (page number only)
+\setbeamertemplate{footline}{
+  \begin{beamercolorbox}[wd=\paperwidth, ht=0.5cm, dp=0.2cm, leftskip=1.1cm, rightskip=1.1cm]{footline}
+    \hfill{\color{muted}\footnotesize\insertframenumber/\inserttotalframenumber}
+  \end{beamercolorbox}
+}
+
+% Blocks
+\setbeamercolor{block title}{fg=ink, bg=bgsoft}
+\setbeamercolor{block body}{fg=slate, bg=bgsoft}
+\setbeamercolor{block title alerted}{fg=ink, bg=bgsoft}
+\setbeamercolor{block body alerted}{fg=slate, bg=bgsoft}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+% Lists
+\setbeamertemplate{itemize item}{\color{accent}\small$\bullet$}
+\setbeamertemplate{itemize subitem}{\color{muted}\tiny$\bullet$}
+\setlength{\leftmargini}{1.2em}
+\setlength{\leftmarginii}{1.1em}
+
+%% ============ 参考文献配置 ============
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\addbibresource{refs.bib}
+
+%% ============ 代码块配置 ============
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{accent}\bfseries,
+    commentstyle=\color{muted},
+    stringstyle=\color{ink},
+    numbers=left,
+    numberstyle=\tiny\color{muted},
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{line},
+    backgroundcolor=\color{bgsoft},
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false,
+    breaklines=true,
+    linewidth=0.9\textwidth,
+    xleftmargin=0.05\textwidth,
+    xrightmargin=0.05\textwidth
+}
+
+%% ============ TikZ 包 ============
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes, arrows, calc}
+
+%% ============ AI‑Native components (pills / cards / bento) ============
+% Keep the deck consistent: every page should reuse the same small set of components.
+\usepackage{xparse}
+\NewDocumentCommand{\pill}{m}{%
+  \tikz[baseline=(P.base)]\node[
+    draw=line,
+    fill=bgsoft,
+    rounded corners=2.6mm,
+    line width=0.45pt,
+    inner xsep=6.5pt,
+    inner ysep=3.2pt,
+    font=\sffamily\scriptsize\bfseries,
+    text=slate
+  ] (P) {#1};%
+}
+\NewDocumentCommand{\pillaccent}{m}{%
+  \tikz[baseline=(P.base)]\node[
+    draw=accentLine,
+    fill=accentSoft,
+    rounded corners=2.6mm,
+    line width=0.55pt,
+    inner xsep=6.5pt,
+    inner ysep=3.2pt,
+    font=\sffamily\scriptsize\bfseries,
+    text=accent
+  ] (P) {#1};%
+}
+\NewDocumentCommand{\framepills}{m}{%
+  \vspace{-0.55em}%
+  \noindent #1\par
+  \vspace{0.55em}%
+}
+% Verbatim-safe card wrapper (supports listings / lstlisting inside).
+% Implementation note: avoid grabbing the environment body as a macro argument.
+% Important: `block` uses `\textwidth` internally; wrap it in a minipage so
+% `\textwidth` becomes the current column width inside `columns`.
+\newenvironment{aicard}[1][]{%
+  \begin{minipage}{\linewidth}
+    \begin{block}{#1}
+}{%
+    \end{block}
+  \end{minipage}
+}
+
+%% ============ 表格样式 ============
+\usepackage{booktabs}
+\newcolumntype{L}{>{\raggedright\arraybackslash}p{0.45\textwidth}}
+\newcolumntype{C}{>{\centering\arraybackslash}p{0.25\textwidth}}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}p{0.25\textwidth}}
+
+%% ============ 数学公式 ============
+\usepackage{amsmath, amsthm, amssymb}
+
+%% ============ 标题信息（请修改以下内容） ============
+% Personal meta (fill with your real info)
+\newcommand{\studentname}{沈佳豪}
+% Light, consistent form line placeholder (Apple-like).
+% Uses a subtle gray rule so empty fields don't look visually "heavy".
+\newcommand{\formline}[1]{\textcolor{line}{\rule[-0.2ex]{#1}{0.6pt}}}
+\newcommand{\studentid}{\formline{3.2cm}}
+\newcommand{\studentmajor}{\formline{3.2cm}}
+\newcommand{\advisor}{\formline{3.2cm}}
+
+% Cover display title (manual line break to avoid awkward CJK wrapping).
+\newcommand{\covertitle}{\mbox{基于 LangGraph 的法律智能体}\\系统设计与实现}
+
+% Keep `\title{...}` single-line for PDF metadata / navigation.
+\title{基于 LangGraph 的法律智能体系统设计与实现}
+\subtitle{自建 LangGraph + RAG · 开题答辩}
+\author{\studentname}
+\institute{湖州学院 \quad 计算机科学与技术学院}
+\date{\today}
+
+%% ============ 校徽路径接口 ============
+% 如果 assets/hzu-logo.png 不存在，将使用 TikZ 占位框
+% 请将真实校徽图片放在 assets/hzu-logo.png
+
+\begin{document}
+
+% 封面
+\input{sections/00-cover}
+
+% 目录
+\input{sections/01-toc}
+
+% 研究背景
+\input{sections/02-background}
+
+% 研究方法
+\input{sections/03-methodology}
+
+% 实验与结果
+\input{sections/04-experiments}
+
+% 结论与展望
+\input{sections/05-conclusion}
+
+% 致谢
+\input{sections/06-acknowledgements}
+
+% 参考文献
+\input{sections/07-references}
+
+\end{document}
