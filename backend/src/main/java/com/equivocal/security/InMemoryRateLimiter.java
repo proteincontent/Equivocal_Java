@@ -1,6 +1,7 @@
 package com.equivocal.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +19,7 @@ public class InMemoryRateLimiter {
 
     private final ConcurrentMap<String, WindowCounter> counters = new ConcurrentHashMap<>();
 
+    @Autowired
     public InMemoryRateLimiter(
             @Value("${app.rate-limit.window-ms:300000}") long windowMs,
             @Value("${app.rate-limit.max-requests:10}") int maxRequests,
