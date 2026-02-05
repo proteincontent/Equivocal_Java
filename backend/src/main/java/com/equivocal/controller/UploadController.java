@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/upload")
@@ -20,6 +23,13 @@ import java.util.Map;
 public class UploadController {
 
     private final AgentService agentService;
+
+    private static final Set<String> ALLOWED_CONTENT_TYPES = new HashSet<>(Arrays.asList(
+            "application/pdf",
+            "text/plain",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ));
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> uploadFile(@RequestParam("file") MultipartFile file) {
@@ -38,6 +48,13 @@ public class UploadController {
             if (file.getSize() > 10 * 1024 * 1024) {
                 response.put("success", false);
                 response.put("error", "文件大小不能超过10MB");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            String contentType = file.getContentType();
+            if (!isAllowedContentType(contentType)) {
+                response.put("success", false);
+                response.put("error", "不支持的文件类型");
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -90,5 +107,13 @@ public class UploadController {
             response.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error occurred during upload: " + e.getClass().getName());
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    private static boolean isAllowedContentType(String contentType) {
+        if (contentType == null || contentType.trim().isEmpty()) {
+            return false;
+        }
+        String normalized = contentType.trim().toLowerCase();
+        return normalized.startsWith("image/") || ALLOWED_CONTENT_TYPES.contains(normalized);
     }
 }

@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -212,7 +213,7 @@ public class ChatController {
             
             Map<String, Object> error = new HashMap<>();
             Map<String, String> errorDetails = new HashMap<>();
-            errorDetails.put("message", e.getMessage());
+            errorDetails.put("message", "服务端内部错误");
             errorDetails.put("type", "api_error");
             errorDetails.put("code", "chat_error");
             error.put("error", errorDetails);
@@ -248,15 +249,14 @@ public class ChatController {
         } catch (Exception e) {
             log.error("[ChatController] Get history failed: {}", e.getMessage(), e);
             Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
+            error.put("error", "服务端内部错误");
             return ResponseEntity.internalServerError().body(error);
         }
     }
     
     private ChatSession createNewSession(String userId) {
         // 生成会话 ID
-        String sessionId = "session_" + System.currentTimeMillis() + "_" +
-                          Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 7);
+        String sessionId = "session_" + UUID.randomUUID().toString().replace("-", "");
                           
         ChatSession session = ChatSession.builder()
                 .id(sessionId)
