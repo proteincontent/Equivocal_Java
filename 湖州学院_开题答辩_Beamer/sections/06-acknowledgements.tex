@@ -1,0 +1,22 @@
+% sections/06-acknowledgements.tex
+% 致谢
+
+\section{致谢}
+
+\begin{frame}[plain]
+    \begin{tikzpicture}[remember picture, overlay]
+        \fill[bg] (current page.south west) rectangle (current page.north east);
+
+        \node[anchor=center] at ($(current page.center) + (0, 0.4cm)$) {
+            {\fontsize{54}{60}\selectfont\bfseries\color{ink}Q \& A}
+        };
+        \node[anchor=center] at ($(current page.center) + (0, -0.55cm)$) {
+            {\fontsize{18}{24}\selectfont\color{slate}谢谢。欢迎提问与质疑我的边界与验收口径。}
+        };
+        \node[anchor=center] at ($(current page.center) + (0, -1.25cm)$) {
+            {\pillaccent{Questions}\hspace{0.15cm}\pill{Boundary}\hspace{0.15cm}\pill{Acceptance}}
+        };
+
+        \draw[accent, line width=1.6pt] ($(current page.south) + (-2.2cm, 1.45cm)$) -- ++(4.4cm, 0);
+    \end{tikzpicture}
+\end{frame}

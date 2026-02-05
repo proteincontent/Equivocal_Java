@@ -1,0 +1,30 @@
+\frametitle{关键流程：工具调用 + 引用 + 追溯（traceId）}
+\framepills{\pillaccent{Trace}\hspace{0.15cm}\pill{Tools}\hspace{0.15cm}\pill{Citations}\hspace{0.15cm}\pill{Replayable}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.54\textwidth}
+            \begin{aicard}[Request pipeline]
+                \begin{itemize}\setlength{\itemsep}{0.24cm}
+                    \item \textbf{Input}：问题/合同片段（可选脱敏）+ 用户身份
+                    \item \textbf{Guard}：鉴权、限流、风险提示模板
+                    \item \textbf{Agent}：决策（检索/生成/追问）
+                    \item \textbf{Tools}：RAG / OCR / 文书生成
+                    \item \textbf{Output}：建议 + 免责声明 +（可选）引用 + traceId
+                \end{itemize}
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.46\textwidth}
+            \begin{aicard}[LangGraph (pseudo)]
+                \lstset{language=Python, basicstyle=\ttfamily\scriptsize, numbers=none, frame=none, backgroundcolor=\color{bg}, linewidth=\linewidth, xleftmargin=0pt, xrightmargin=0pt}
+                \begin{lstlisting}
+graph = StateGraph(State)
+graph.add_node("decide", decide)
+graph.add_node("rag", legal_rag_search)
+graph.add_edge("decide", "rag")
+graph.add_edge("rag", "decide")
+graph.compile()
+                \end{lstlisting}
+                {\footnotesize\color{muted}要点：把多步推理固定为图结构，便于测试与回放。}
+            \end{aicard}
+        \end{column}
+    \end{columns}

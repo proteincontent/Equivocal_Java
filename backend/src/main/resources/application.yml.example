@@ -60,11 +60,15 @@ resend:
 coze:
   # Coze AI 配置
   # 从 https://www.coze.com 获取以下信息
-  api-url: ${COZE_API_URL:https://api.coze.com}
-  api-key: ${COZE_API_KEY:}
+  api-url: ${COZE_API_URL:https://x83jmqzc72.coze.site}
+  api-key: ${COZE_API_KEY:eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk2MGE3ZDNiLTcwNzMtNDBhNy1iN2QzLWMxNjEzNjJjMTExOCJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbImFSMTI1N1NtZTFTWjlhVmdlVXJLV0RzTlE2VXM4a2lpIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzY2Mjg4OTkwLCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NTg1Nzc0NjE2MzU1MDc4MTgyIiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NTg2MTUzNDQ3NjE1ODg5NDE4In0.NN-9FvOty90dTQX2v1PHbu1K9TBeBMhem9bNaZN51m4PbORv_3vyp88f04_kvh_ig-29Y_aKUPYFLpJ60XDEDA07jvCwNLjW4Fx8HUH8RKZ4wrxI7_IiVDvHkItFIcQF0QE2k3Kc8CLZf_98IiQr8kDjXyh3W7LuTgZjep8jVLAYPlc4HG9-Ur-V_mNmWoYX6MQV9yhvJJjRdrWPCB2K-oPCVeja0m94N_zo9zmViZ2D3-423IkdgNlckw66WhHDVEEkiTYiqbF_5UNnl3-SAXO1gvZbR0B7Q3lVBmg2gee1dldc7UOszmkkHD64Zw_rHztv0_jtj6yoK738EtT_1g}
   title-token: ${COZE_TITLE_TOKEN:}
   bot-id: ${COZE_BOT_ID:}
-  project-id: ${COZE_PROJECT_ID:}
+  project-id: ${COZE_PROJECT_ID:7585758179074670602}
+
+agent:
+  # 自建 LangGraph Agent 服务配置
+  api-url: ${AGENT_API_URL:http://localhost:8100/v1}
 
 app:
   cors:

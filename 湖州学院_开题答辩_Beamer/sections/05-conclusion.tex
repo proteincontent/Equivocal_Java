@@ -1,0 +1,56 @@
+% sections/05-conclusion.tex
+% 结论与展望
+
+\section{计划与成果}
+
+\begin{frame}[c]{阶段性成果（当前进展）}
+    \framepills{\pillaccent{Progress}\hspace{0.15cm}\pill{MVP ready}\hspace{0.15cm}\pill{Engineering-first}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.5\textwidth}
+            \begin{aicard}[Product]
+                多服务类型入口（合同审查 / 文书生成 / 法律咨询），围绕“\textbf{可执行下一步}”。
+            \end{aicard}
+            \vspace{0.28cm}
+            \begin{aicard}[System]
+                前端（Next.js）+ 后端（Java）+ 智能体（FastAPI + LangGraph）链路成型。
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{aicard}[RAG infra]
+                向量库（Cloudflare Vectorize）+ 文件存储（R2），支持引用与材料上传。
+            \end{aicard}
+            \vspace{0.28cm}
+            \begin{aicard}[Acceptance baseline]
+                追溯字段、审计日志、失败降级策略，支持\textbf{可验收与可复盘}。
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[c]{计划与预期成果（W1–W8）}
+    \framepills{\pillaccent{Roadmap}\hspace{0.15cm}\pill{W1–W8}\hspace{0.15cm}\pill{Deliverables}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.56\textwidth}
+            \begin{aicard}[Milestones]
+                \begin{itemize}\setlength{\itemsep}{0.14cm}
+                    \item W1–W2：用例与数据结构定稿；会话/审计表结构；关键页面原型
+                    \item W3–W4：Java 网关与鉴权完善；SSE 流式链路；端到端联调
+                    \item W5–W6：智能体策略（追问/检索/生成）；降级与风控；引用输出规范
+                    \item W7：测试与验收脚本（合同审查/劳动争议/文书生成）
+                    \item W8：论文与答辩材料；演示脚本与彩排
+                \end{itemize}
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.44\textwidth}
+            \begin{aicard}[Deliverables]
+                \begin{itemize}\setlength{\itemsep}{0.14cm}
+                    \item 可演示 MVP：登录 + 咨询 + 留痕 + 可追溯引用
+                    \item 关键场景 Demo：合同审查 / 文书生成 / 法律咨询
+                    \item 可验收口径：指标 + 日志 + traceId 回放 + 风险对策
+                \end{itemize}
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}

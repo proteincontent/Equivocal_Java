@@ -8,9 +8,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
+@lombok.extern.slf4j.Slf4j
 public class CorsConfig {
     
     @Value("${app.cors.allowed-origins}")
@@ -18,10 +21,19 @@ public class CorsConfig {
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        log.info("[CorsConfig] 初始化 CORS 配置, 允许的源: {}", allowedOrigins);
         CorsConfiguration configuration = new CorsConfiguration();
         
         // 解析允许的源
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        List<String> origins;
+        if (allowedOrigins == null || allowedOrigins.trim().isEmpty()) {
+            origins = Collections.emptyList();
+        } else {
+            origins = Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(origin -> !origin.isEmpty())
+                    .collect(Collectors.toList());
+        }
         configuration.setAllowedOrigins(origins);
         
         // 允许的 HTTP 方法

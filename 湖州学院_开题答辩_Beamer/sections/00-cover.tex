@@ -1,0 +1,62 @@
+% sections/00-cover.tex
+% 封面页
+
+\begin{frame}[plain]
+    \begin{tikzpicture}[remember picture, overlay]
+        % Background (Apple Light)
+        \fill[bg] (current page.south west) rectangle (current page.north east);
+
+        % Top meta
+        \node[anchor=north west] at ($(current page.north west) + (1.1cm, -0.9cm)$) {
+            % \sffamily 才是优雅的。两个单词之间用 · 分隔，而不是程序员的 //
+            {\sffamily\fontsize{8}{12}\selectfont\color{muted}\textbf{EQUIVOCAL LEGAL} \quad $\cdot$ \quad \textbf{PROPOSAL DEFENSE}}
+        };
+
+        % Minimal HZU badge (fallback if no logo asset)
+        \node[anchor=north east] at ($(current page.north east) + (-1.1cm, -0.85cm)$) {
+            \tikz[baseline] \node[
+                draw=line,
+                fill=bgsoft,
+                rounded corners=2mm,
+                minimum width=1.35cm,
+                minimum height=0.62cm,
+                font=\fontsize{9}{11}\selectfont\bfseries,
+                text=ink
+            ] {HZU};
+        };
+
+        % Title & subtitle (split from pills so the underline never falls into the meta card area)
+        \node[anchor=west, text width=0.84\textwidth, align=left] (title_node) at ($(current page.west) + (1.1cm, 1.55cm)$) {
+            {\fontsize{25}{31}\selectfont\bfseries\color{ink}\covertitle}\par
+            \vspace{0.30cm}
+            {\fontsize{14}{18}\selectfont\color{slate}\insertsubtitle}\par
+        };
+
+        % Accent underline (belongs to title area)
+        \draw[accent, line width=1.6pt] ($(title_node.south west) + (0, -0.05cm)$) -- ++(2.8cm, 0);
+
+        % Pills (kept visually close to subtitle, but independent from underline)
+        \node[anchor=north west, text width=0.84\textwidth, align=left] (pills_node) at ($(title_node.south west) + (0, -0.18cm)$) {
+            {\pillaccent{LangGraph}\hspace{0.15cm}\pill{RAG}\hspace{0.15cm}\pill{Legal AI}\hspace{0.15cm}\pill{Traceable}}
+        };
+
+        % Bottom-left meta card
+        \node[anchor=south west] at ($(current page.south west) + (1.1cm, 0.9cm)$) {
+            \begin{tikzpicture}
+                \node[draw=line, fill=bgsoft, rounded corners=3.2mm, line width=0.55pt, inner sep=10pt] (meta) {
+                    \begin{minipage}{0.68\textwidth}
+                        {\fontsize{11}{14}\selectfont\color{ink}\textbf{姓名：}\studentname}\par
+                        \vspace{0.12cm}
+                        {\fontsize{11}{14}\selectfont\color{ink}\textbf{学号：}\studentid}\par
+                        \vspace{0.12cm}
+                        {\fontsize{11}{14}\selectfont\color{ink}\textbf{学院/专业：}\studentmajor}\par
+                        \vspace{0.12cm}
+                        {\fontsize{11}{14}\selectfont\color{ink}\textbf{指导教师：}\advisor}\par
+                        \vspace{0.28cm}
+                        {\fontsize{10}{13}\selectfont\color{muted}\insertinstitute \quad · \quad \insertdate}
+                    \end{minipage}
+                };
+            \end{tikzpicture}
+        };
+    \end{tikzpicture}
+\end{frame}

@@ -1,0 +1,49 @@
+% sections/02-background.tex
+% 研究背景
+
+\section{背景与问题}
+
+\begin{frame}[c]{背景与意义：为什么需要法律智能体}
+    \framepills{\pillaccent{Problem}\hspace{0.15cm}\pill{Cost}\hspace{0.15cm}\pill{Risk}\hspace{0.15cm}\pill{Fragmented info}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.58\textwidth}
+            \begin{aicard}[User pain]
+                \begin{itemize}\setlength{\itemsep}{0.32cm}
+                    \item \textbf{成本高、门槛高}：依赖专业人力；用户常常“问不到点子上”
+                    \item \textbf{风险点隐蔽}：条款风险埋在细节里，误解可能带来高代价
+                    \item \textbf{信息碎片化}：法条/案例/流程分散，检索与比对成本高
+                \end{itemize}
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{aicard}[Why now]
+                \textbf{大模型}带来自然语言交互能力，\textbf{RAG}把回答与依据绑定，让关键结论\textbf{可追溯、可复核}\cite{lewis2020rag}。\par
+                \vspace{0.35em}
+                {\footnotesize\color{muted}目标不是“更会聊天”，而是“更可验收”。}
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[c]{问题定义：把“咨询”工程化到可验收}
+    \framepills{\pillaccent{Definition}\hspace{0.15cm}\pill{MVP}\hspace{0.15cm}\pill{Traceable}\hspace{0.15cm}\pill{Safe boundary}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.52\textwidth}
+            \begin{aicard}[One‑sentence mission]
+                让用户在 3 分钟内得到\textbf{可执行的下一步}（需要补充哪些事实 / 风险点在哪里 / 建议怎么做），并保证\textbf{可追溯、可回放、可验收}。
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \begin{aicard}[Boundaries \& principles]
+                \begin{itemize}\setlength{\itemsep}{0.26cm}
+                    \item \textbf{不替代律师}：输出建议与依据，提示适用范围与不确定性
+                    \item \textbf{可追溯}：关键输出绑定 traceId / 模型信息 / 引用来源
+                    \item \textbf{可降级}：上游不可用时返回结构化替代步骤（非“报错/沉默”）
+                    \item \textbf{隐私最小化}：最小化存储、可选脱敏，避免泄露敏感信息
+                \end{itemize}
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}

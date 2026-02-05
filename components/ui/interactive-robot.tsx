@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react"; /* Hook就是一些以use开头的函数，让你“钩入”React的内部机制 */
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  useState,
+  useEffect,
+  useRef,
+} from "react"; /* Hook就是一些以use开头的函数，让你“钩入”React的内部机制 */
+import { motion } from "framer-motion";
 import { SplineScene } from "./spline-enhanced";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +78,7 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
       onClick={handleClick}
       role="button"
       tabIndex={0}
-      aria-label="Interactive robot assistant - click or hover to interact"
+      aria-label="交互式机器人助手 - 点击或悬停以互动"
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           handleClick();
@@ -112,7 +116,6 @@ export function InteractiveRobot({ className, onInteraction }: InteractiveRobotP
             />
           ))}
         </div>
-
       </div>
 
       {/* Glow effect - Shopify Style Magenta/Purple */}

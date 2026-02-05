@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export type Card = {
   id: number;
@@ -35,17 +36,17 @@ export const CardSlide = ({
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 640) {
-        setDynamicOffset(6);
-        setDynamicScale(0.03);
-        setCardSize({ height: "11rem", width: "9.5rem" });
-      } else if (window.innerWidth < 1024) {
-        setDynamicOffset(8);
-        setDynamicScale(0.04);
-        setCardSize({ height: "13rem", width: "11rem" });
-      } else {
         setDynamicOffset(10);
         setDynamicScale(0.05);
-        setCardSize({ height: "15rem", width: "12.5rem" });
+        setCardSize({ height: "16rem", width: "13rem" }); // 移动端加大
+      } else if (window.innerWidth < 1024) {
+        setDynamicOffset(12);
+        setDynamicScale(0.06);
+        setCardSize({ height: "20rem", width: "16rem" }); // 平板端加大
+      } else {
+        setDynamicOffset(15);
+        setDynamicScale(0.06);
+        setCardSize({ height: "24rem", width: "20rem" }); // 桌面端大幅加大：从 12.5rem -> 20rem
       }
     };
 
@@ -95,7 +96,7 @@ export const CardSlide = ({
         <motion.div
           key={card.id}
           onClick={() => handleCardClick(index, card)}
-          className="absolute bg-white dark:bg-neutral-900 rounded-2xl p-4 md:p-5 shadow-2xl border border-neutral-200 dark:border-white/[0.08] flex flex-col justify-between text-left overflow-hidden cursor-pointer"
+          className="absolute bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl rounded-2xl p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/20 dark:border-white/10 flex flex-col justify-between text-left overflow-hidden cursor-pointer transition-all duration-300 group hover:shadow-[0_20px_40px_rgb(0,0,0,0.2)]"
           style={{
             transformOrigin: "top center",
             height: cardSize.height,
@@ -108,29 +109,41 @@ export const CardSlide = ({
           }}
           transition={{ type: "spring", stiffness: 120, damping: 18 }}
         >
-          <div className="space-y-2">
-            <div className="font-bold text-base md:text-lg text-neutral-800 dark:text-neutral-100 leading-tight">
+          <div className="space-y-3 relative z-10">
+            <div className="font-bold text-lg md:text-xl text-neutral-900 dark:text-neutral-50 leading-tight tracking-tight">
               {card.name}
             </div>
-            <div className="text-neutral-600 dark:text-neutral-300 text-[11px] sm:text-xs leading-relaxed line-clamp-3">
+            <div className="text-neutral-600 dark:text-neutral-400 text-xs sm:text-sm leading-relaxed line-clamp-3 font-medium">
               {card.content}
             </div>
 
             {/* Image Section */}
-            <div className="mt-1">
-              <img
+            <div className="mt-2 relative h-20 sm:h-24 md:h-28 overflow-hidden rounded-lg">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2563EB]/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Image
                 src={card.image}
                 alt={card.name}
-                className="w-full h-16 sm:h-20 md:h-24 rounded-lg border border-neutral-200 dark:border-neutral-800 object-cover shadow-md"
+                fill
+                sizes="(max-width: 640px) 90vw, 420px"
+                className="rounded-lg border border-neutral-200/50 dark:border-neutral-700/50 object-cover shadow-sm transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </div>
 
-          <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 mt-2">
-            <p className="text-neutral-700 dark:text-white font-medium text-[10px] sm:text-xs">
+          <div className="pt-3 border-t border-neutral-200/60 dark:border-neutral-800/60 mt-3 flex items-center justify-between">
+            <p className="text-neutral-800 dark:text-neutral-200 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">
               {card.designation}
             </p>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#2563EB] animate-pulse" />
           </div>
+
+          {/* Subtle noise texture overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply dark:mix-blend-overlay"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            }}
+          />
         </motion.div>
       ))}
     </div>
@@ -144,56 +157,46 @@ export function HeroPreviewWalls() {
   const CARDS = [
     {
       id: 0,
-      name: "AI-Powered Automation",
-      designation: "Efficiency through Intelligence",
+      name: "AI 自动化",
+      designation: "以智能提升效率",
       content: (
         <p>
-          We design intelligent systems that streamline workflows, reduce
-          overhead, and enable you to scale without friction. Our automation
-          modules integrate seamlessly across{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-            multiple platforms and APIs
-          </span>
-          , ensuring precision and reliability.
+          我们设计智能系统来优化工作流、降低管理成本，并帮助业务平滑扩展。我们的自动化模块可无缝集成于{" "}
+          <span className="font-semibold text-[#2563EB] dark:text-[#3B82F6]">多平台与 API</span>
+          ，确保精度与可靠性。
         </p>
       ),
-      image:
-        "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/dashboard-gradient.png",
+      image: "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/dashboard-gradient.png",
     },
     {
       id: 1,
-      name: "Modern Design Systems",
-      designation: "Built for Flexibility and Speed",
+      name: "现代化设计系统",
+      designation: "为灵活与速度而生",
       content: (
         <p>
-          From concept to code, our design systems empower product teams to move
-          faster. We build reusable components, maintain visual consistency, and
-          support{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-            theme-aware UI kits
+          从概念到落地，我们的设计系统帮助产品团队更快推进。我们构建可复用组件、保持视觉一致性，并提供{" "}
+          <span className="font-semibold text-[#2563EB] dark:text-[#3B82F6]">
+            支持主题切换的 UI 组件库
           </span>{" "}
-          that adapt dynamically to dark and light modes.
+          ，可在深色与浅色模式间动态适配。
         </p>
       ),
-      image:
-        "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/crm-featured.png",
+      image: "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/crm-featured.png",
     },
     {
       id: 2,
-      name: "Cloud & Edge Deployment",
-      designation: "Reliable Infrastructure at Scale",
+      name: "云端与边缘部署",
+      designation: "可规模化的可靠基础设施",
       content: (
         <p>
-          Our deployments leverage the latest in container orchestration and
-          edge computing. Whether you’re hosting on{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-            AWS, GCP, or on-prem
+          我们的部署方案结合最新的容器编排与边缘计算能力。无论您选择{" "}
+          <span className="font-semibold text-[#2563EB] dark:text-[#3B82F6]">
+            AWS、GCP 或本地部署
           </span>
-          , our pipelines ensure performance, monitoring, and fault tolerance.
+          ，我们的流水线都能保障性能、监控与容错能力。
         </p>
       ),
-      image:
-        "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/featured-06.png",
+      image: "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/featured-06.png",
     },
   ];
 
@@ -201,35 +204,38 @@ export function HeroPreviewWalls() {
     <section className="relative w-full overflow-hidden bg-white dark:bg-black text-black dark:text-white py-16 sm:py-20 md:py-24">
       <div className="max-w-5xl mx-auto text-left px-4 sm:px-6">
         <div className="inline-block mb-4 border border-neutral-300 dark:border-neutral-700 rounded-full px-3 py-1 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
-          Your building and design partner
+          您的建设与设计伙伴
         </div>
 
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4">
-          We build technology that moves your vision forward
+          我们打造推动愿景前行的技术
         </h1>
 
         <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mb-8">
-          Empowering startups and teams to turn ambitious ideas into stunning
-          products — fast, scalable, and beautifully engineered.
+          助力创业团队与组织将宏大想法快速落地为惊艳产品：更快、更可扩展，并且精工打造。
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 sm:mb-20">
           <button className="rounded-full bg-black dark:bg-white text-white dark:text-black px-6 py-3 text-sm font-medium hover:opacity-80 transition">
-            Explore Components
+            浏览组件
           </button>
           <button className="rounded-full border border-neutral-400 dark:border-neutral-600 px-6 py-3 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-            Get Started
+            开始使用
           </button>
         </div>
       </div>
 
       {/* Background Image */}
       <div className="relative flex justify-center max-w-5xl mx-auto px-4 sm:px-6">
-        <img
-          src="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/abstract-glass-walls.jpg"
-          alt="Background"
-          className="rounded-2xl shadow-xl w-full object-cover border-8 border-neutral-200 dark:border-neutral-800"
-        />
+        <div className="relative w-full aspect-[16/9]">
+          <Image
+            src="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/abstract-glass-walls.jpg"
+            alt="背景"
+            fill
+            sizes="(max-width: 1024px) 100vw, 900px"
+            className="rounded-2xl shadow-xl object-cover border-8 border-neutral-200 dark:border-neutral-800"
+          />
+        </div>
 
         {/* Anchored Card Stack */}
         <div className="absolute -bottom-36 sm:-bottom-16 md:-bottom-9 flex justify-center w-full">

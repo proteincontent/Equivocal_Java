@@ -28,20 +28,20 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
   // 扫描线动画
   useEffect(() => {
     const scanInterval = setInterval(() => {
-      setScanlinePosition(prev => (prev + 1) % 100);
+      setScanlinePosition((prev) => (prev + 1) % 100);
     }, 50);
 
     return () => clearInterval(scanInterval);
   }, []);
 
   const statusColors = {
-    online: "text-emerald-400",
+    online: "text-cyan-400",
     warning: "text-amber-400",
     critical: "text-red-400",
   };
 
   const statusGlow = {
-    online: "shadow-emerald-500/50",
+    online: "shadow-cyan-500/50",
     warning: "shadow-amber-500/50",
     critical: "shadow-red-500/50",
   };
@@ -57,11 +57,11 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
       {/* 背景装饰线条 */}
       <div className="absolute -left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent" />
       <div className="absolute -left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-cyan-500/30 to-transparent" />
-      
+
       {/* 主标题区域 */}
       <div className="relative overflow-hidden">
         {/* 扫描线效果 */}
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
             background: `linear-gradient(
@@ -69,12 +69,12 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
               transparent ${scanlinePosition - 5}%,
               rgba(0, 255, 255, 0.1) ${scanlinePosition}%,
               transparent ${scanlinePosition + 5}%
-            )`
+            )`,
           }}
         />
-        
+
         {/* 水平扫描线纹理 */}
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none opacity-10"
           style={{
             backgroundImage: `repeating-linear-gradient(
@@ -83,13 +83,13 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
               transparent 2px,
               rgba(255, 255, 255, 0.03) 2px,
               rgba(255, 255, 255, 0.03) 4px
-            )`
+            )`,
           }}
         />
 
         {/* 标题文字 */}
-        <motion.h1 
-          className={`text-5xl md:text-7xl font-black tracking-tighter relative ${glitchActive ? 'translate-x-[2px]' : ''}`}
+        <motion.h1
+          className={`text-5xl md:text-7xl font-black tracking-tighter relative ${glitchActive ? "translate-x-[2px]" : ""}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -97,13 +97,13 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
           {/* 主文字 */}
           <span className="relative inline-block">
             {/* 底层光晕 */}
-            <span className="absolute inset-0 blur-2xl bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30" />
-            
+            <span className="absolute inset-0 blur-2xl bg-gradient-to-r from-cyan-500/30 via-[#2563EB]/30 to-blue-500/30" />
+
             {/* 主文字层 */}
-            <span className="relative bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,255,255,0.5)]">
+            <span className="relative bg-gradient-to-r from-cyan-400 via-[#2563EB] to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,255,255,0.5)]">
               {title}
             </span>
-            
+
             {/* 故障时的偏移层 */}
             {glitchActive && (
               <>
@@ -119,7 +119,7 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
         </motion.h1>
 
         {/* 副标题/状态指示器 */}
-        <motion.div 
+        <motion.div
           className="mt-4 flex items-center gap-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -127,8 +127,12 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
         >
           {/* 状态指示灯 */}
           <div className="flex items-center gap-2">
-            <div className={`relative w-2 h-2 rounded-full ${statusColors[status]} shadow-lg ${statusGlow[status]}`}>
-              <div className={`absolute inset-0 rounded-full ${statusColors[status]} animate-ping opacity-75`} />
+            <div
+              className={`relative w-2 h-2 rounded-full ${statusColors[status]} shadow-lg ${statusGlow[status]}`}
+            >
+              <div
+                className={`absolute inset-0 rounded-full ${statusColors[status]} animate-ping opacity-75`}
+              />
             </div>
             <span className={`text-sm font-mono uppercase tracking-wider ${statusColors[status]}`}>
               {statusText[status]}
@@ -147,7 +151,7 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
         </motion.div>
 
         {/* 底部装饰线 */}
-        <motion.div 
+        <motion.div
           className="mt-6 h-px bg-gradient-to-r from-cyan-500/50 via-blue-500/30 to-transparent"
           initial={{ scaleX: 0, originX: 0 }}
           animate={{ scaleX: 1 }}
@@ -162,14 +166,14 @@ export function HolographicTitle({ title, subtitle, status = "online" }: Hologra
             key={i}
             className="h-px bg-cyan-500"
             style={{ width: Math.random() * 20 + 10 }}
-            animate={{ 
+            animate={{
               opacity: [0.3, 1, 0.3],
-              width: [10, 30, 10]
+              width: [10, 30, 10],
             }}
             transition={{
               duration: 1 + Math.random(),
               repeat: Infinity,
-              delay: i * 0.1
+              delay: i * 0.1,
             }}
           />
         ))}

@@ -19,9 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body
-        className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
-      >
+      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -31,8 +29,17 @@ export default function RootLayout({
           <div className="fixed inset-0 z-0 pointer-events-none">
             <div className="absolute inset-0 grid-bg" />
             {/* Geometric Arcs - Shopify Style */}
-            <svg className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.05]" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M0 100 Q 50 -50 100 100" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <svg
+              className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.05]"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0 100 Q 50 -50 100 100"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.2"
+              />
               <circle cx="0" cy="0" r="45" fill="none" stroke="currentColor" strokeWidth="0.2" />
               <circle cx="100" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="0.2" />
             </svg>
@@ -46,4 +53,3 @@ export default function RootLayout({
     </html>
   );
 }
-

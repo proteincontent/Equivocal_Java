@@ -15,24 +15,24 @@ interface HolographicStatsProps {
   loading?: boolean;
 }
 
-function ArcGauge({ 
-  value, 
-  maxValue, 
-  label, 
-  icon: Icon, 
+function ArcGauge({
+  value,
+  maxValue,
+  label,
+  icon: Icon,
   color,
-  delay = 0 
-}: { 
-  value: number; 
-  maxValue: number; 
-  label: string; 
+  delay = 0,
+}: {
+  value: number;
+  maxValue: number;
+  label: string;
   icon: React.ElementType;
   color: string;
   delay?: number;
 }) {
   const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
   const springValue = useSpring(0, { stiffness: 50, damping: 20 });
-  const displayValue = useTransform(springValue, v => Math.round(v));
+  const displayValue = useTransform(springValue, (v) => Math.round(v));
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -55,34 +55,36 @@ function ArcGauge({
       stroke: "stroke-cyan-400",
       glow: "drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]",
       text: "text-cyan-400",
-      bg: "from-cyan-500/20"
+      bg: "from-cyan-500/20",
     },
     purple: {
-      stroke: "stroke-purple-400",
-      glow: "drop-shadow-[0_0_10px_rgba(192,132,252,0.8)]",
-      text: "text-purple-400",
-      bg: "from-purple-500/20"
+      stroke: "stroke-[#2563EB]",
+      glow: "drop-shadow-[0_0_10px_rgba(37,99,235,0.8)]",
+      text: "text-[#2563EB]",
+      bg: "from-[#2563EB]/20",
     },
     emerald: {
-      stroke: "stroke-emerald-400",
-      glow: "drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]",
-      text: "text-emerald-400",
-      bg: "from-emerald-500/20"
-    }
+      stroke: "stroke-indigo-400",
+      glow: "drop-shadow-[0_0_10px_rgba(129,140,248,0.8)]",
+      text: "text-indigo-400",
+      bg: "from-indigo-500/20",
+    },
   };
 
   const colors = colorClasses[color] || colorClasses.cyan;
 
   return (
-    <motion.div 
+    <motion.div
       className="relative flex flex-col items-center"
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.8, delay: delay / 1000, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* 背景光晕 */}
-      <div className={`absolute inset-0 bg-gradient-radial ${colors.bg} to-transparent blur-3xl opacity-50`} />
-      
+      <div
+        className={`absolute inset-0 bg-gradient-radial ${colors.bg} to-transparent blur-3xl opacity-50`}
+      />
+
       {/* SVG 仪表盘 */}
       <div className="relative w-44 h-44">
         <svg className="w-full h-full -rotate-[135deg]" viewBox="0 0 160 160">
@@ -97,7 +99,7 @@ function ArcGauge({
             strokeDasharray={`${arcLength} ${circumference}`}
             className="text-white/5"
           />
-          
+
           {/* 刻度线 */}
           {[...Array(28)].map((_, i) => {
             const angle = (i * 270) / 27 - 135;
@@ -117,7 +119,7 @@ function ArcGauge({
               />
             );
           })}
-          
+
           {/* 进度弧 */}
           <motion.circle
             cx="80"
@@ -132,7 +134,7 @@ function ArcGauge({
             transition={{ duration: 1.5, delay: delay / 1000, ease: [0.16, 1, 0.3, 1] }}
             className={`${colors.stroke} ${colors.glow}`}
           />
-          
+
           {/* 发光点 */}
           <motion.circle
             cx="80"
@@ -148,41 +150,37 @@ function ArcGauge({
             className={`${colors.stroke} ${colors.glow} opacity-100`}
           />
         </svg>
-        
+
         {/* 中心内容 */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {/* 图标 */}
-          <motion.div 
+          <motion.div
             className={`mb-1 ${colors.text}`}
-            animate={{ 
+            animate={{
               scale: [1, 1.1, 1],
-              opacity: [0.7, 1, 0.7]
+              opacity: [0.7, 1, 0.7],
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
             <Icon className="w-6 h-6" />
           </motion.div>
-          
+
           {/* 数值 */}
-          <motion.span 
-            className={`text-4xl font-black tabular-nums ${colors.text}`}
-          >
+          <motion.span className={`text-4xl font-black tabular-nums ${colors.text}`}>
             {displayValue}
           </motion.span>
-          
+
           {/* 标签 */}
           <span className="text-xs text-muted-foreground/70 font-mono uppercase tracking-wider mt-1">
             {label}
           </span>
         </div>
       </div>
-      
+
       {/* 底部装饰 */}
       <div className="mt-4 flex items-center gap-2">
         <div className={`w-1 h-1 rounded-full ${colors.text} animate-pulse`} />
-        <span className="text-xs text-muted-foreground/50 font-mono">
-          {percentage.toFixed(1)}%
-        </span>
+        <span className="text-xs text-muted-foreground/50 font-mono">{percentage.toFixed(1)}%</span>
         <div className={`w-1 h-1 rounded-full ${colors.text} animate-pulse`} />
       </div>
     </motion.div>
@@ -206,7 +204,7 @@ export function HolographicStats({ stats, loading }: HolographicStatsProps) {
     <div className="relative">
       {/* 连接线装饰 */}
       <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent -translate-y-1/2 hidden md:block" />
-      
+
       {/* 仪表盘网格 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
         <ArcGauge
@@ -234,19 +232,19 @@ export function HolographicStats({ stats, loading }: HolographicStatsProps) {
           delay={400}
         />
       </div>
-      
+
       {/* 底部数据流 */}
-      <motion.div 
+      <motion.div
         className="mt-8 flex justify-center gap-4 text-xs font-mono text-muted-foreground/40"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        <span>SYS.USERS.TOTAL: {stats.total}</span>
+        <span>用户总数：{stats.total}</span>
         <span className="text-cyan-500/50">|</span>
-        <span>SYS.USERS.ADMIN: {stats.admins}</span>
+        <span>管理员数：{stats.admins}</span>
         <span className="text-cyan-500/50">|</span>
-        <span>SYS.USERS.NORMAL: {stats.users}</span>
+        <span>普通用户数：{stats.users}</span>
       </motion.div>
     </div>
   );

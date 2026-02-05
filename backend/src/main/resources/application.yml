@@ -7,21 +7,21 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/equivocal?useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/test?useSSL=true&requireSSL=true&verifyServerCertificate=false&allowPublicKeyRetrieval=true&connectTimeout=10000&socketTimeout=30000&autoReconnect=true&failOverReadOnly=false&maxReconnects=3&tcpKeepAlive=true}
+    username: ${SPRING_DATASOURCE_USERNAME:gdjqzvhsjk1agjw.root}
+    password: ${SPRING_DATASOURCE_PASSWORD:0upXu0riDOLiJPCk}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       # 连接超时时间（毫秒）- 等待连接池分配连接的最大时间
-      connection-timeout: 30000
+      connection-timeout: 10000
       # 最大连接池大小
-      maximum-pool-size: 30
-      # 最小空闲连接数
-      minimum-idle: 5
-      # 空闲连接超时时间（毫秒）- 30秒，TiDB Cloud 对于空闲连接非常敏感
-      idle-timeout: 30000
-      # 连接最大生命周期（毫秒）- 60秒，强制频繁刷新连接
-      max-lifetime: 60000
+      maximum-pool-size: 10
+      # 最小空闲连接数 - 设为0让连接按需创建
+      minimum-idle: 0
+      # 空闲连接超时时间（毫秒）- 10秒，快速释放空闲连接
+      idle-timeout: 10000
+      # 连接最大生命周期（毫秒）- 30秒，强制频繁刷新连接
+      max-lifetime: 30000
       # 连接验证超时时间（毫秒）
       validation-timeout: 3000
       # 连接测试查询 - 用于验证连接是否有效
@@ -31,9 +31,13 @@ spring:
       # 显式指定事务隔离级别，跳过自动检测 (解决 TiDB Serverless 启动报错)
       transaction-isolation: TRANSACTION_REPEATABLE_READ
       # 连接泄漏检测阈值（毫秒）- 用于检测未关闭的连接
-      leak-detection-threshold: 60000
+      leak-detection-threshold: 30000
       # 连接池名称
       pool-name: TiDBHikariPool
+      # 初始化失败超时 - 设为0表示快速失败
+      initialization-fail-timeout: 0
+      # 自动提交
+      auto-commit: true
   jpa:
     open-in-view: false
     hibernate:
@@ -55,13 +59,10 @@ resend:
   api-key: ${RESEND_API_KEY:}
   from-email: ${RESEND_FROM_EMAIL:noreply@example.com}
 
-coze:
-  api-url: ${COZE_API_URL:https://api.coze.com}
-  api-key: ${COZE_API_KEY:}
-  title-token: ${COZE_TITLE_TOKEN:}
-  bot-id: ${COZE_BOT_ID:}
-  project-id: ${COZE_PROJECT_ID:}
+# Python AI Agent 配置 (LangGraph)
+agent:
+  api-url: ${AGENT_API_URL:http://localhost:8100/v1}
 
 app:
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,http://localhost:3100}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,http://localhost:3100,http://localhost:31000}

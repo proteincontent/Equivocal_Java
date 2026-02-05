@@ -4,108 +4,93 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * 法律AI服务品牌设计系统
- * 核心理念：专业、信任、权威、高效
- *
- * 色彩心理学：
- * - 深海蓝：权威、专业、可信赖
- * - 琥珀金：高端、价值、信任
- * - 暖白：温暖、亲和、专业
+ * 法律AI服务 - 极简主义重构
+ * 核心理念：Rams式功能纯粹主义，去除一切装饰性噪音
  */
 
 :root {
-  /* === 品牌核心色 === */
-  --brand-navy: #0A1628;
-  --brand-navy-light: #1A2744;
-  --brand-royal: #2563EB;
-  --brand-gold: #D4A853;
-  --brand-gold-light: #E8C878;
-  --brand-warm-white: #F8F6F3;
-  --brand-warm-gray: #9CA3AF;
-  
-  /* === 语义化颜色 (Light Mode - Paper & Ink) === */
-  --background: #F9FAFB; /* 极淡的冷灰，更现代 */
-  --foreground: #0F172A; /* 深岩灰，比纯黑更柔和 */
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #0F172A; /* 主色调改为深色，强调墨水感 */
-  --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #334155;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #D4A853;
-  --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
-  --destructive-foreground: #FFFFFF;
-  --border: #E5E7EB;
-  --input: #E5E7EB;
-  --ring: #2563EB;
-  
-  /* === 图表色彩 === */
-  --chart-1: #2563EB;
-  --chart-2: #D4A853;
-  --chart-3: #10B981;
-  --chart-4: #8B5CF6;
-  --chart-5: #F59E0B;
-  
-  /* === 圆角系统 === */
-  --radius: 0.5rem;
-  
-  /* === 侧边栏 === */
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #1A1A1A;
-  --sidebar-primary: #2563EB;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F3F4F6;
-  --sidebar-accent-foreground: #374151;
-  --sidebar-border: #E5E7EB;
-  --sidebar-ring: #2563EB;
+  /* === 基础色板 (Neutral Palette) === */
+  --background: #fdfdfd; /* 接近纯白的纸张感 */
+  --foreground: #171717; /* 极深的灰，比纯黑更护眼 */
 
-  /* 全局缩放因子：用于统一放大/缩小 rem 体系 */
+  --card: #ffffff;
+  --card-foreground: #171717;
+
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+
+  --primary: #171717; /* 极简黑 */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f5f5f5; /* 极浅灰 */
+  --secondary-foreground: #171717;
+
+  --muted: #fafafa;
+  --muted-foreground: #737373; /* Neutral-500 */
+
+  --accent: #f5f5f5;
+  --accent-foreground: #171717;
+
+  /* === 功能色 (Functional Colors) === */
+  /* 只有在需要引起注意时才使用颜色 */
+  --destructive: #dc2626; /* Red-600 */
+  --destructive-foreground: #ffffff;
+
+  --warning: #d97706; /* Amber-600 */
+  --success: #059669; /* Emerald-600 */
+
+  --border: #e5e5e5; /* Neutral-200 */
+  --input: #e5e5e5;
+  --ring: #171717;
+
+  /* === 圆角系统 === */
+  --radius: 0.375rem; /* 6px，更紧凑 */
+
+  /* === 侧边栏 === */
+  --sidebar: #fafafa;
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #171717;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #171717;
+
+  /* 全局缩放因子 */
   --app-scale: 1;
 }
 
 .dark {
-  /* === 深色模式 - 专业法律风格 === */
-  --background: #0A1628;
-  --foreground: #F8F6F3;
-  --card: #1A2744;
-  --card-foreground: #F8F6F3;
-  --popover: #1A2744;
-  --popover-foreground: #F8F6F3;
-  --primary: #3B82F6;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1E3A5F;
-  --secondary-foreground: #F8F6F3;
-  --muted: #1E3A5F;
-  --muted-foreground: #9CA3AF;
-  --accent: #D4A853;
-  --accent-foreground: #0A1628;
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-  --border: #2A3F5F;
-  --input: #2A3F5F;
-  --ring: #3B82F6;
-  
-  /* === 图表色彩 === */
-  --chart-1: #3B82F6;
-  --chart-2: #D4A853;
-  --chart-3: #10B981;
-  --chart-4: #A78BFA;
-  --chart-5: #FBBF24;
-  
-  /* === 侧边栏 === */
-  --sidebar: #0F1D32;
-  --sidebar-foreground: #F8F6F3;
-  --sidebar-primary: #3B82F6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E3A5F;
-  --sidebar-accent-foreground: #F8F6F3;
-  --sidebar-border: #2A3F5F;
-  --sidebar-ring: #3B82F6;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #121212;
+  --card-foreground: #ededed;
+  --popover: #121212;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
+  --secondary: #262626;
+  --secondary-foreground: #ededed;
+  --muted: #171717;
+  --muted-foreground: #a3a3a3;
+  --accent: #262626;
+  --accent-foreground: #ededed;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --border: #262626;
+  --input: #262626;
+  --ring: #ededed;
+
+  --sidebar: #121212;
+  --sidebar-foreground: #ededed;
+  --sidebar-primary: #ededed;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #262626;
+  --sidebar-accent-foreground: #ededed;
+  --sidebar-border: #262626;
+  --sidebar-ring: #ededed;
 }
 
 @theme inline {
@@ -149,7 +134,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
+
   /* 注册品牌色到 Tailwind 主题 */
   --color-brand-navy: var(--brand-navy);
   --color-brand-navy-light: var(--brand-navy-light);
@@ -170,176 +155,24 @@
   }
 }
 
-/* === 品牌动画系统 === */
+/* === 动画系统 (极简版) === */
+/* 只有必要的状态转换才需要动画 */
 
-@keyframes spotlight {
-  0% {
+.transition-all-200 {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
-    transform: translate(-72%, -62%) scale(0.5);
   }
-  100% {
+  to {
     opacity: 1;
-    transform: translate(-50%, -40%) scale(1);
   }
-}
-
-.animate-spotlight {
-  animation: spotlight 2s ease 0.75s 1 forwards;
-}
-
-/* 优雅的淡入动画 */
-@keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
-}
-
-/* 金色光晕脉冲 */
-@keyframes gold-pulse {
-  0%, 100% {
-    opacity: 0.4;
-    box-shadow: 0 0 20px rgba(212, 168, 83, 0.3);
-  }
-  50% {
-    opacity: 0.6;
-    box-shadow: 0 0 40px rgba(212, 168, 83, 0.5);
-  }
-}
-
-.animate-gold-pulse {
-  animation: gold-pulse 3s ease-in-out infinite;
-}
-
-/* 细腻的噪点纹理 - 增加质感 */
-.noise-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 40;
-  opacity: 0.015;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-.dark .noise-bg {
-  opacity: 0.025;
-}
-
-/* 专业法律风格的玻璃面板 */
-.glass-panel {
-  @apply backdrop-blur-xl border shadow-2xl;
-  background: rgba(255, 255, 255, 0.85); /* 增加不透明度 */
-  border-color: rgba(0, 0, 0, 0.08); /* 加深边框 */
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(0, 0, 0, 0.1), /* 加深阴影 */
-    0 20px 25px -5px rgba(0, 0, 0, 0.05);
-}
-
-.dark .glass-panel {
-  background: rgba(26, 39, 68, 0.8);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.2),
-    0 10px 15px -3px rgba(0, 0, 0, 0.3),
-    0 20px 25px -5px rgba(0, 0, 0, 0.2);
-}
-
-/* 输入框样式 */
-.glass-input {
-  @apply backdrop-blur-xl border transition-all duration-300;
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-
-.dark .glass-input {
-  background: rgba(26, 39, 68, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.glass-input:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.dark .glass-input:focus-within {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-/* 金色边框装饰 */
-.gold-border {
-  position: relative;
-}
-
-.gold-border::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgba(212, 168, 83, 0.5),
-    rgba(212, 168, 83, 0.1) 30%,
-    rgba(212, 168, 83, 0) 50%,
-    rgba(212, 168, 83, 0.1) 70%,
-    rgba(212, 168, 83, 0.5)
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* 缓慢的呼吸动画 */
-@keyframes breathe {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.15;
-    transform: scale(1.05);
-  }
-}
-
-.animate-breathe {
-  animation: breathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* 优雅的漂浮动画 */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
 }
 
 /* === 精致滚动条 === */
@@ -380,120 +213,223 @@
   scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
 }
 
-/* === 品牌专属样式 === */
+/* === 极简组件样式 === */
 
-/* 标题渐变效果 - 哑光烫金质感 (更内敛、更高端) */
-.text-gradient-gold {
-  background: linear-gradient(135deg, #A67C37 0%, #D4A853 50%, #A67C37 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-}
-
-.dark .text-gradient-gold {
-  background: linear-gradient(135deg, #C5A059 0%, #F3D081 50%, #C5A059 100%);
-  filter: drop-shadow(0 0 15px rgba(212, 168, 83, 0.2));
-}
-
-/* 超薄磨砂玻璃 */
-.glass-premium {
-  @apply backdrop-blur-2xl border transition-all duration-500;
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.dark .glass-premium {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.05);
-}
-
-.text-gradient-blue {
-  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #60A5FA 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* 高端按钮样式 */
+/* 按钮 - 去除所有浮夸的阴影和渐变 */
 .btn-premium {
-  @apply relative overflow-hidden transition-all duration-300;
-  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
+}
+
+/* === 合同排版系统 (Typography) === */
+
+.contract-paper {
+  @apply relative mx-auto bg-white;
+  /* 模拟A4纸的比例和质感，但不要阴影，要的是纯粹的内容承载 */
+  max-width: 210mm; /* A4 width */
+  min-height: 297mm;
+  padding: 48px;
+}
+
+/* 打印样式优化 */
+@media print {
+  .contract-paper {
+    padding: 0;
+    max-width: none;
+  }
+}
+
+.contract-doc {
+  font-family: "Times New Roman", Times, serif; /* 经典的法律字体 */
+  color: #111827; /* Gray-900 */
+  font-size: 16px;
+  line-height: 1.8; /* 宽松的行高，便于阅读 */
+  text-align: justify; /* 两端对齐，增加庄重感 */
+}
+
+/* 标题层级 */
+.contract-doc h1 {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 32px;
+  color: #000;
+}
+
+.contract-doc h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.contract-doc h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.contract-doc p {
+  margin-bottom: 16px;
+}
+
+/* 列表缩进优化 */
+.contract-doc ul,
+.contract-doc ol {
+  padding-left: 2em;
+  margin-bottom: 16px;
+}
+
+/* 表格样式 */
+.contract-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.contract-doc th,
+.contract-doc td {
+  border: 1px solid #e5e5e5;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.contract-doc th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+/* === 风险高亮系统 (Annotation System) === */
+/*
+ * 采用背景色块+下划实线风格，增强视觉权重
+ * 灵感来源：法律合同审查专业工具
+ */
+
+/* 基础高亮容器 */
+.risk-highlight {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-radius: 2px;
+  padding: 0 2px; /* 给文字一点呼吸空间 */
+  margin: 0 -1px; /* 视觉补偿 */
+}
+
+/* === 风险等级样式 === */
+
+/* High Risk: 红色背景 + 红色下划线 */
+.risk-high {
+  background-color: rgba(220, 38, 38, 0.08); /* Red-500 with low opacity */
+  border-bottom-color: rgba(220, 38, 38, 0.6);
+}
+.risk-high::before {
+  content: "⚠️";
+  font-size: 0.7em;
+  margin-right: 4px;
+  vertical-align: text-top;
+  opacity: 0.8;
+}
+.risk-high:hover {
+  background-color: rgba(220, 38, 38, 0.15);
+  border-bottom-color: var(--destructive);
+}
+
+/* Medium Risk: 橙色背景 + 橙色下划线 */
+.risk-medium {
+  background-color: rgba(217, 119, 6, 0.08); /* Amber-600 with low opacity */
+  border-bottom-color: rgba(217, 119, 6, 0.6);
+}
+.risk-medium::before {
+  content: "⚡";
+  font-size: 0.7em;
+  margin-right: 4px;
+  vertical-align: text-top;
+  opacity: 0.8;
+}
+.risk-medium:hover {
+  background-color: rgba(217, 119, 6, 0.15);
+  border-bottom-color: var(--warning);
+}
+
+/* Safe/Low Risk: 绿色背景 + 绿色下划线 */
+.risk-safe {
+  background-color: rgba(5, 150, 105, 0.08); /* Emerald-600 with low opacity */
+  border-bottom-color: rgba(5, 150, 105, 0.6);
+}
+.risk-safe::before {
+  content: "🛡️";
+  font-size: 0.7em;
+  margin-right: 4px;
+  vertical-align: text-top;
+  opacity: 0.8;
+}
+.risk-safe:hover {
+  background-color: rgba(5, 150, 105, 0.15);
+  border-bottom-color: var(--success);
+}
+
+/* === 激活状态 (Active State) === */
+/* 当点击卡片或文本时，高亮显示当前关注的风险点 */
+
+.risk-highlight-active {
+  position: relative;
+  z-index: 10;
   box-shadow:
-    0 4px 6px -1px rgba(37, 99, 235, 0.2),
-    0 10px 15px -3px rgba(37, 99, 235, 0.15);
+    0 0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 0 6px currentColor; /* 双层光环效果 */
 }
 
-.btn-premium:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 12px -2px rgba(37, 99, 235, 0.25),
-    0 16px 24px -4px rgba(37, 99, 235, 0.2);
+.risk-highlight-active.risk-high {
+  background-color: rgba(220, 38, 38, 0.2);
+  border-bottom-color: var(--destructive);
+  color: #7f1d1d; /* Red-900 */
 }
 
-.btn-premium:active {
-  transform: translateY(0);
+.risk-highlight-active.risk-medium {
+  background-color: rgba(217, 119, 6, 0.2);
+  border-bottom-color: var(--warning);
+  color: #78350f; /* Amber-900 */
 }
 
-/* 金色高端按钮 */
-.btn-gold {
-  @apply relative overflow-hidden transition-all duration-300;
-  background: linear-gradient(135deg, #D4A853 0%, #B8923F 100%);
-  color: #0A1628;
-  box-shadow:
-    0 4px 6px -1px rgba(212, 168, 83, 0.3),
-    0 10px 15px -3px rgba(212, 168, 83, 0.2);
+.risk-highlight-active.risk-safe {
+  background-color: rgba(5, 150, 105, 0.2);
+  border-bottom-color: var(--success);
+  color: #064e3b; /* Emerald-900 */
 }
 
-.btn-gold:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 12px -2px rgba(212, 168, 83, 0.35),
-    0 16px 24px -4px rgba(212, 168, 83, 0.25);
+/* === 筛选时的淡化效果 (Dimmed State) === */
+/* 当用户筛选特定风险等级时，其他等级的高亮变淡 */
+
+.risk-dimmed {
+  opacity: 0.3;
+  filter: grayscale(0.5);
+  pointer-events: none; /* 禁止点击 */
 }
 
-/* 专业法律服务卡片 */
-.legal-card {
-  @apply rounded-xl border transition-all duration-300;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.05);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+.risk-dimmed::before {
+  opacity: 0.3;
 }
 
-.legal-card:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 20px 40px -10px rgba(0, 0, 0, 0.05);
+/* === 已修复状态 (Fixed State) === */
+/* 当用户采纳修改建议后的样式 */
+
+.risk-fixed {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #166534; /* Green-800 */
+  padding: 0 4px;
+  border-radius: 2px;
+  transition: all 0.3s ease;
 }
 
-.dark .legal-card {
-  background: rgba(26, 39, 68, 0.9);
-  border-color: rgba(255, 255, 255, 0.08);
+.risk-fixed:hover {
+  background-color: rgba(34, 197, 94, 0.25);
 }
 
-/* 信任徽章 */
-.trust-badge {
-  @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium;
-  background: rgba(212, 168, 83, 0.1);
-  color: #B8923F;
-  border: 1px solid rgba(212, 168, 83, 0.2);
-}
-
-.dark .trust-badge {
-  background: rgba(212, 168, 83, 0.15);
-  color: #E8C878;
-  border-color: rgba(212, 168, 83, 0.3);
-}
-
-/* 分隔线 */
-.divider-gold {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #D4A853, transparent);
-}
-
-/* 选中状态指示器 */
-.selection-indicator {
-  @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full;
-  background: linear-gradient(180deg, #D4A853 0%, #B8923F 100%);
+/* 暗色模式下的已修复状态 */
+.dark .risk-fixed {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #86efac; /* Green-300 */
 }

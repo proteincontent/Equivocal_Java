@@ -106,7 +106,7 @@ export function UserChatHistoryDialog({
             buildApiUrl(`/api/admin/chat-sessions/${selectedSessionId}/messages`),
             {
               headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-            }
+            },
           );
           if (response.ok) {
             const data = await response.json();
@@ -209,7 +209,8 @@ export function UserChatHistoryDialog({
                       onClick={() => setSelectedSessionId(session.id)}
                       className={cn(
                         "flex flex-col items-start gap-1 p-4 text-left transition-colors border-b border-border/50 hover:bg-muted/50",
-                        selectedSessionId === session.id && "bg-primary/5 border-l-4 border-l-primary"
+                        selectedSessionId === session.id &&
+                          "bg-primary/5 border-l-4 border-l-primary",
                       )}
                     >
                       <span className="font-medium text-sm line-clamp-1">
@@ -283,13 +284,15 @@ export function UserChatHistoryDialog({
                       key={msg.id}
                       className={cn(
                         "flex gap-3 max-w-[85%]",
-                        isUser ? "ml-auto flex-row-reverse" : "mr-auto"
+                        isUser ? "ml-auto flex-row-reverse" : "mr-auto",
                       )}
                     >
                       <div
                         className={cn(
                           "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
-                          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                          isUser
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
                         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -300,7 +303,7 @@ export function UserChatHistoryDialog({
                             "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
                             isUser
                               ? "bg-primary text-primary-foreground rounded-tr-none"
-                              : "bg-muted/50 border rounded-tl-none"
+                              : "bg-muted/50 border rounded-tl-none",
                           )}
                         >
                           <p className="whitespace-pre-wrap break-words">{msg.content}</p>
@@ -308,10 +311,12 @@ export function UserChatHistoryDialog({
                         <div
                           className={cn(
                             "text-[10px] text-muted-foreground px-1",
-                            isUser ? "text-right" : "text-left"
+                            isUser ? "text-right" : "text-left",
                           )}
                         >
-                          {format(new Date(msg.created_at), "yyyy-MM-dd HH:mm:ss", { locale: zhCN })}
+                          {format(new Date(msg.created_at), "yyyy-MM-dd HH:mm:ss", {
+                            locale: zhCN,
+                          })}
                         </div>
                       </div>
                     </div>

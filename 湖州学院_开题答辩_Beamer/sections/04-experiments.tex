@@ -1,0 +1,54 @@
+% sections/04-experiments.tex
+% 实验与结果
+
+\section{实验与验收}
+
+\begin{frame}[c]{核心能力与服务类型（MVP）}
+    \framepills{\pillaccent{MVP}\hspace{0.15cm}\pill{Contract review}\hspace{0.15cm}\pill{Drafting}\hspace{0.15cm}\pill{Consulting}}
+
+    \begin{aicard}[Service types]
+        {\small
+        \renewcommand{\arraystretch}{1.01}
+        \begin{tabular}{p{0.28\textwidth} p{0.66\textwidth}}
+            \toprule
+            \textbf{服务类型} & \textbf{典型输出} \\
+            \midrule
+            合同审查 & 风险点 + 修改建议 +（可选）引用依据 \\
+            合同生成/保密协议/借条/租赁合同 & 结构化信息收集 + 文书草案 + 风险提示 \\
+            \rowcolor{accentSoft}
+            法律咨询 & 追问补全事实 + 可执行下一步 + 边界声明 \\
+            \bottomrule
+        \end{tabular}
+        }
+    \end{aicard}
+
+    \vspace{0.05cm}
+    \begin{aicard}[Why tools matter]
+        {\footnotesize 工具让智能体能\textbf{检索引用、生成文书、做 OCR}，并把多步推理固定成可验证的流程（而不是一次性生成）\cite{yao2022react}。}
+    \end{aicard}
+\end{frame}
+
+\begin{frame}[c]{验收指标：可用、可追溯、可降级}
+    \framepills{\pillaccent{Acceptance}\hspace{0.15cm}\pill{Available}\hspace{0.15cm}\pill{Traceable}\hspace{0.15cm}\pill{Degradable}}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.5\textwidth}
+            \begin{aicard}[Availability]
+                \textbf{关键接口}可用性 $\ge$ 99\%；失败可定位（错误码 + traceId）。
+            \end{aicard}
+            \vspace{0.32cm}
+            \begin{aicard}[Traceability]
+                会话/消息/关键输出可检索（provider / model / latency / tokens）。
+            \end{aicard}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{aicard}[Latency]
+                流式输出首 token 体验优先；常见请求 < 2s（按环境调参）。
+            \end{aicard}
+            \vspace{0.32cm}
+            \begin{aicard}[Fallback \& boundary]
+                检索失败/模型不可用时返回“下一步要补充的信息清单”，并提示不确定性与适用范围。
+            \end{aicard}
+        \end{column}
+    \end{columns}
+\end{frame}

@@ -2,12 +2,27 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { XIcon, LoaderIcon, User, LogOut, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import {
+  XIcon,
+  LoaderIcon,
+  User,
+  LogOut,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { buildApiUrl } from "@/lib/api";
+import {
+  buildApiUrl,
+  fetchWithTimeout,
+  isNetworkOrTimeoutError,
+  readResponseJsonSafe,
+} from "@/lib/api";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,7 +31,12 @@ interface AuthModalProps {
   initialMode?: "login" | "register";
 }
 
-export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login" }: AuthModalProps) {
+export function AuthModal({
+  isOpen,
+  onClose,
+  onAuthSuccess,
+  initialMode = "login",
+}: AuthModalProps) {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,22 +81,30 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
     setIsSendingCode(true);
 
     try {
-      const response = await fetch(buildApiUrl("/api/auth/send-code"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetchWithTimeout(
+        buildApiUrl("/api/auth/send-code"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        },
+        15000,
+      );
 
-      const data = await response.json();
+      const data = await readResponseJsonSafe<{ error?: string; message?: string }>(response);
 
       if (!response.ok) {
-        throw new Error(data.error || "发送验证码失败");
+        throw new Error(data?.error || data?.message || "发送验证码失败");
       }
 
       setCodeMessage("验证码已发送到您的邮箱，请查收");
       setCountdown(60); // 60秒倒计时
     } catch (err) {
-      setError(err instanceof Error ? err.message : "发送验证码失败");
+      if (isNetworkOrTimeoutError(err)) {
+        setError("请求超时或无法连接服务器，请确认后端服务可用后重试");
+      } else {
+        setError(err instanceof Error ? err.message : "发送验证码失败");
+      }
     } finally {
       setIsSendingCode(false);
     }
@@ -96,12 +124,13 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
       return;
     }
 
-    if (password.length < 6) {
-      setError("密码至少需要6个字符");
-      return;
-    }
-
     if (mode === "register") {
+      // 只在注册时验证密码长度
+      if (password.length < 6) {
+        setError("密码至少需要6个字符");
+        return;
+      }
+
       if (password !== confirmPassword) {
         setError("两次输入的密码不一致");
         return;
@@ -121,32 +150,42 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
     setIsLoading(true);
 
     try {
-      const response = await fetch(buildApiUrl("/api/auth"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: mode,
-          email,
-          password,
-          ...(mode === "register" && { code: verificationCode }),
-        }),
-      });
+      const response = await fetchWithTimeout(
+        buildApiUrl("/api/auth/login"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: mode,
+            email,
+            password,
+            ...(mode === "register" && { code: verificationCode }),
+          }),
+        },
+        15000,
+      );
 
-      const data = await response.json();
+      const data = await readResponseJsonSafe<any>(response);
 
       if (!response.ok) {
-        throw new Error(data.error || (mode === "login" ? "登录失败" : "注册失败"));
+        throw new Error(
+          data?.error || data?.message || (mode === "login" ? "登录失败" : "注册失败"),
+        );
       }
 
       // 保存到 localStorage
+      if (!data?.token) {
+        throw new Error("服务端未返回 token，请联系管理员检查后端响应");
+      }
+
       localStorage.setItem("auth_token", data.token);
-      
+
       // 适配 Java 后端响应结构 (data.user) 或旧版扁平结构
       const userInfo = data.user || data;
       const userToSave = {
         userId: userInfo.id || userInfo.userId,
         email: userInfo.email,
-        role: userInfo.role || 1
+        role: userInfo.role || 1,
       };
 
       localStorage.setItem("auth_user", JSON.stringify(userToSave));
@@ -154,7 +193,11 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
       onAuthSuccess(userToSave);
       handleClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "操作失败，请稍后再试");
+      if (isNetworkOrTimeoutError(err)) {
+        setError("请求超时或无法连接服务器，请确认后端服务可用后重试");
+      } else {
+        setError(err instanceof Error ? err.message : "操作失败，请稍后再试");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -192,8 +235,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
     if (mouseDownPos && e.target === e.currentTarget) {
       // 计算鼠标移动距离
       const distance = Math.sqrt(
-        Math.pow(e.clientX - mouseDownPos.x, 2) + 
-        Math.pow(e.clientY - mouseDownPos.y, 2)
+        Math.pow(e.clientX - mouseDownPos.x, 2) + Math.pow(e.clientY - mouseDownPos.y, 2),
       );
       // 只有移动距离小于5px才算真实点击
       if (distance < 5) {
@@ -252,7 +294,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
                   <p className="text-sm text-destructive">{error}</p>
                 </motion.div>
               )}
-              
+
               {codeMessage && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -303,7 +345,9 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
                         id="auth-code"
                         type="text"
                         value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        onChange={(e) =>
+                          setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                        }
                         placeholder="6位数字验证码"
                         className="pl-10"
                         maxLength={6}
@@ -391,8 +435,10 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "login
                     <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                     {mode === "login" ? "登录中..." : "注册中..."}
                   </>
+                ) : mode === "login" ? (
+                  "登录"
                 ) : (
-                  mode === "login" ? "登录" : "注册"
+                  "注册"
                 )}
               </Button>
             </div>
@@ -451,7 +497,7 @@ export function UserAvatar({ user, onLogin, onLogout, className }: UserAvatarPro
           "hover:border-border dark:hover:border-white/20",
           "hover:shadow-md",
           "active:scale-[0.98]",
-          className
+          className,
         )}
       >
         <User className="h-4 w-4" />
@@ -479,18 +525,18 @@ export function UserAvatar({ user, onLogin, onLogout, className }: UserAvatarPro
           "hover:border-border dark:hover:border-white/20",
           "hover:shadow-md",
           "active:scale-[0.98]",
-          className
+          className,
         )}
       >
         {/* 头像 */}
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-          <span className="text-xs font-semibold text-primary-foreground">
-            {initial}
-          </span>
+          <span className="text-xs font-semibold text-primary-foreground">{initial}</span>
         </div>
         {/* 用户名 - 仅桌面端显示 */}
         <div className="hidden sm:flex flex-col items-start leading-none">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">User ID</span>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+            User ID
+          </span>
           <span className="text-sm font-medium text-foreground/80 dark:text-white/80 max-w-[100px] truncate">
             {username}
           </span>
@@ -516,7 +562,7 @@ export function UserAvatar({ user, onLogin, onLogout, className }: UserAvatarPro
                 "bg-background/95 dark:bg-card/95 backdrop-blur-xl",
                 "rounded-xl shadow-xl",
                 "border border-border/50 dark:border-white/10",
-                "overflow-hidden z-50"
+                "overflow-hidden z-50",
               )}
               initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -527,9 +573,7 @@ export function UserAvatar({ user, onLogin, onLogout, className }: UserAvatarPro
               <div className="p-4 border-b border-border/50 dark:border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-                    <span className="text-sm font-semibold text-primary-foreground">
-                      {initial}
-                    </span>
+                    <span className="text-sm font-semibold text-primary-foreground">{initial}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{username}</p>
@@ -537,7 +581,7 @@ export function UserAvatar({ user, onLogin, onLogout, className }: UserAvatarPro
                   </div>
                 </div>
               </div>
-              
+
               {/* 操作按钮 */}
               <div className="p-2">
                 <button
@@ -549,7 +593,7 @@ export function UserAvatar({ user, onLogin, onLogout, className }: UserAvatarPro
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg",
                     "text-sm font-medium text-destructive",
                     "hover:bg-destructive/10",
-                    "transition-colors duration-200"
+                    "transition-colors duration-200",
                   )}
                 >
                   <LogOut className="h-4 w-4" />

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="210" y1="110" x2="470" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#A78BFA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Chat bubble -->
+  <path d="M196 124C196 108 209 95 225 95H415C431 95 444 108 444 124V226C444 242 431 255 415 255H288L238 290V255H225C209 255 196 242 196 226V124Z" stroke="url(#accent)" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M246 150H394" stroke="#38BDF8" stroke-opacity="0.75" stroke-width="8" stroke-linecap="round"/>
+  <path d="M246 182H350" stroke="#38BDF8" stroke-opacity="0.45" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Transfer arrows -->
+  <path d="M274 232H362" stroke="#A78BFA" stroke-width="10" stroke-linecap="round"/>
+  <path d="M346 214L364 232L346 250" stroke="#A78BFA" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

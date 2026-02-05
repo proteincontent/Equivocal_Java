@@ -1,0 +1,201 @@
+%% beamerthemelu.sty
+%% Copyright 2023- J.P. van Leenen
+%%
+%% LPPL 1.3c+
+
+\mode<presentation>
+% Requirements
+\RequirePackage{tikz}
+\usetikzlibrary{calc,positioning}
+\RequirePackage{booktabs}
+\RequirePackage{fontspec}
+\RequirePackage{listings}
+\RequirePackage{unicode-math}
+
+% Options
+\DeclareOptionBeamer{style}{%
+  \PassOptionsToPackage{style=#1}{beamercolorthemelu}%
+}
+\DeclareOptionBeamer{noslidenumbering}{%
+  \PassOptionsToPackage{noslidenumbering}{beamerouterthemelu}%
+}
+\DeclareOptionBeamer{footleft}{%
+  \PassOptionsToPackage{footleft=#1}{beamerouterthemelu}%
+}
+
+\ProcessOptionsBeamer
+
+% Themes
+\usecolortheme{lu}
+\useinnertheme{lu}
+\useoutertheme{lu}
+\usecolortheme{rose}
+
+\newlength{\BlockTitlePadV}
+\newlength{\BlockBodyPadV}
+
+\setlength{\BlockTitlePadV}{0.8ex}
+\setlength{\BlockBodyPadV}{0.8ex}
+
+% Helper:
+% #1 = template base name:  block / block alerted / block example
+% #2 = upper colour name:   block title ... 
+% #3 = lower colour name:   block body ...
+% #4 = title font name:     block title ...
+% #5 = body font name:      block body ...
+\newcommand{\LUdefineblock}[5]{%
+    \defbeamertemplate*{#1 begin}{rounded padded}{%
+        \par\vskip\smallskipamount%
+        \begin{beamerboxesrounded}[
+            upper=#2,
+            lower=#3,
+            shadow=false,
+            width=\linewidth
+        ]{%
+            \vspace{\BlockTitlePadV}%
+            \usebeamerfont*{#4}\insertblocktitle\par
+            \vspace{\BlockTitlePadV}%
+        }%
+        \vspace{\BlockBodyPadV}%
+        \usebeamerfont{#5}%
+    }%
+    \defbeamertemplate*{#1 end}{rounded padded}{%
+        \vspace{\BlockBodyPadV}%
+        \end{beamerboxesrounded}%
+        \vskip\smallskipamount%
+    }%
+}
+
+\LUdefineblock{block}
+  {block title}{block body}
+  {block title}{block body}
+
+\LUdefineblock{block alerted}
+  {block title alerted}{block body alerted}
+  {block title alerted}{block body alerted}
+
+\LUdefineblock{block example}
+  {block title example}{block body example}
+  {block title example}{block body example}
+
+\setbeamertemplate{block begin}[rounded padded]
+\setbeamertemplate{block end}[rounded padded]
+\setbeamertemplate{block alerted begin}[rounded padded]
+\setbeamertemplate{block alerted end}[rounded padded]
+\setbeamertemplate{block example begin}[rounded padded]
+\setbeamertemplate{block example end}[rounded padded]
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamersize{text margin left=.08\paperwidth, text margin right=.08\paperwidth}
+
+% Font-related
+\usefonttheme{professionalfonts}
+
+\setmainfont{Merriweather}[
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic
+]
+
+\setsansfont{Merriweather}[
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic
+]
+
+\newfontfamily\AltSans{Lato}[
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic
+]
+
+\setmonofont{IBM Plex Mono}[
+    Scale=0.97,
+]
+
+\setmathfont{STIX Two Math}[
+    Scale=1.1,
+]
+
+\setbeamerfont{normal text}{size=\footnotesize}
+
+\setbeamerfont{title}{
+    series=\bfseries,
+    size=\huge
+}
+\setbeamerfont{author}{
+    size=\small,
+    series=\bfseries
+}
+
+\setbeamerfont{institute}{
+    size=\footnotesize,
+    series=\bfseries,
+    shape=\itshape
+}
+\setbeamerfont{frametitle}{
+    series=\bfseries,
+    size=\Large
+}
+\setbeamerfont{framesubtitle}{
+    series=\mdseries,
+    size=\large
+}
+\setbeamerfont{subtitle}{
+    series=\mdseries,
+    size=\large
+}
+\setbeamerfont{block title}{
+    series=\bfseries,
+    size=\normalsize
+}
+\setbeamerfont{block title alerted}{
+    series=\bfseries,
+    size=\normalsize
+}
+\setbeamerfont{block title example}{
+    series=\bfseries,
+    size=\normalsize
+}
+\setbeamerfont{footline}{
+    series=\mdseries,
+    size=\scriptsize
+}
+\setbeamerfont{page number in head/foot}{
+    series=\mdseries,
+    size=\tiny
+}
+\setbeamerfont{caption}{
+    size=\footnotesize,
+    shape=\itshape
+}
+
+% Custom Commands
+\def\beamer@lu@lu{LU}
+\newcommand<>{\accent}[2][orange]{%
+        {\setbeamercolor{alerted text}{fg=#1\beamer@lu@lu}%
+    \begin{alertenv}
+        #3\relax#2%
+    \end{alertenv}}%
+}
+
+% Custom Styles
+% This Listings style is primarily focused on usage with Python due to its popularity
+\lstdefinestyle{lu}{
+    showstringspaces=false,
+    upquote=true,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=Ltb,
+    basicstyle=\normalsize\ttfamily,
+    keywordstyle=\color{orangeLU},       % core keywords
+    keywordstyle={[2]\color{violetLU}},  % built-ins
+    stringstyle=\color{darkgreenLU},
+    commentstyle=\color{turquoiseLU},
+}
+
+\mode<all>
