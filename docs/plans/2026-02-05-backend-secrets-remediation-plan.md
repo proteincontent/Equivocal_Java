@@ -101,7 +101,7 @@ Expected: `BUILD SUCCESS`（0 failures）
 
 **Step 2: repo 全局搜索明显 token 形态**
 
-Run: `rg -n \"(eyJhbGci|\\bpat_|\\bsk-|BEGIN( RSA)? PRIVATE KEY)\" -S`
+Run: `rg -n \"(eyJhbGci|\\bpat_|\\bsk-|BEGIN( RSA)? PRIVATE KEY)\" -S --glob \"!docs/**\" --glob \"!backend/src/test/**\" --glob \"!node_modules/**\" --glob \"!backend/target/**\"`
 
-Expected: 无匹配
+Expected: `backend/src/main/**` / `backend/src/main/resources/**` 无匹配（文档/测试中的示例字符串不计）
 

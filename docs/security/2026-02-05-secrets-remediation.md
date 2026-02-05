@@ -107,5 +107,6 @@ git reset --hard origin/main
 cd backend
 ./mvnw test
 
-rg -n "(eyJhbGci|\\bpat_|\\bsk-|BEGIN( RSA)? PRIVATE KEY)" -S
+rg -n "(eyJhbGci|\\bpat_|\\bsk-|BEGIN( RSA)? PRIVATE KEY)" -S \
+  --glob "!docs/**" --glob "!backend/src/test/**" --glob "!node_modules/**" --glob "!backend/target/**"
 ```
